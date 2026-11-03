@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-size: 18px;
+  text-decoration: none;
+
+  b {
+    font-weight: 500;
+  }
+}

@@ -1,0 +1,4 @@
+// The <nav class="sidebar"> is the grid item of the shell, not this host.
+:host {
+  display: contents;
+}

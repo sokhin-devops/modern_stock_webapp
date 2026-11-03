@@ -1,0 +1,20 @@
+<ms-auth-frame [title]="'auth.verifyTitle' | translate">
+  <div class="result" role="status">
+    @switch (state()) {
+      @case ('checking') {
+        <mat-progress-spinner mode="indeterminate" diameter="40" />
+        <p class="muted">{{ 'auth.verifying' | translate }}</p>
+      }
+      @case ('done') {
+        <span class="big-icon"><mat-icon>mark_email_read</mat-icon></span>
+        <h2 class="page-title">{{ 'auth.verified' | translate }}</h2>
+        <a matButton="filled" routerLink="/login">{{ 'auth.signIn' | translate }}</a>
+      }
+      @default {
+        <span class="big-icon danger"><mat-icon>link_off</mat-icon></span>
+        <p class="form-error"><mat-icon>error</mat-icon>{{ error() ?? ('auth.linkInvalid' | translate) }}</p>
+        <a matButton routerLink="/login">{{ 'auth.backToSignIn' | translate }}</a>
+      }
+    }
+  </div>
+</ms-auth-frame>

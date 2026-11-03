@@ -1,0 +1,76 @@
+<header class="topbar">
+  <button matIconButton type="button" class="menu-btn" (click)="menu.emit()" [attr.aria-label]="'shell.menu' | translate">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <div class="brand">
+    <a class="logo" routerLink="/dashboard" aria-label="ModernStock"><mat-icon>inventory_2</mat-icon></a>
+    <button class="business-btn" type="button" [matMenuTriggerFor]="businessMenu">
+      <span>{{ businessName() }}</span><mat-icon>expand_more</mat-icon>
+    </button>
+  </div>
+
+  @if (business.canPickBranch()) {
+    <button class="chip branch-chip" type="button" [matMenuTriggerFor]="branchMenu">
+      <mat-icon>storefront</mat-icon>{{ branchName() ?? ('shell.allBranches' | translate) }}<mat-icon>expand_more</mat-icon>
+    </button>
+  } @else if (branchName()) {
+    <span class="chip branch-chip fixed"><mat-icon>storefront</mat-icon>{{ branchName() }}</span>
+  }
+
+  <span class="spacer"></span>
+
+  <div class="topbar-actions">
+    @if (business.rate(); as rate) {
+      <a class="rate-chip" routerLink="/settings/rates"
+         [matTooltip]="(rate.stale ? 'shell.rateStale' : 'shell.rateToday') | translate: { date: rate.rateDate }"
+         [class.stale]="rate.stale">
+        <mat-icon>currency_exchange</mat-icon>$1 = ៛{{ rate.usdToKhr | number: '1.0-0' }}
+      </a>
+    }
+    <button matIconButton type="button" [matMenuTriggerFor]="notifMenu" [attr.aria-label]="'shell.notifications' | translate">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    <ms-lang-button class="lang" />
+    <button matIconButton type="button" class="dark-toggle" (click)="theme.toggle()"
+            [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate">
+      <mat-icon>{{ theme.dark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+    <ms-account-menu />
+  </div>
+</header>
+
+<mat-menu #businessMenu="matMenu" class="business-menu">
+  <div class="pop-title">{{ 'shell.yourBusinesses' | translate }}</div>
+  @for (b of business.businesses() ?? []; track b.id; let i = $index) {
+    <button mat-menu-item type="button" (click)="switchTo(b)" [class.active]="b.id === business.businessId()">
+      <span class="biz-row">
+        <span class="biz-avatar" [class.alt]="i % 2 === 1">{{ initials(b) }}</span>
+        <span class="grow">
+          <b>{{ lang.name(b.nameEn, b.nameKm) }}</b>
+          <small>{{ 'roles.' + b.roleCode | translate }}@if (b.subscriptionStatus === 'TRIALING') { · {{ 'account.proTrial' | translate }} }</small>
+        </span>
+      </span>
+    </button>
+  }
+  <mat-divider />
+  <a mat-menu-item routerLink="/businesses"><mat-icon>apps</mat-icon>{{ 'shell.allMyBusinesses' | translate }}</a>
+</mat-menu>
+
+<mat-menu #branchMenu="matMenu">
+  <div class="pop-title">{{ 'shell.branch' | translate }}</div>
+  <button mat-menu-item type="button" (click)="business.selectBranch(null)" [class.active]="business.branchId() === null">
+    <mat-icon>select_all</mat-icon>{{ 'shell.allBranches' | translate }}
+  </button>
+  @for (b of business.branches(); track b.id) {
+    <button mat-menu-item type="button" (click)="business.selectBranch(b.id)" [class.active]="b.id === business.branchId()">
+      <mat-icon>storefront</mat-icon>
+      <span class="grow">{{ lang.name(b.nameEn, b.nameKm) }}@if (b.main) { <small> · {{ 'shell.mainBranch' | translate }}</small> }</span>
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #notifMenu="matMenu">
+  <div class="pop-title">{{ 'shell.notifications' | translate }}</div>
+  <div class="empty muted">{{ 'shell.noNotifications' | translate }}</div>
+</mat-menu>

@@ -1,0 +1,25 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.rounding {
+  width: 100%;
+
+  mat-button-toggle {
+    flex: 1;
+  }
+}
+
+.finish {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.submit {
+  min-width: 160px;
+  height: 48px;
+}

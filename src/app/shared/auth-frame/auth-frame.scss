@@ -19,6 +19,3 @@
   align-items: center;
   gap: 4px;
 }
-
-// Form layout shared by every page inside the frame (projected content keeps its own component styles,
-// so these generic rules are global to the frame through ::ng-deep-free classes in each page).

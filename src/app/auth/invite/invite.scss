@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.stack-16 {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.invite-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+
+  b {
+    font-weight: 500;
+  }
+}
+
+.big-icon.danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.submit {
+  height: 48px;
+}

@@ -1,6 +1,6 @@
 // Global styles, ported from the prototype (doc/plain/UX_UI/prototype/assets/theme.css): tokens, the app shell,
 // page header, buttons, forms, tables, tags, dialogs, settings, account pages and the POS. The web app looks
-// exactly like the approved design; PrimeNG components get the same tokens through the theme preset.
+// exactly like the approved design; Angular Material components get the brand color through the Material 3 theme.
 // Layers: tokens and resets in base, everything else in components (order in tailwind.css).
 
 @layer base {
@@ -547,7 +547,7 @@ td.num, th.num, .right { text-align: right; }
 .prod-cell small { display: block; color: var(--muted); }
 .thumb-sm { width: 32px; height: 32px; border-radius: 10px; background: var(--surface-2); color: var(--muted); display: grid; place-items: center; flex-shrink: 0; }
 .thumb-sm .icon { font-size: 18px; }
-/* Searchable select in a line (PrimeNG Select with filter): a field that opens a list with a search box. */
+/* Searchable select in a line (Angular Material select or autocomplete): a field that opens a list with a search box. */
 .line-select { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 220px; height: 40px; padding: 0 8px 0 5px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color .15s var(--ease); }
 .line-select:hover { border-color: var(--muted); }
 .line-select [data-label] { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

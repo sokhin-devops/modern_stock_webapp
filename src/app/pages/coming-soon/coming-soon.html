@@ -1,0 +1,14 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ title() | translate }}</span></nav>
+  </div>
+  <div class="page-body">
+    <div class="soon">
+      <span class="big-icon"><mat-icon>construction</mat-icon></span>
+      <h1 class="page-title">{{ 'comingSoon.title' | translate }}</h1>
+      <p class="muted">{{ 'comingSoon.lead' | translate }}</p>
+      <p class="muted">{{ 'comingSoon.apiReady' | translate }}</p>
+      <a matButton routerLink="/dashboard"><mat-icon>arrow_back</mat-icon>{{ 'dashboard.title' | translate }}</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+<ms-auth-frame [title]="'auth.inviteTitle' | translate" [sub]="details()?.businessName ?? 'ModernStock'">
+  @if (closed()) {
+    <div class="stack-16" role="status">
+      <span class="big-icon danger"><mat-icon>link_off</mat-icon></span>
+      <p class="form-error"><mat-icon>error</mat-icon>{{ 'auth.inviteClosed' | translate }}</p>
+      <a matButton routerLink="/login">{{ 'auth.backToSignIn' | translate }}</a>
+    </div>
+  } @else if (details(); as d) {
+    <div class="stack-16">
+      <div class="invite-card">
+        <span class="big-icon"><mat-icon>badge</mat-icon></span>
+        <div>
+          <b>{{ 'auth.inviteLead' | translate: { business: lang.name(d.businessName, d.businessNameKm), role: lang.name(d.roleNameEn, d.roleNameKm) } }}</b>
+          <div class="muted">{{ 'auth.inviteBranch' | translate: { branch: d.branchName ?? ('auth.inviteAllBranches' | translate) } }}</div>
+        </div>
+      </div>
+
+      @if (auth.loggedIn()) {
+        <div class="row">
+          <button matButton="filled" type="button" (click)="accept()" [disabled]="busy()">{{ 'auth.inviteAccept' | translate }}</button>
+          <button matButton type="button" (click)="decline()">{{ 'auth.inviteDecline' | translate }}</button>
+        </div>
+        @if (error()) {
+          <p class="form-error" role="alert"><mat-icon>error</mat-icon>{{ error() }}</p>
+        }
+      } @else {
+        <form class="ms-form" [formGroup]="form" (ngSubmit)="join()" novalidate>
+          <p class="muted">{{ 'auth.inviteNew' | translate }}</p>
+          <mat-form-field>
+            <mat-label>{{ 'auth.fullName' | translate }}</mat-label>
+            <input matInput formControlName="fullName" autocomplete="name" />
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>{{ 'auth.username' | translate }}</mat-label>
+            <input matInput formControlName="username" autocomplete="username" autocapitalize="off" />
+            <mat-hint>{{ 'auth.usernameHint' | translate }}</mat-hint>
+            <mat-error>{{ 'auth.usernameHint' | translate }}</mat-error>
+          </mat-form-field>
+          <div class="ms-form-row">
+            <mat-form-field>
+              <mat-label>{{ 'auth.password' | translate }}</mat-label>
+              <input matInput type="password" formControlName="password" autocomplete="new-password" />
+              <mat-error>{{ 'errors.passwordShort' | translate }}</mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{ 'auth.confirmPassword' | translate }}</mat-label>
+              <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
+            </mat-form-field>
+          </div>
+          @if (form.hasError('notSame') && form.controls.confirmPassword.touched) {
+            <small class="danger-text">{{ 'errors.passwordsDiffer' | translate }}</small>
+          }
+          <div class="ms-form-row">
+            <mat-form-field>
+              <mat-label>{{ 'auth.phone' | translate }} ({{ 'common.optional' | translate }})</mat-label>
+              <input matInput type="tel" formControlName="phone" autocomplete="tel" />
+              <mat-error>{{ 'errors.phone' | translate }}</mat-error>
+            </mat-form-field>
+            @if (!d.email) {
+              <mat-form-field>
+                <mat-label>{{ 'auth.emailOptional' | translate }}</mat-label>
+                <input matInput type="email" formControlName="email" autocomplete="email" />
+                <mat-error>{{ 'errors.email' | translate }}</mat-error>
+              </mat-form-field>
+            }
+          </div>
+          @if (error()) {
+            <p class="form-error" role="alert"><mat-icon>error</mat-icon>{{ error() }}</p>
+          }
+          <button matButton="filled" type="submit" class="submit" [disabled]="busy()">{{ 'auth.join' | translate }}</button>
+          <p class="auth-switch">
+            {{ 'auth.inviteHasAccount' | translate }}
+            <a routerLink="/login" [queryParams]="{ returnUrl: '/invite/' + token() }">{{ 'auth.inviteSignInAccept' | translate }}</a>
+          </p>
+        </form>
+      }
+    </div>
+  } @else {
+    <mat-progress-spinner mode="indeterminate" diameter="40" />
+  }
+</ms-auth-frame>

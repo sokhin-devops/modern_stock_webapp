@@ -44,3 +44,95 @@ html {
   width: auto;
   height: auto;
 }
+
+// Forms built with Angular Material fields: one column with even spacing, an error line and a success line.
+@layer components {
+  .ms-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ms-form .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  .ms-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .form-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+
+  .form-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--primary-soft);
+    color: var(--text);
+  }
+
+  .dev-link {
+    font-size: 13px;
+    word-break: break-all;
+  }
+
+  @media (max-width: 768px) {
+    .ms-form-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+// Content of Angular Material menus (business switcher, branch selector, notifications), like the prototype popovers.
+.mat-mdc-menu-panel {
+  .pop-title {
+    padding: 10px 16px 4px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .empty {
+    padding: 12px 16px 16px;
+  }
+}
+
+.mat-mdc-menu-item {
+  .grow {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.35;
+  }
+
+  b {
+    font-weight: 500;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .biz-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+  }
+
+  &.active {
+    background: var(--primary-soft);
+  }
+}

@@ -1,0 +1,116 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'dashboard.title' | translate }}</span></nav>
+    <div class="page-actions">
+      @if (business.can('sale:create')) {
+        <a matButton="filled" routerLink="/pos"><mat-icon>point_of_sale</mat-icon>{{ 'dashboard.openPos' | translate }}</a>
+      }
+    </div>
+  </div>
+
+  <div class="page-body">
+    <h1 class="hello">{{ 'dashboard.hello' | translate: { name: firstName() } }}</h1>
+
+    @if (trialDaysLeft(); as days) {
+      <div class="banner banner-primary">
+        <mat-icon>workspace_premium</mat-icon>
+        <div class="text">
+          <b>{{ 'dashboard.trialEnds' | translate: { days } }}</b>
+          <div class="small">{{ 'dashboard.trialLead' | translate: { date: (billing.value()?.trialEndsAt | date: 'dd/MM/yyyy') } }}</div>
+        </div>
+        <a matButton routerLink="/settings/billing">{{ 'nav.billing' | translate }}</a>
+      </div>
+    }
+
+    @if (business.can('stock:view')) {
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-label"><mat-icon>inventory_2</mat-icon>{{ 'dashboard.stockValue' | translate }}</div>
+          <div class="kpi-value">{{ (summary.value()?.onHandValue ?? 0) | currency: 'USD' }}</div>
+          <div class="kpi-sub">{{ 'dashboard.stockValueHint' | translate }}</div>
+        </div>
+        @if (summary.value()?.inTransitValue != null) {
+          <div class="kpi">
+            <div class="kpi-label"><mat-icon>local_shipping</mat-icon>{{ 'dashboard.inTransit' | translate }}</div>
+            <div class="kpi-value">{{ summary.value()!.inTransitValue! | currency: 'USD' }}</div>
+            <div class="kpi-sub">{{ 'dashboard.inTransitHint' | translate }}</div>
+          </div>
+        }
+        <a class="kpi link" routerLink="/inventory/stock">
+          <div class="kpi-label"><mat-icon>trending_down</mat-icon>{{ 'dashboard.lowStock' | translate }}</div>
+          <div class="kpi-value" [class.warn]="(summary.value()?.lowStockItems ?? 0) > 0">{{ summary.value()?.lowStockItems ?? 0 }}</div>
+          <div class="kpi-sub">{{ 'dashboard.items' | translate }}</div>
+        </a>
+        <a class="kpi link" routerLink="/inventory/stock">
+          <div class="kpi-label"><mat-icon>event_busy</mat-icon>{{ 'dashboard.expiring' | translate }}</div>
+          <div class="kpi-value">{{ summary.value()?.expiringIn30Days ?? 0 }}</div>
+          <div class="kpi-sub">
+            {{ 'dashboard.batches' | translate }}
+            @if (summary.value()?.expiredBatches) {
+              · <span class="danger-text">{{ 'dashboard.expired' | translate: { n: summary.value()!.expiredBatches } }}</span>
+            }
+          </div>
+        </a>
+      </div>
+      @if (summary.isLoading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+    }
+
+    <div class="cols">
+      @if (business.can('stock:view')) {
+        <section class="card">
+          <div class="card-head"><h2 class="card-title">{{ 'dashboard.lowStockList' | translate }}</h2></div>
+          @if (low.value()?.length) {
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>{{ 'nav.products' | translate }}</th>
+                  <th class="num">{{ 'dashboard.onHand' | translate }}</th>
+                  <th class="num">{{ 'dashboard.reorderAt' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of low.value()!.slice(0, 8); track row.productId) {
+                  <tr>
+                    <td>
+                      <div class="strong">{{ lang.name(row.nameEn, row.nameKm) }}</div>
+                      <div class="muted small">{{ row.sku }}</div>
+                    </td>
+                    <td class="num danger-text">{{ row.qtyOnHand | number: '1.0-3' }} {{ row.unitSymbol }}</td>
+                    <td class="num muted">{{ row.reorderLevel | number: '1.0-3' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else if (!low.isLoading()) {
+            <p class="muted empty"><mat-icon>check_circle</mat-icon>{{ 'dashboard.lowStockEmpty' | translate }}</p>
+          }
+        </section>
+      }
+
+      @if (billing.value(); as plan) {
+        <section class="card">
+          <div class="card-head">
+            <h2 class="card-title">{{ 'dashboard.plan' | translate }}</h2>
+            <span class="spacer"></span>
+            <span class="tag tag-primary">{{ plan.effectivePlanCode }}</span>
+          </div>
+          @for (u of plan.usage; track u.key) {
+            @if (u.key === 'branches' || u.key === 'members' || u.key === 'products') {
+              <div class="usage">
+                <div class="usage-row">
+                  <span>{{ 'dashboard.limit.' + u.key | translate }}</span>
+                  <span class="num muted">{{ u.used }} / {{ u.limit ?? '∞' }}</span>
+                </div>
+                <mat-progress-bar mode="determinate" [value]="usagePercent(u.used, u.limit)" />
+              </div>
+            }
+          }
+        </section>
+      }
+    </div>
+
+    <p class="form-note tw:mt-4"><mat-icon>insights</mat-icon>{{ 'dashboard.salesSoon' | translate }}</p>
+  </div>
+</div>

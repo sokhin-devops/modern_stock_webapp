@@ -1,4 +1,6 @@
-import { DOCUMENT, Injectable, afterNextRender, inject } from '@angular/core';
+import { DOCUMENT, Injectable, inject } from '@angular/core';
+import { NavigationCancel, NavigationEnd, NavigationError, Router } from '@angular/router';
+import { filter, take } from 'rxjs';
 
 /** Long enough to read as a deliberate splash, never a flicker. */
 const MIN_VISIBLE_MS = 450;
@@ -6,29 +8,47 @@ const MIN_VISIBLE_MS = 450;
 const MAX_FONT_WAIT_MS = 1500;
 
 /**
- * Hides the splash screen in index.html once the app has started (the session is restored before the first
- * render, see app.config.ts) and the fonts are ready, so the app appears in one smooth step.
+ * The fonts the first screen needs. Loading them on purpose matters: the browser only fetches a web font once some
+ * text uses it, and the first page is lazy-loaded, so "document.fonts.ready" alone would resolve before the icons
+ * were even requested and they would pop in after the splash.
+ */
+const FONTS = ['24px "Material Symbols Outlined"', '400 16px Roboto', '500 16px Roboto', '400 16px "Kantumruy Pro"'];
+
+/**
+ * Hides the splash screen in index.html once the first page has been routed and rendered (the session is restored
+ * before that, see app.config.ts) and its fonts are loaded, so the app appears in one smooth step.
  */
 @Injectable({ providedIn: 'root' })
 export class SplashService {
   private readonly document = inject(DOCUMENT);
+  private readonly router = inject(Router);
 
   /** Call once from the root component's constructor. */
   hideWhenReady(): void {
-    afterNextRender(() => {
-      const splash = this.document.getElementById('ms-splash');
-      if (!splash) {
-        return;
-      }
-      const fonts = this.document.fonts?.ready ?? Promise.resolve();
-      const fontsOrTimeout = Promise.race([fonts, wait(MAX_FONT_WAIT_MS)]);
-      const minimum = wait(Math.max(0, MIN_VISIBLE_MS - performance.now()));
-      Promise.all([fontsOrTimeout, minimum]).then(() => {
-        splash.classList.add('ms-splash-out');
-        // Remove it after the fade; the timeout covers browsers that skip transitionend.
-        splash.addEventListener('transitionend', () => splash.remove(), { once: true });
-        setTimeout(() => splash.remove(), 800);
-      });
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd || e instanceof NavigationCancel || e instanceof NavigationError),
+        take(1),
+      )
+      .subscribe(() => requestAnimationFrame(() => this.hide()));
+  }
+
+  private hide(): void {
+    const splash = this.document.getElementById('ms-splash');
+    if (!splash) {
+      return;
+    }
+    const fonts = this.document.fonts;
+    const loading = fonts
+      ? Promise.all(FONTS.map((f) => fonts.load(f, f.includes('Kantumruy') ? 'ក' : 'a'))).then(() => fonts.ready)
+      : Promise.resolve();
+    const fontsOrTimeout = Promise.race([loading.catch(() => undefined), wait(MAX_FONT_WAIT_MS)]);
+    const minimum = wait(Math.max(0, MIN_VISIBLE_MS - performance.now()));
+    Promise.all([fontsOrTimeout, minimum]).then(() => {
+      splash.classList.add('ms-splash-out');
+      // Remove it after the fade; the timeout covers browsers that skip transitionend.
+      splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+      setTimeout(() => splash.remove(), 800);
     });
   }
 }

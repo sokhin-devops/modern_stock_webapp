@@ -78,7 +78,8 @@
     "usernameHint": "Letters, numbers, dot, dash. You sign in with it.",
     "emailOptional": "Email (optional)",
     "join": "Join the business",
-    "inviteClosed": "This invitation was already used, cancelled, or has expired. Ask for a new link."
+    "inviteClosed": "This invitation was already used, cancelled, or has expired. Ask for a new link.",
+    "linkInvalid": "This link is not valid or has expired."
   },
   "account": {
     "myBusinesses": "My businesses",
@@ -199,7 +200,12 @@
     "trialLead": "Your trial ends on {{date}}. Nothing is deleted when it ends.",
     "plan": "Plan",
     "openPos": "Open the POS",
-    "salesSoon": "Sales and profit cards appear here when the reports API is ready."
+    "salesSoon": "Sales and profit cards appear here when the reports API is ready.",
+    "limit": {
+      "branches": "Branches",
+      "members": "Members",
+      "products": "Products"
+    }
   },
   "comingSoon": {
     "title": "Coming next",

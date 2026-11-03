@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.big-icon.danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}

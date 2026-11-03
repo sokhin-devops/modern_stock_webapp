@@ -1,0 +1,33 @@
+<div class="dialog-head">
+  <h2 mat-dialog-title>{{ 'account.newBusiness' | translate }}</h2>
+  <button matIconButton type="button" mat-dialog-close [attr.aria-label]="'common.close' | translate"><mat-icon>close</mat-icon></button>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <mat-dialog-content class="ms-form">
+    <mat-form-field>
+      <mat-label>{{ 'account.nameEn' | translate }}</mat-label>
+      <input matInput formControlName="nameEn" placeholder="Sokha Mini-mart" />
+      <mat-error>{{ 'common.required' | translate }}</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'account.nameKm' | translate }} ({{ 'common.optional' | translate }})</mat-label>
+      <input matInput formControlName="nameKm" placeholder="ហាងសុខា មីនីម៉ាត" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'account.type' | translate }}</mat-label>
+      <mat-select formControlName="businessType">
+        @for (type of types; track type) {
+          <mat-option [value]="type">{{ 'account.types.' + type | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <span class="tag tag-primary"><mat-icon>workspace_premium</mat-icon>{{ 'account.trialTag' | translate }}</span>
+    <span class="spacer"></span>
+    <button matButton type="button" mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+    <button matButton="filled" type="submit" [disabled]="busy()">{{ 'common.create' | translate }}</button>
+  </mat-dialog-actions>
+</form>
