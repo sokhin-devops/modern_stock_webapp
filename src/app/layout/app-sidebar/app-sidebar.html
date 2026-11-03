@@ -31,8 +31,8 @@
     }
   }
 
-  <!-- Tablets always show icons, so there is nothing to expand there -->
-  @if (!screen.tablet()) {
+  <!-- Only computers can switch: tablets always show icons, phones always the full menu -->
+  @if (!screen.tablet() && !screen.phone()) {
     <div class="sidebar-footer">
       <button class="nav-item" type="button" (click)="collapse.emit()"
               [pTooltip]="'shell.expand' | translate" tooltipPosition="right" [tooltipDisabled]="!rail()">

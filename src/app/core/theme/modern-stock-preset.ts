@@ -197,5 +197,8 @@ export const ModernStockPreset = definePreset(Material, {
     dialog: {
       title: { fontSize: '22px', fontWeight: '400' },
     },
+    floatlabel: {
+      root: { fontWeight: '400' },
+    },
   },
 });

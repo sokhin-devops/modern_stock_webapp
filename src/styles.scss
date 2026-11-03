@@ -4,9 +4,9 @@
 @use 'styles/prototype';
 
 // PrimeIcons in the prototype's icon box: <i class="icon pi pi-box"></i> takes a square of the prototype's size
-// (20 px, 18 px in buttons...). PrimeIcons glyphs fill their whole box, Material Symbols (which the prototype was
-// drawn with) about 80 %, so the glyph is drawn at 80 % to keep the same visual weight. Not layered: it must beat
-// the PrimeIcons stylesheet (.pi { display: inline-block }).
+// (20 px, 18 px in buttons...). PrimeIcons glyphs fill more of their box than Material Symbols (which the prototype
+// was drawn with), so the glyph is drawn at 90 % to keep the same visual weight. Not layered: it must beat the
+// PrimeIcons stylesheet (.pi { display: inline-block }).
 .pi.icon {
   display: inline-grid;
   place-items: center;
@@ -14,7 +14,7 @@
   height: 1em;
 
   &::before {
-    font-size: 0.8em;
+    font-size: 0.9em;
   }
 }
 
