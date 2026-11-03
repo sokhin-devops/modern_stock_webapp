@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+.website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-weight: 500;
+
+  .mat-icon {
+    font-size: 18px;
+  }
+}
+
+.below-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// Form layout shared by every page inside the frame (projected content keeps its own component styles,
+// so these generic rules are global to the frame through ::ng-deep-free classes in each page).

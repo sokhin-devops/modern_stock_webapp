@@ -1,12 +1,17 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
+import { SplashService } from './core/splash.service';
+
+/** The root only hosts the router: auth pages, the account shell, or the business shell. */
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.scss',
+  imports: [RouterOutlet],
   templateUrl: './app.html',
+  styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('modern_stock_webapp');
+  constructor() {
+    inject(SplashService).hideWhenReady();
+  }
 }

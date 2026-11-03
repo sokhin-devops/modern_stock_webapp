@@ -1,0 +1,4 @@
+<button matIconButton type="button" class="lang-btn" (click)="lang.toggle()"
+        [attr.aria-label]="'common.switchLanguage' | translate" [matTooltip]="'common.switchLanguage' | translate">
+  <ms-flag [lang]="lang.lang()" />
+</button>

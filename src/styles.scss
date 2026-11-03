@@ -37,3 +37,10 @@ html {
     container-shape: var(--radius-md),
   ));
 }
+
+// <mat-icon> uses the prototype's .icon class as its font set (app.config.ts), so icons get the Material Symbols
+// font and the prototype's sizes (20 px, 18 px in buttons...). Material fixes the box at 24 px; let it follow the font.
+.mat-icon.icon {
+  width: auto;
+  height: auto;
+}

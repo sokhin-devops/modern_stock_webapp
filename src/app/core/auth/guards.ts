@@ -55,8 +55,9 @@ export const setupGuard: CanActivateFn = () => {
   );
 };
 
-/** Screens that need a permission (route data "permission"): the API checks again, this only hides the screen. */
+/** Screens that need a permission (route data "permissions", any one is enough). The API checks again; this only hides the screen. */
 export const permissionGuard: CanActivateFn = (route) => {
-  const permission = route.data['permission'] as string | undefined;
-  return !permission || inject(BusinessService).can(permission) || inject(Router).createUrlTree(['/dashboard']);
+  const permissions = (route.data['permissions'] as string[] | undefined) ?? [];
+  const business = inject(BusinessService);
+  return !permissions.length || permissions.some((p) => business.can(p)) || inject(Router).createUrlTree(['/dashboard']);
 };
