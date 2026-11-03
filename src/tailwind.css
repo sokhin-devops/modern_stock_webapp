@@ -1,0 +1,15 @@
+/* Tailwind v4 in plain CSS (it doesn't run through Sass), listed before styles.scss in angular.json.
+   Layer order: Tailwind theme and base, then our components (the prototype styles), then Tailwind utilities,
+   so a utility always wins. Angular Material styles are not layered; they only use .mat-* classes.
+   The tw: prefix keeps Tailwind utilities apart from the prototype's own helper classes (.row, .grid, .mt-8...),
+   which mean something different: write tw:flex, tw:gap-4, tw:md:grid-cols-2. */
+@layer theme, base, components, utilities;
+
+@import "tailwindcss" prefix(tw);
+
+/* Dark mode follows the .app-dark class on <html>, like the prototype. */
+@custom-variant dark (&:where(.app-dark, .app-dark *));
+
+@theme {
+  --font-sans: "Roboto", "Kantumruy Pro", "Noto Sans Khmer", system-ui, -apple-system, "Segoe UI", sans-serif;
+}

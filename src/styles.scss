@@ -1,1 +1,39 @@
-/* You can add global styles to this file, and also import other style files */
+// Global styles shared by every screen. Styles that belong to one component live in its .scss file.
+@use '@angular/material' as mat;
+@use 'styles/theme-colors' as brand;
+@use 'styles/prototype';
+
+// Angular Material 3 theme from the brand blue #1A73E8 (src/styles/_theme-colors.scss, made by
+// "ng generate @angular/material:theme-color"). Light and dark both come from one theme through the
+// CSS color-scheme, switched by the same .app-dark class the prototype uses.
+html {
+  color-scheme: light;
+  @include mat.theme((
+    color: (
+      primary: brand.$primary-palette,
+      tertiary: brand.$tertiary-palette,
+    ),
+    typography: (
+      plain-family: ('Roboto', 'Kantumruy Pro', 'Noto Sans Khmer', system-ui, sans-serif),
+      brand-family: ('Roboto', 'Kantumruy Pro', 'Noto Sans Khmer', system-ui, sans-serif),
+    ),
+    density: 0,
+  ));
+}
+
+html.app-dark {
+  color-scheme: dark;
+}
+
+// Material components on the prototype's surfaces: dialogs and menus use the same radius as the prototype cards.
+html {
+  @include mat.dialog-overrides((
+    container-shape: var(--radius-xl),
+  ));
+  @include mat.menu-overrides((
+    container-shape: var(--radius-md),
+  ));
+  @include mat.snack-bar-overrides((
+    container-shape: var(--radius-md),
+  ));
+}
