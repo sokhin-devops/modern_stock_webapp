@@ -1,35 +1,31 @@
-<div class="dialog-head">
-  <h2 mat-dialog-title>{{ 'account.newBusiness' | translate }}</h2>
-  <button matIconButton type="button" mat-dialog-close [attr.aria-label]="'common.close' | translate"><mat-icon>close</mat-icon></button>
-</div>
+<form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="ms-field">
+    <p-floatlabel variant="on">
+      <input pInputText id="nameEn" formControlName="nameEn" placeholder="Sokha Mini-mart" />
+      <label for="nameEn">{{ 'account.nameEn' | translate }} *</label>
+    </p-floatlabel>
+    @if (showError(form.controls.nameEn)) {
+      <small class="field-error">{{ 'common.required' | translate }}</small>
+    }
+  </div>
+  <div class="ms-field">
+    <p-floatlabel variant="on">
+      <input pInputText id="nameKm" formControlName="nameKm" placeholder="ហាងសុខា មីនីម៉ាត" />
+      <label for="nameKm">{{ 'account.nameKm' | translate }} ({{ 'common.optional' | translate }})</label>
+    </p-floatlabel>
+  </div>
+  <div class="ms-field">
+    <p-floatlabel variant="on">
+      <p-select inputId="businessType" formControlName="businessType" [options]="types()" optionLabel="label"
+                optionValue="value" appendTo="body" />
+      <label for="businessType">{{ 'account.type' | translate }} *</label>
+    </p-floatlabel>
+  </div>
 
-<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <mat-dialog-content>
-    <div class="ms-form">
-      <mat-form-field>
-        <mat-label>{{ 'account.nameEn' | translate }}</mat-label>
-        <input matInput formControlName="nameEn" placeholder="Sokha Mini-mart" />
-        <mat-error>{{ 'common.required' | translate }}</mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{ 'account.nameKm' | translate }} ({{ 'common.optional' | translate }})</mat-label>
-        <input matInput formControlName="nameKm" placeholder="ហាងសុខា មីនីម៉ាត" />
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{ 'account.type' | translate }}</mat-label>
-        <mat-select formControlName="businessType">
-          @for (type of types; track type) {
-            <mat-option [value]="type">{{ 'account.types.' + type | translate }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </mat-dialog-content>
-
-  <mat-dialog-actions>
-    <span class="tag tag-primary"><mat-icon>workspace_premium</mat-icon>{{ 'account.trialTag' | translate }}</span>
+  <div class="dialog-actions">
+    <span class="tag tag-primary"><i class="icon pi pi-star"></i>{{ 'account.trialTag' | translate }}</span>
     <span class="spacer"></span>
-    <button matButton type="button" mat-dialog-close>{{ 'common.cancel' | translate }}</button>
-    <button matButton="filled" type="submit" [disabled]="busy()">{{ 'common.create' | translate }}</button>
-  </mat-dialog-actions>
+    <button pButton type="button" [text]="true" (click)="ref.close()"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="submit" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.create' | translate }}</span></button>
+  </div>
 </form>

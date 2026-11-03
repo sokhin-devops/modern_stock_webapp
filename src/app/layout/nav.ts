@@ -11,6 +11,7 @@ export interface NavPage {
 
 export interface NavItem extends Partial<NavPage> {
   id: string;
+  /** PrimeIcons classes, for example "pi pi-box". */
   icon: string;
   label: string;
   children?: NavPage[];
@@ -18,24 +19,24 @@ export interface NavItem extends Partial<NavPage> {
 }
 
 export const NAV: NavItem[] = [
-  { id: 'dashboard', icon: 'space_dashboard', label: 'nav.dashboard', path: 'dashboard' },
-  { id: 'pos', icon: 'point_of_sale', label: 'nav.pos', path: 'pos', permissions: ['sale:create'], divider: true },
+  { id: 'dashboard', icon: 'pi pi-objects-column', label: 'nav.dashboard', path: 'dashboard' },
+  { id: 'pos', icon: 'pi pi-shopping-cart', label: 'nav.pos', path: 'pos', permissions: ['sale:create'], divider: true },
   {
-    id: 'customers', icon: 'groups', label: 'nav.customerMenu', children: [
+    id: 'customers', icon: 'pi pi-users', label: 'nav.customerMenu', children: [
       { path: 'customers', label: 'nav.customers', permissions: ['customer:view', 'customer:create_pos'] },
       { path: 'customers/transactions', label: 'nav.customerTransactions', permissions: ['sale:create', 'customer:view'] },
       { path: 'customers/cash-shifts', label: 'nav.shifts', permissions: ['cash_shift:own', 'cash_shift:all'] },
     ],
   },
   {
-    id: 'suppliers', icon: 'local_shipping', label: 'nav.supplierMenu', children: [
+    id: 'suppliers', icon: 'pi pi-truck', label: 'nav.supplierMenu', children: [
       { path: 'suppliers', label: 'nav.suppliers', permissions: ['supplier:view'] },
       { path: 'suppliers/transactions', label: 'nav.supplierTransactions', permissions: ['purchase_order:view', 'bill:manage'] },
       { path: 'suppliers/expenses', label: 'nav.expenses', permissions: ['expense:manage'] },
     ],
   },
   {
-    id: 'inventory', icon: 'inventory_2', label: 'nav.inventory', children: [
+    id: 'inventory', icon: 'pi pi-box', label: 'nav.inventory', children: [
       { path: 'inventory/stock', label: 'nav.stock', permissions: ['stock:view'] },
       { path: 'inventory/adjustments', label: 'nav.adjustments', permissions: ['stock:view'] },
       { path: 'inventory/transfers', label: 'nav.transfers', permissions: ['stock:view'] },
@@ -43,14 +44,14 @@ export const NAV: NavItem[] = [
     ],
   },
   {
-    id: 'products', icon: 'category', label: 'nav.catalog', children: [
+    id: 'products', icon: 'pi pi-tags', label: 'nav.catalog', children: [
       { path: 'products', label: 'nav.products', permissions: ['product:view'] },
       { path: 'products/import', label: 'nav.import', permissions: ['product:manage'] },
     ],
   },
-  { id: 'reports', icon: 'bar_chart', label: 'nav.reports', path: 'reports', permissions: ['report:view'] },
+  { id: 'reports', icon: 'pi pi-chart-bar', label: 'nav.reports', path: 'reports', permissions: ['report:view'] },
   {
-    id: 'settings', icon: 'settings', label: 'nav.settings', children: [
+    id: 'settings', icon: 'pi pi-cog', label: 'nav.settings', children: [
       { path: 'settings/profile', label: 'nav.profile', permissions: ['business:manage'] },
       { path: 'settings/branches', label: 'nav.branches', permissions: ['business:manage'] },
       { path: 'settings/members', label: 'nav.members', permissions: ['member:view'] },

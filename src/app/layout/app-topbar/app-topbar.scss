@@ -3,6 +3,12 @@
   display: contents;
 }
 
+// The popup menus open in an overlay on <body>; their own elements stay out of the shell grid.
+p-menu,
+p-popover {
+  position: absolute;
+}
+
 .business-btn {
   color: var(--text);
 
@@ -34,7 +40,7 @@
   font-weight: 500;
   cursor: pointer;
 
-  .mat-icon {
+  .icon {
     font-size: 18px;
   }
 
@@ -46,8 +52,20 @@
 .rate-chip.stale {
   color: var(--danger);
 
-  .mat-icon {
+  .icon {
     color: var(--danger);
+  }
+}
+
+// The notifications popover (its content keeps this component's styles).
+.notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 240px;
+
+  b {
+    font-weight: 500;
   }
 }
 

@@ -1,7 +1,8 @@
 // Global styles, ported from the prototype (doc/plain/UX_UI/prototype/assets/theme.css): tokens, the app shell,
 // page header, buttons, forms, tables, tags, dialogs, settings, account pages and the POS. The web app looks
-// exactly like the approved design; Angular Material components get the brand color through the Material 3 theme.
-// Layers: tokens and resets in base, everything else in components (order in tailwind.css).
+// exactly like the approved design; PrimeNG components take these colors through the theme preset
+// (app/core/theme/modern-stock-preset.ts). Layers: tokens and resets in base, everything else in components
+// (order in tailwind.css: theme, base, primeng, components, utilities).
 
 @layer base {
 /* ---------- Tokens ---------- */
@@ -109,20 +110,11 @@ button { font: inherit; color: inherit; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border: 3px solid transparent; border-radius: 999px; background-clip: content-box; }
 ::-webkit-scrollbar-track { background: transparent; }
+/* Icons are PrimeIcons: <i class="icon pi pi-box"></i>. .icon gives the prototype's sizes (20 px, 18 px in
+   buttons...); the square box and the glyph scale are in styles.scss, next to the PrimeIcons stylesheet. */
 .icon {
-  font-family: "Material Symbols Outlined";
-  font-weight: normal;
-  font-style: normal;
   font-size: 20px;
   line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  direction: ltr;
-  font-feature-settings: "liga";
-  -webkit-font-feature-settings: "liga";
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
   flex-shrink: 0;
   user-select: none;
 }
@@ -393,7 +385,7 @@ td.num, th.num, .right { text-align: right; }
 /* Breadcrumb: one small size on every page. Parents gray, the current page dark; a chevron between items. */
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 14px; color: var(--muted); }
 .breadcrumb > * { display: inline-flex; align-items: center; gap: 4px; }
-.breadcrumb > * + *::before { content: "chevron_right"; color: var(--border-strong); font-family: "Material Symbols Outlined"; font-size: 18px; font-weight: normal; line-height: 1; font-feature-settings: "liga"; }
+.breadcrumb > * + *::before { content: "\e901"; color: var(--border-strong); font-family: "primeicons"; font-size: 12px; font-weight: normal; line-height: 1; } /* pi-chevron-right */
 .breadcrumb .current { color: var(--text); font-weight: 500; }
 .breadcrumb a { color: inherit; }
 .breadcrumb a:hover { color: var(--text); text-decoration: none; }

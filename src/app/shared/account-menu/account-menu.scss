@@ -2,23 +2,4 @@
   display: inline-flex;
 }
 
-.menu-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 240px;
-  padding: 12px 16px;
-
-  .avatar {
-    margin: 0;
-    cursor: default;
-  }
-
-  b {
-    font-weight: 500;
-  }
-
-  .small {
-    font-size: 12px;
-  }
-}
+// The menu itself (header with avatar and name) is styled in styles.scss: it opens in an overlay outside this host.

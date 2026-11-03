@@ -1,26 +1,26 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatError, MatFormField, MatHint, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
+import { Checkbox } from 'primeng/checkbox';
+import { FloatLabel } from 'primeng/floatlabel';
+import { InputText } from 'primeng/inputtext';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth/auth.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
+import { revealErrors, showError } from '../../shared/forms';
 import { CAMBODIAN_PHONE } from '../../shared/validators';
 
 /** Create an account (PLAIN.md 11.12). The account is unverified until the email link is opened. */
 @Component({
   selector: 'ms-sign-up',
   imports: [
-    ReactiveFormsModule, RouterLink, TranslatePipe, MatFormField, MatLabel, MatHint, MatError, MatInput, MatSuffix,
-    MatButton, MatIconButton, MatIcon, MatCheckbox, AuthFrame,
+    ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, Checkbox, ButtonDirective, ButtonIcon,
+    ButtonLabel, AuthFrame,
   ],
   templateUrl: './sign-up.html',
   styleUrl: './sign-up.scss',
@@ -31,6 +31,7 @@ export class SignUp {
   private readonly notify = inject(NotifyService);
 
   protected readonly websiteUrl = environment.websiteUrl;
+  protected readonly showError = showError;
   protected readonly showPassword = signal(false);
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -48,7 +49,7 @@ export class SignUp {
 
   protected submit(): void {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     const value = this.form.getRawValue();

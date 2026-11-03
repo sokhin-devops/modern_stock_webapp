@@ -1,18 +1,19 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { MatError, MatFormField, MatHint, MatLabel, MatPrefix } from '@angular/material/form-field';
-import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
+import { FloatLabel } from 'primeng/floatlabel';
+import { InputNumber } from 'primeng/inputnumber';
+import { InputText } from 'primeng/inputtext';
+import { SelectButton } from 'primeng/selectbutton';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { switchMap } from 'rxjs';
 
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
+import { revealErrors, showError } from '../../shared/forms';
 import { CAMBODIAN_PHONE } from '../../shared/validators';
 
 /**
@@ -22,8 +23,8 @@ import { CAMBODIAN_PHONE } from '../../shared/validators';
 @Component({
   selector: 'ms-setup',
   imports: [
-    ReactiveFormsModule, RouterLink, TranslatePipe, MatFormField, MatLabel, MatHint, MatError, MatPrefix, MatInput,
-    MatButton, MatIcon, MatButtonToggleGroup, MatButtonToggle, MatSlideToggle,
+    ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, InputNumber, SelectButton, ToggleSwitch,
+    ButtonDirective, ButtonIcon, ButtonLabel,
   ],
   templateUrl: './setup.html',
   styleUrl: './setup.scss',
@@ -34,7 +35,14 @@ export class Setup {
   private readonly router = inject(Router);
   private readonly notify = inject(NotifyService);
 
+  protected readonly showError = showError;
   protected readonly busy = signal(false);
+  /** Riel rounding steps (PLAIN.md 11.6). */
+  protected readonly roundings = [
+    { label: '100', value: 100 },
+    { label: '500', value: 500 },
+    { label: '1,000', value: 1000 },
+  ];
   protected readonly name = computed(() => {
     const b = this.business.current();
     return b ? this.lang.name(b.nameEn, b.nameKm) : '';
@@ -50,7 +58,7 @@ export class Setup {
 
   protected submit(): void {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     const v = this.form.getRawValue();

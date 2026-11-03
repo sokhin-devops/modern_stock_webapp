@@ -1,14 +1,15 @@
 <ms-auth-frame [title]="'auth.inviteTitle' | translate" [sub]="details()?.businessName ?? 'ModernStock'">
   @if (closed()) {
     <div class="stack-16" role="status">
-      <span class="big-icon danger"><mat-icon>link_off</mat-icon></span>
-      <p class="form-error"><mat-icon>error</mat-icon>{{ 'auth.inviteClosed' | translate }}</p>
-      <a matButton routerLink="/login">{{ 'auth.backToSignIn' | translate }}</a>
+      <span class="big-icon danger"><i class="icon pi pi-ban"></i></span>
+      <p class="form-error"><i class="icon pi pi-exclamation-circle"></i>{{ 'auth.inviteClosed' | translate }}</p>
+      <a pButton routerLink="/login" [text]="true"><span pButtonLabel>{{ 'auth.backToSignIn' | translate }}</span></a>
     </div>
-  } @else if (details(); as d) {
+  } @else if (details()) {
+    @let d = details()!;
     <div class="stack-16">
       <div class="invite-card">
-        <span class="big-icon"><mat-icon>badge</mat-icon></span>
+        <span class="big-icon"><i class="icon pi pi-id-card"></i></span>
         <div>
           <b>{{ 'auth.inviteLead' | translate: { business: lang.name(d.businessName, d.businessNameKm), role: lang.name(d.roleNameEn, d.roleNameKm) } }}</b>
           <div class="muted">{{ 'auth.inviteBranch' | translate: { branch: d.branchName ?? ('auth.inviteAllBranches' | translate) } }}</div>
@@ -17,58 +18,81 @@
 
       @if (auth.loggedIn()) {
         <div class="row">
-          <button matButton="filled" type="button" (click)="accept()" [disabled]="busy()">{{ 'auth.inviteAccept' | translate }}</button>
-          <button matButton type="button" (click)="decline()">{{ 'auth.inviteDecline' | translate }}</button>
+          <button pButton type="button" (click)="accept()" [loading]="busy()" [disabled]="busy()">
+            <span pButtonLabel>{{ 'auth.inviteAccept' | translate }}</span>
+          </button>
+          <button pButton type="button" [text]="true" (click)="decline()"><span pButtonLabel>{{ 'auth.inviteDecline' | translate }}</span></button>
         </div>
         @if (error()) {
-          <p class="form-error" role="alert"><mat-icon>error</mat-icon>{{ error() }}</p>
+          <p class="form-error" role="alert"><i class="icon pi pi-exclamation-circle"></i>{{ error() }}</p>
         }
       } @else {
         <form class="ms-form" [formGroup]="form" (ngSubmit)="join()" novalidate>
           <p class="muted">{{ 'auth.inviteNew' | translate }}</p>
-          <mat-form-field>
-            <mat-label>{{ 'auth.fullName' | translate }}</mat-label>
-            <input matInput formControlName="fullName" autocomplete="name" />
-            <mat-error>{{ 'common.required' | translate }}</mat-error>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>{{ 'auth.username' | translate }}</mat-label>
-            <input matInput formControlName="username" autocomplete="username" autocapitalize="off" />
-            <mat-hint>{{ 'auth.usernameHint' | translate }}</mat-hint>
-            <mat-error>{{ 'auth.usernameHint' | translate }}</mat-error>
-          </mat-form-field>
-          <div class="ms-form-row">
-            <mat-form-field>
-              <mat-label>{{ 'auth.password' | translate }}</mat-label>
-              <input matInput type="password" formControlName="password" autocomplete="new-password" />
-              <mat-error>{{ 'errors.passwordShort' | translate }}</mat-error>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{ 'auth.confirmPassword' | translate }}</mat-label>
-              <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
-            </mat-form-field>
+          <div class="ms-field">
+            <p-floatlabel variant="on">
+              <input pInputText id="fullName" formControlName="fullName" autocomplete="name" />
+              <label for="fullName">{{ 'auth.fullName' | translate }} *</label>
+            </p-floatlabel>
+            @if (showError(form.controls.fullName)) {
+              <small class="field-error">{{ 'common.required' | translate }}</small>
+            }
           </div>
-          @if (form.hasError('notSame') && form.controls.confirmPassword.touched) {
-            <small class="danger-text">{{ 'errors.passwordsDiffer' | translate }}</small>
-          }
+          <div class="ms-field">
+            <p-floatlabel variant="on">
+              <input pInputText id="username" formControlName="username" autocomplete="username" autocapitalize="off" />
+              <label for="username">{{ 'auth.username' | translate }} *</label>
+            </p-floatlabel>
+            <small [class]="showError(form.controls.username) ? 'field-error' : 'field-hint'">{{ 'auth.usernameHint' | translate }}</small>
+          </div>
           <div class="ms-form-row">
-            <mat-form-field>
-              <mat-label>{{ 'auth.phone' | translate }} ({{ 'common.optional' | translate }})</mat-label>
-              <input matInput type="tel" formControlName="phone" autocomplete="tel" />
-              <mat-error>{{ 'errors.phone' | translate }}</mat-error>
-            </mat-form-field>
+            <div class="ms-field">
+              <p-floatlabel variant="on">
+                <input pInputText id="password" type="password" formControlName="password" autocomplete="new-password" />
+                <label for="password">{{ 'auth.password' | translate }} *</label>
+              </p-floatlabel>
+              @if (showError(form.controls.password)) {
+                <small class="field-error">{{ 'errors.passwordShort' | translate }}</small>
+              }
+            </div>
+            <div class="ms-field">
+              <p-floatlabel variant="on">
+                <input pInputText id="confirmPassword" type="password" formControlName="confirmPassword" autocomplete="new-password" />
+                <label for="confirmPassword">{{ 'auth.confirmPassword' | translate }} *</label>
+              </p-floatlabel>
+              @if (form.controls.confirmPassword.dirty && form.hasError('notSame')) {
+                <small class="field-error">{{ 'errors.passwordsDiffer' | translate }}</small>
+              } @else if (showError(form.controls.confirmPassword)) {
+                <small class="field-error">{{ 'common.required' | translate }}</small>
+              }
+            </div>
+          </div>
+          <div class="ms-form-row">
+            <div class="ms-field">
+              <p-floatlabel variant="on">
+                <input pInputText id="phone" type="tel" formControlName="phone" autocomplete="tel" />
+                <label for="phone">{{ 'auth.phone' | translate }} ({{ 'common.optional' | translate }})</label>
+              </p-floatlabel>
+              @if (showError(form.controls.phone)) {
+                <small class="field-error">{{ 'errors.phone' | translate }}</small>
+              }
+            </div>
             @if (!d.email) {
-              <mat-form-field>
-                <mat-label>{{ 'auth.emailOptional' | translate }}</mat-label>
-                <input matInput type="email" formControlName="email" autocomplete="email" />
-                <mat-error>{{ 'errors.email' | translate }}</mat-error>
-              </mat-form-field>
+              <div class="ms-field">
+                <p-floatlabel variant="on">
+                  <input pInputText id="email" type="email" formControlName="email" autocomplete="email" />
+                  <label for="email">{{ 'auth.emailOptional' | translate }}</label>
+                </p-floatlabel>
+                @if (showError(form.controls.email)) {
+                  <small class="field-error">{{ 'errors.email' | translate }}</small>
+                }
+              </div>
             }
           </div>
           @if (error()) {
-            <p class="form-error" role="alert"><mat-icon>error</mat-icon>{{ error() }}</p>
+            <p class="form-error" role="alert"><i class="icon pi pi-exclamation-circle"></i>{{ error() }}</p>
           }
-          <button matButton="filled" type="submit" class="submit" [disabled]="busy()">{{ 'auth.join' | translate }}</button>
+          <button pButton type="submit" class="submit" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'auth.join' | translate }}</span></button>
           <p class="auth-switch">
             {{ 'auth.inviteHasAccount' | translate }}
             <a routerLink="/login" [queryParams]="{ returnUrl: '/invite/' + token() }">{{ 'auth.inviteSignInAccept' | translate }}</a>
@@ -77,6 +101,6 @@
       }
     </div>
   } @else {
-    <mat-progress-spinner mode="indeterminate" diameter="40" />
+    <p-progress-spinner strokeWidth="4" [style]="{ width: '40px', height: '40px' }" />
   }
 </ms-auth-frame>

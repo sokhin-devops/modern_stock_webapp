@@ -1,31 +1,43 @@
 <ms-auth-frame [title]="'auth.signInTitle' | translate">
   <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
     @if (expired()) {
-      <p class="form-note" role="status"><mat-icon>schedule</mat-icon>{{ 'errors.sessionExpired' | translate }}</p>
+      <p class="form-note" role="status"><i class="icon pi pi-clock"></i>{{ 'errors.sessionExpired' | translate }}</p>
     }
 
-    <mat-form-field>
-      <mat-label>{{ 'auth.login' | translate }}</mat-label>
-      <input matInput formControlName="login" autocomplete="username" autocapitalize="off" />
-    </mat-form-field>
+    <div class="ms-field">
+      <p-floatlabel variant="on">
+        <input pInputText id="login" formControlName="login" autocomplete="username" autocapitalize="off" />
+        <label for="login">{{ 'auth.login' | translate }} *</label>
+      </p-floatlabel>
+      @if (showError(form.controls.login)) {
+        <small class="field-error">{{ 'common.required' | translate }}</small>
+      }
+    </div>
 
-    <mat-form-field>
-      <mat-label>{{ 'auth.password' | translate }}</mat-label>
-      <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" />
-      <button matIconButton matSuffix type="button" (click)="showPassword.set(!showPassword())"
-              [attr.aria-label]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | translate">
-        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-      </button>
-    </mat-form-field>
+    <div class="ms-field">
+      <p-floatlabel variant="on" class="ms-password">
+        <input pInputText id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+               autocomplete="current-password" />
+        <label for="password">{{ 'auth.password' | translate }} *</label>
+        <button pButton type="button" class="reveal" [rounded]="true" [text]="true" severity="secondary"
+                (click)="showPassword.set(!showPassword())" [attr.aria-pressed]="showPassword()"
+                [attr.aria-label]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | translate">
+          <i class="pi" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()" pButtonIcon></i>
+        </button>
+      </p-floatlabel>
+      @if (showError(form.controls.password)) {
+        <small class="field-error">{{ 'common.required' | translate }}</small>
+      }
+    </div>
 
     @if (error()) {
-      <p class="form-error" role="alert"><mat-icon>error</mat-icon>{{ error() }}</p>
+      <p class="form-error" role="alert"><i class="icon pi pi-exclamation-circle"></i>{{ error() }}</p>
     }
 
     <div class="auth-actions">
       <a routerLink="/forgot-password">{{ 'auth.forgot' | translate }}</a>
-      <button matButton="filled" type="submit" class="submit" [disabled]="busy()">
-        {{ 'auth.signIn' | translate }}
+      <button pButton type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
+        <span pButtonLabel>{{ 'auth.signIn' | translate }}</span>
       </button>
     </div>
     <p class="auth-switch">{{ 'auth.newHere' | translate }} <a routerLink="/sign-up">{{ 'auth.createAccount' | translate }}</a></p>

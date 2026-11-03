@@ -4,11 +4,13 @@
   </div>
   <div class="page-body">
     <div class="soon">
-      <span class="big-icon"><mat-icon>construction</mat-icon></span>
+      <span class="big-icon"><i class="icon pi pi-wrench"></i></span>
       <h1 class="page-title">{{ 'comingSoon.title' | translate }}</h1>
       <p class="muted">{{ 'comingSoon.lead' | translate }}</p>
       <p class="muted">{{ 'comingSoon.apiReady' | translate }}</p>
-      <a matButton routerLink="/dashboard"><mat-icon>arrow_back</mat-icon>{{ 'dashboard.title' | translate }}</a>
+      <a pButton routerLink="/dashboard" [text]="true">
+        <i class="pi pi-arrow-left" pButtonIcon></i><span pButtonLabel>{{ 'dashboard.title' | translate }}</span>
+      </a>
     </div>
   </div>
 </div>

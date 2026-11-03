@@ -1,24 +1,21 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import {
-  ApplicationConfig,
-  inject,
-  provideAppInitializer,
-  provideBrowserGlobalErrorListeners,
-} from '@angular/core';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { MatIconRegistry } from '@angular/material/icon';
+import { ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideTranslateLoader, provideTranslateService } from '@ngx-translate/core';
+import { MessageService } from 'primeng/api';
+import { providePrimeNG } from 'primeng/config';
 
 import { routes } from './app.routes';
 import { apiInterceptor } from './core/auth/api.interceptor';
 import { AuthService } from './core/auth/auth.service';
 import { JsonTranslateLoader } from './core/i18n';
 import { LangService } from './core/lang.service';
+import { ModernStockPreset } from './core/theme/modern-stock-preset';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding(), withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
     provideHttpClient(withInterceptors([apiInterceptor])),
     provideTranslateService({
@@ -26,12 +23,24 @@ export const appConfig: ApplicationConfig = {
       lang: 'km',
       fallbackLang: 'en',
     }),
-    // Same outlined fields everywhere, like the prototype's bordered inputs.
-    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline', subscriptSizing: 'dynamic' } },
-    // Before the first screen: language, icon font, and the session from the refresh cookie (behind the splash).
+    // PrimeNG 19 (MIT, no license key) with the Material preset in the prototype's colors. Its styles go into the
+    // "primeng" CSS layer, before the prototype's components layer (tailwind.css), and dark mode follows .app-dark.
+    provideAnimationsAsync(),
+    providePrimeNG({
+      ripple: true,
+      theme: {
+        preset: ModernStockPreset,
+        options: {
+          darkModeSelector: '.app-dark',
+          cssLayer: { name: 'primeng', order: 'theme, base, primeng, components, utilities' },
+        },
+      },
+    }),
+    // The toasts (<p-toast> in app.html, see NotifyService).
+    MessageService,
+    // Before the first screen: language, then the session from the refresh cookie (behind the splash).
     provideAppInitializer(() => {
       inject(LangService).init();
-      inject(MatIconRegistry).setDefaultFontSetClass('icon');
       return inject(AuthService).init();
     }),
   ],

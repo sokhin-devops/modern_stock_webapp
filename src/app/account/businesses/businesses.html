@@ -3,30 +3,34 @@
     <div class="page-head">
       <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'account.myBusinesses' | translate }}</span></nav>
       <div class="page-actions">
-        <button matButton="filled" type="button" (click)="create()"><mat-icon>add</mat-icon>{{ 'account.newBusiness' | translate }}</button>
+        <button pButton type="button" (click)="create()">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'account.newBusiness' | translate }}</span>
+        </button>
       </div>
     </div>
 
     <div class="page-body">
       @for (invitation of business.invitations(); track invitation.id) {
         <div class="banner banner-primary">
-          <mat-icon>mail</mat-icon>
+          <i class="icon pi pi-envelope"></i>
           <div class="text">
             {{ 'account.invited' | translate: { business: invitation.businessName, role: lang.name(invitation.roleNameEn, invitation.roleNameKm) } }}
           </div>
-          <button matButton type="button" (click)="decline(invitation)">{{ 'account.decline' | translate }}</button>
-          <button matButton="filled" type="button" (click)="accept(invitation)">{{ 'account.accept' | translate }}</button>
+          <button pButton type="button" [text]="true" (click)="decline(invitation)"><span pButtonLabel>{{ 'account.decline' | translate }}</span></button>
+          <button pButton type="button" (click)="accept(invitation)"><span pButtonLabel>{{ 'account.accept' | translate }}</span></button>
         </div>
       }
 
       @if (loading()) {
-        <div class="center-box"><mat-progress-spinner mode="indeterminate" diameter="40" /></div>
+        <div class="center-box"><p-progress-spinner strokeWidth="4" [style]="{ width: '40px', height: '40px' }" /></div>
       } @else if (!business.businesses()?.length) {
         <div class="empty">
-          <span class="big-icon"><mat-icon>add_business</mat-icon></span>
+          <span class="big-icon"><i class="icon pi pi-building"></i></span>
           <h2 class="page-title">{{ 'account.noBusinessTitle' | translate }}</h2>
           <p class="muted">{{ 'account.noBusinessLead' | translate }}</p>
-          <button matButton="filled" type="button" (click)="create()"><mat-icon>add</mat-icon>{{ 'account.newBusiness' | translate }}</button>
+          <button pButton type="button" (click)="create()">
+            <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'account.newBusiness' | translate }}</span>
+          </button>
         </div>
       } @else {
         <div class="biz-grid">
@@ -50,7 +54,7 @@
             </button>
           }
           <button class="biz-card biz-new" type="button" (click)="create()">
-            <mat-icon>add</mat-icon><span>{{ 'account.newBusiness' | translate }}</span>
+            <i class="icon pi pi-plus"></i><span>{{ 'account.newBusiness' | translate }}</span>
           </button>
         </div>
       }

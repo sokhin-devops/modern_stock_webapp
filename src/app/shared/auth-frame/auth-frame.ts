@@ -1,7 +1,6 @@
 import { Component, inject, input } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonDirective, ButtonIcon } from 'primeng/button';
 
 import { environment } from '../../../environments/environment';
 import { LangService } from '../../core/lang.service';
@@ -14,7 +13,7 @@ import { LangButton } from '../lang-button/lang-button';
  */
 @Component({
   selector: 'ms-auth-frame',
-  imports: [MatIcon, MatIconButton, TranslatePipe, LangButton],
+  imports: [ButtonDirective, ButtonIcon, TranslatePipe, LangButton],
   templateUrl: './auth-frame.html',
   styleUrl: './auth-frame.scss',
 })

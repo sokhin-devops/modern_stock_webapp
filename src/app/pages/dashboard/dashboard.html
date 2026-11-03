@@ -3,7 +3,7 @@
     <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'dashboard.title' | translate }}</span></nav>
     <div class="page-actions">
       @if (business.can('sale:create')) {
-        <a matButton="filled" routerLink="/pos"><mat-icon>point_of_sale</mat-icon>{{ 'dashboard.openPos' | translate }}</a>
+        <a pButton routerLink="/pos"><i class="pi pi-shopping-cart" pButtonIcon></i><span pButtonLabel>{{ 'dashboard.openPos' | translate }}</span></a>
       }
     </div>
   </div>
@@ -13,36 +13,36 @@
 
     @if (trialDaysLeft(); as days) {
       <div class="banner banner-primary">
-        <mat-icon>workspace_premium</mat-icon>
+        <i class="icon pi pi-star"></i>
         <div class="text">
           <b>{{ 'dashboard.trialEnds' | translate: { days } }}</b>
           <div class="small">{{ 'dashboard.trialLead' | translate: { date: (billing.value()?.trialEndsAt | date: 'dd/MM/yyyy') } }}</div>
         </div>
-        <a matButton routerLink="/settings/billing">{{ 'nav.billing' | translate }}</a>
+        <a pButton routerLink="/settings/billing" [text]="true"><span pButtonLabel>{{ 'nav.billing' | translate }}</span></a>
       </div>
     }
 
     @if (business.can('stock:view')) {
       <div class="kpis">
         <div class="kpi">
-          <div class="kpi-label"><mat-icon>inventory_2</mat-icon>{{ 'dashboard.stockValue' | translate }}</div>
+          <div class="kpi-label"><i class="icon pi pi-box"></i>{{ 'dashboard.stockValue' | translate }}</div>
           <div class="kpi-value">{{ (summary.value()?.onHandValue ?? 0) | currency: 'USD' }}</div>
           <div class="kpi-sub">{{ 'dashboard.stockValueHint' | translate }}</div>
         </div>
         @if (summary.value()?.inTransitValue != null) {
           <div class="kpi">
-            <div class="kpi-label"><mat-icon>local_shipping</mat-icon>{{ 'dashboard.inTransit' | translate }}</div>
+            <div class="kpi-label"><i class="icon pi pi-truck"></i>{{ 'dashboard.inTransit' | translate }}</div>
             <div class="kpi-value">{{ summary.value()!.inTransitValue! | currency: 'USD' }}</div>
             <div class="kpi-sub">{{ 'dashboard.inTransitHint' | translate }}</div>
           </div>
         }
         <a class="kpi link" routerLink="/inventory/stock">
-          <div class="kpi-label"><mat-icon>trending_down</mat-icon>{{ 'dashboard.lowStock' | translate }}</div>
+          <div class="kpi-label"><i class="icon pi pi-arrow-down"></i>{{ 'dashboard.lowStock' | translate }}</div>
           <div class="kpi-value" [class.warn]="(summary.value()?.lowStockItems ?? 0) > 0">{{ summary.value()?.lowStockItems ?? 0 }}</div>
           <div class="kpi-sub">{{ ((summary.value()?.lowStockItems ?? 0) === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
         </a>
         <a class="kpi link" routerLink="/inventory/stock">
-          <div class="kpi-label"><mat-icon>event_busy</mat-icon>{{ 'dashboard.expiring' | translate }}</div>
+          <div class="kpi-label"><i class="icon pi pi-calendar-times"></i>{{ 'dashboard.expiring' | translate }}</div>
           <div class="kpi-value">{{ summary.value()?.expiringIn30Days ?? 0 }}</div>
           <div class="kpi-sub">
             {{ (summary.value()?.expiringIn30Days === 1 ? 'dashboard.batch' : 'dashboard.batches') | translate }}
@@ -53,7 +53,7 @@
         </a>
       </div>
       @if (summary.isLoading()) {
-        <mat-progress-bar mode="indeterminate" />
+        <p-progressbar mode="indeterminate" />
       }
     }
 
@@ -84,7 +84,7 @@
               </tbody>
             </table>
           } @else if (!low.isLoading()) {
-            <p class="muted empty"><mat-icon>check_circle</mat-icon>{{ 'dashboard.lowStockEmpty' | translate }}</p>
+            <p class="muted empty"><i class="icon pi pi-check-circle"></i>{{ 'dashboard.lowStockEmpty' | translate }}</p>
           }
         </section>
       }
@@ -108,8 +108,9 @@
                   }
                 </div>
                 @if (u.limit !== null) {
-                  <mat-progress-bar mode="determinate" [value]="usagePercent(u.used, u.limit)"
-                                    [class.danger]="usagePercent(u.used, u.limit) >= 90" />
+                  <p-progressbar [value]="usagePercent(u.used, u.limit)" [showValue]="false"
+                                 [class.danger]="usagePercent(u.used, u.limit) >= 90"
+                                 [attr.aria-label]="'dashboard.limit.' + u.key | translate" />
                 }
               </div>
             }
@@ -118,6 +119,6 @@
       }
     </div>
 
-    <p class="form-note tw:mt-4"><mat-icon>insights</mat-icon>{{ 'dashboard.salesSoon' | translate }}</p>
+    <p class="form-note tw:mt-4"><i class="icon pi pi-chart-line"></i>{{ 'dashboard.salesSoon' | translate }}</p>
   </div>
 </div>

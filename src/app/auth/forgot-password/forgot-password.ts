@@ -1,20 +1,20 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonDirective, ButtonLabel } from 'primeng/button';
+import { FloatLabel } from 'primeng/floatlabel';
+import { InputText } from 'primeng/inputtext';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { NotifyService } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
+import { revealErrors, showError } from '../../shared/forms';
 
 /** Accounts with a verified email get a reset link; staff without email ask their Owner (PLAIN.md 11.12). */
 @Component({
   selector: 'ms-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatFormField, MatLabel, MatError, MatInput, MatButton, MatIcon, AuthFrame],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, ButtonDirective, ButtonLabel, AuthFrame],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.scss',
 })
@@ -22,6 +22,7 @@ export class ForgotPassword {
   private readonly auth = inject(AuthService);
   private readonly notify = inject(NotifyService);
 
+  protected readonly showError = showError;
   protected readonly busy = signal(false);
   protected readonly sent = signal<{ devLink?: string } | null>(null);
   protected readonly form = inject(NonNullableFormBuilder).group({
@@ -30,7 +31,7 @@ export class ForgotPassword {
 
   protected submit(): void {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     this.busy.set(true);

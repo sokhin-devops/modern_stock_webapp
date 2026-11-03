@@ -1,10 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { MatButton } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { MyBusiness, MyInvitation } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
@@ -15,14 +14,16 @@ import { CreateBusinessDialog } from '../create-business-dialog/create-business-
 /** My businesses (prototype businesses.html): open one, accept an invitation, or create a new business. */
 @Component({
   selector: 'ms-businesses',
-  imports: [TranslatePipe, MatButton, MatIcon, MatProgressSpinner],
+  imports: [TranslatePipe, ButtonDirective, ButtonIcon, ButtonLabel, ProgressSpinner],
+  providers: [DialogService],
   templateUrl: './businesses.html',
   styleUrl: './businesses.scss',
 })
 export class Businesses implements OnInit {
   protected readonly business = inject(BusinessService);
   protected readonly lang = inject(LangService);
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(DialogService);
+  private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly notify = inject(NotifyService);
 
@@ -49,9 +50,16 @@ export class Businesses implements OnInit {
 
   protected create(): void {
     this.dialog
-      .open(CreateBusinessDialog, { width: '560px', maxWidth: 'calc(100vw - 32px)', autoFocus: 'first-tabbable' })
-      .afterClosed()
-      .subscribe((created?: MyBusiness) => {
+      .open(CreateBusinessDialog, {
+        header: this.translate.instant('account.newBusiness'),
+        closeAriaLabel: this.translate.instant('common.close'),
+        width: '560px',
+        breakpoints: { '640px': 'calc(100vw - 32px)' },
+        modal: true,
+        closable: true,
+        focusOnShow: true,
+      })
+      .onClose.subscribe((created?: MyBusiness) => {
         if (created) {
           this.business.open(created.id);
           this.router.navigate(['/setup']);

@@ -1,9 +1,8 @@
 import { Component, OnInit, inject, input, signal } from '@angular/core';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonDirective, ButtonLabel } from 'primeng/button';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { NotifyService } from '../../core/notify.service';
@@ -12,7 +11,7 @@ import { AuthFrame } from '../../shared/auth-frame/auth-frame';
 /** Opened from the verification email: /verify-email?token=… */
 @Component({
   selector: 'ms-verify-email',
-  imports: [RouterLink, TranslatePipe, MatButton, MatIcon, MatProgressSpinner, AuthFrame],
+  imports: [RouterLink, TranslatePipe, ButtonDirective, ButtonLabel, ProgressSpinner, AuthFrame],
   templateUrl: './verify-email.html',
   styleUrl: './verify-email.scss',
 })

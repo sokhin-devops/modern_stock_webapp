@@ -11,8 +11,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Kantumruy+Pro:wght@400;500;700&display=swap">
-  <!-- Material Symbols: the icon font of <mat-icon>, used through the prototype class .icon (see app.config.ts) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
   <script>
     // Apply the saved light or dark choice before the page paints (see ThemeModeService).
     try { if (localStorage.getItem('ms-theme') === 'dark') document.documentElement.classList.add('app-dark'); } catch (e) {}
@@ -36,7 +34,7 @@
     .ms-splash-logo { width: 72px; height: 72px; border-radius: 22px; background: #1a73e8; display: grid; place-items: center;
       box-shadow: 0 12px 32px rgba(26, 115, 232, .35); animation: ms-splash-pulse 1.6s ease-in-out .6s infinite; }
     .app-dark .ms-splash-logo { background: #8ab4f8; box-shadow: 0 12px 32px rgba(138, 180, 248, .25); }
-    .ms-splash-logo svg { width: 40px; height: 40px; }
+    .ms-splash-logo svg { width: 34px; height: 34px; }
     .app-dark .ms-splash-logo svg path { fill: #062e6f; }
     .ms-splash-name { font-size: 22px; font-weight: 500; letter-spacing: -.01em; }
     .ms-splash-bar { position: relative; width: 120px; height: 3px; overflow: hidden; border-radius: 999px; background: #d3e3fd; }
@@ -58,8 +56,8 @@
   <div id="ms-splash" role="status" aria-live="polite" aria-label="Loading ModernStock">
     <div class="ms-splash-box">
       <div class="ms-splash-logo">
-        <!-- Material Symbols "inventory_2", the same mark as the logo in the top bar -->
-        <svg viewBox="0 -960 960 960" aria-hidden="true"><path fill="#fff" d="M200-80q-33 0-56.5-23.5T120-160v-451q-18-11-29-28.5T80-680v-120q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v120q0 23-11 40.5T840-611v451q0 33-23.5 56.5T760-80H200Zm0-520v440h560v-440H200Zm-40-80h640v-120H160v120Zm200 280h240v-80H360v80Z"/></svg>
+        <!-- PrimeIcons "pi-box", the same mark as the logo in the top bar (font glyph: y axis flipped, 1024 units) -->
+        <svg viewBox="0 0 1024 1024" aria-hidden="true"><path fill="#fff" transform="translate(0 960) scale(1 -1)" d="M1022.811 183.526s0 4.096 0 6.436v516.077c-0.023 7.052-1.751 13.696-4.793 19.546l0.112-0.237c-4.397 9.329-11.736 16.668-20.801 20.952l-0.263 0.112-468.096 209.474c-5.326 2.478-11.563 3.924-18.139 3.924s-12.811-1.445-18.411-4.037l0.272 0.112-468.096-209.474c-14.982-7.661-25.187-22.762-25.744-40.299l-0.001-0.074v-516.077c0.941-17.495 11.005-32.44 25.487-40.246l0.258-0.128 468.096-209.474c5.306-2.591 11.546-4.105 18.139-4.105s12.832 1.514 18.389 4.214l-0.251-0.11 468.096 209.474c13.538 6.306 23.285 18.763 25.711 33.677l0.034 0.259zM86.616 638.749l380.328-170.856v-420.117l-380.328 170.27zM554.714 467.895l380.328 170.856v-420.702l-380.328-170.27zM512 868.117l361.019-162.079-361.019-161.493-361.019 161.493z"/></svg>
       </div>
       <div class="ms-splash-name">ModernStock</div>
       <div class="ms-splash-bar"><span></span></div>

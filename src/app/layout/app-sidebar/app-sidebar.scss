@@ -3,14 +3,12 @@
   display: contents;
 }
 
-// Collapsed to icons: no arrows (the prototype rule can't hide a mat-icon, whose own style sets its display).
-:host-context(.collapsed) .chev {
-  display: none;
+// The flyout opens in an overlay on <body>; its own element stays out of the shell grid.
+p-menu {
+  position: absolute;
 }
 
-// Phones always show the full menu (it slides in), whatever the desktop setting.
-@media (max-width: 768px) {
-  :host-context(.collapsed) .chev {
-    display: inline-block;
-  }
+// Icons only: no arrows (the prototype hides them with a layered rule, which the PrimeIcons box in styles.scss beats).
+.rail .chev {
+  display: none;
 }

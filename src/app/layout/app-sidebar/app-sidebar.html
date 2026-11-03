@@ -1,14 +1,14 @@
-<nav class="sidebar" [attr.aria-label]="'shell.mainMenu' | translate">
+<nav class="sidebar" [class.rail]="rail()" [attr.aria-label]="'shell.mainMenu' | translate">
   @for (item of items(); track item.id) {
     @if (item.children) {
       <div class="nav-group" [class.open]="isOpen(item)" [class.current]="isCurrent(item)">
-        <!-- Collapsed to icons: the group's pages open in a flyout menu beside the icon -->
-        <button class="nav-item" type="button" (click)="collapsed() || toggle(item)" [attr.aria-expanded]="isOpen(item)"
-                [matMenuTriggerFor]="collapsed() ? flyout : null" [matMenuTriggerData]="{ item }"
-                [matTooltip]="collapsed() ? (item.label | translate) : ''" matTooltipPosition="right">
-          <mat-icon>{{ item.icon }}</mat-icon>
+        <!-- Icons only: the group's pages open in a flyout menu beside the icon -->
+        <button class="nav-item" type="button" (click)="rail() ? openFlyout($event, item) : toggle(item)"
+                [attr.aria-expanded]="rail() ? null : isOpen(item)" [attr.aria-haspopup]="rail() ? 'menu' : null"
+                [pTooltip]="item.label | translate" tooltipPosition="right" [tooltipDisabled]="!rail()">
+          <i class="icon" [class]="item.icon"></i>
           <span class="nav-label">{{ item.label | translate }}</span>
-          <mat-icon class="chev">expand_more</mat-icon>
+          <i class="icon pi pi-chevron-down chev"></i>
         </button>
         <div class="nav-sub">
           <div class="nav-sub-inner">
@@ -21,8 +21,8 @@
       </div>
     } @else {
       <a class="nav-item" [routerLink]="'/' + item.path" routerLinkActive="active" (click)="navigate.emit()"
-         [matTooltip]="collapsed() ? (item.label | translate) : ''" matTooltipPosition="right">
-        <mat-icon>{{ item.icon }}</mat-icon>
+         [pTooltip]="item.label | translate" tooltipPosition="right" [tooltipDisabled]="!rail()">
+        <i class="icon" [class]="item.icon"></i>
         <span class="nav-label">{{ item.label | translate }}</span>
       </a>
     }
@@ -31,22 +31,16 @@
     }
   }
 
-  <div class="sidebar-footer">
-    <button class="nav-item" type="button" (click)="collapse.emit()"
-            [matTooltip]="collapsed() ? ('shell.expand' | translate) : ''" matTooltipPosition="right">
-      <mat-icon class="collapse-icon">{{ collapsed() ? 'left_panel_open' : 'left_panel_close' }}</mat-icon>
-      <span class="nav-label">{{ (collapsed() ? 'shell.expand' : 'shell.collapse') | translate }}</span>
-    </button>
-  </div>
+  <!-- Tablets always show icons, so there is nothing to expand there -->
+  @if (!screen.tablet()) {
+    <div class="sidebar-footer">
+      <button class="nav-item" type="button" (click)="collapse.emit()"
+              [pTooltip]="'shell.expand' | translate" tooltipPosition="right" [tooltipDisabled]="!rail()">
+        <i class="icon pi" [class.pi-angle-double-right]="rail()" [class.pi-angle-double-left]="!rail()"></i>
+        <span class="nav-label">{{ (rail() ? 'shell.expand' : 'shell.collapse') | translate }}</span>
+      </button>
+    </div>
+  }
 </nav>
 
-<mat-menu #flyout="matMenu" xPosition="after" class="nav-flyout">
-  <ng-template matMenuContent let-item="item">
-    <div class="pop-title">{{ item.label | translate }}</div>
-    @for (page of item.children; track page.path) {
-      <a mat-menu-item [routerLink]="'/' + page.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        {{ page.label | translate }}
-      </a>
-    }
-  </ng-template>
-</mat-menu>
+<p-menu #flyout [model]="flyoutItems()" [popup]="true" appendTo="body" (onShow)="placeFlyout()" />

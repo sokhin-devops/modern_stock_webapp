@@ -4,14 +4,6 @@
   min-height: 0;
 }
 
-.rounding {
-  width: 100%;
-
-  mat-button-toggle {
-    flex: 1;
-  }
-}
-
 .finish {
   display: flex;
   justify-content: flex-end;
@@ -21,5 +13,4 @@
 
 .submit {
   min-width: 160px;
-  height: 48px;
 }

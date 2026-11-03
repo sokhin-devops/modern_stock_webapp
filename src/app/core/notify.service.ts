@@ -1,18 +1,18 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
+import { MessageService } from 'primeng/api';
 
 import { ProblemDetail } from './api/models';
 
-/** Short messages at the bottom of the screen (the prototype's toasts), with Angular Material's snack bar. */
+/** Short messages at the bottom of the screen (the prototype's toasts), shown by <p-toast> in app.html. */
 @Injectable({ providedIn: 'root' })
 export class NotifyService {
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly messages = inject(MessageService);
   private readonly translate = inject(TranslateService);
 
   show(message: string): void {
-    this.snackBar.open(message, undefined, { duration: 3500 });
+    this.messages.add({ severity: 'contrast', summary: message, life: 3500 });
   }
 
   /** Translation key or plain text. */
@@ -21,7 +21,7 @@ export class NotifyService {
   }
 
   error(error: unknown): void {
-    this.snackBar.open(this.message(error), this.translate.instant('common.close'), { duration: 6000 });
+    this.messages.add({ severity: 'error', summary: this.message(error), life: 6000 });
   }
 
   /** The API's translated message (ProblemDetail.detail), or a friendly fallback. */

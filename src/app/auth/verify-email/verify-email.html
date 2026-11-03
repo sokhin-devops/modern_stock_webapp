@@ -2,18 +2,18 @@
   <div class="result" role="status">
     @switch (state()) {
       @case ('checking') {
-        <mat-progress-spinner mode="indeterminate" diameter="40" />
+        <p-progress-spinner strokeWidth="4" [style]="{ width: '40px', height: '40px' }" />
         <p class="muted">{{ 'auth.verifying' | translate }}</p>
       }
       @case ('done') {
-        <span class="big-icon"><mat-icon>mark_email_read</mat-icon></span>
+        <span class="big-icon"><i class="icon pi pi-check-circle"></i></span>
         <h2 class="page-title">{{ 'auth.verified' | translate }}</h2>
-        <a matButton="filled" routerLink="/login">{{ 'auth.signIn' | translate }}</a>
+        <a pButton routerLink="/login"><span pButtonLabel>{{ 'auth.signIn' | translate }}</span></a>
       }
       @default {
-        <span class="big-icon danger"><mat-icon>link_off</mat-icon></span>
-        <p class="form-error"><mat-icon>error</mat-icon>{{ error() ?? ('auth.linkInvalid' | translate) }}</p>
-        <a matButton routerLink="/login">{{ 'auth.backToSignIn' | translate }}</a>
+        <span class="big-icon danger"><i class="icon pi pi-ban"></i></span>
+        <p class="form-error"><i class="icon pi pi-exclamation-circle"></i>{{ error() ?? ('auth.linkInvalid' | translate) }}</p>
+        <a pButton routerLink="/login" [text]="true"><span pButtonLabel>{{ 'auth.backToSignIn' | translate }}</span></a>
       }
     }
   </div>

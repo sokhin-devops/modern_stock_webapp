@@ -1,25 +1,15 @@
-<button class="avatar" type="button" [matMenuTriggerFor]="menu" [attr.aria-label]="'shell.account' | translate">{{ initial() }}</button>
+<button class="avatar" type="button" (click)="menu.toggle($event)" aria-haspopup="menu" [attr.aria-label]="'shell.account' | translate">
+  {{ initial() }}
+</button>
 
-<mat-menu #menu="matMenu" xPosition="before" class="account-menu">
-  <div class="menu-head">
-    <span class="avatar">{{ initial() }}</span>
-    <div class="who">
-      <b>{{ auth.user()?.fullName }}</b>
-      <div class="muted small">{{ login() }}</div>
+<p-menu #menu [model]="items()" [popup]="true" appendTo="body" styleClass="account-menu">
+  <ng-template #start>
+    <div class="menu-head">
+      <span class="avatar">{{ initial() }}</span>
+      <div>
+        <b>{{ auth.user()?.fullName }}</b>
+        <div class="muted small">{{ login() }}</div>
+      </div>
     </div>
-  </div>
-  <mat-divider />
-  <a mat-menu-item routerLink="/businesses"><mat-icon>apps</mat-icon>{{ 'account.myBusinesses' | translate }}</a>
-  <a mat-menu-item [href]="websiteUrl + '/' + lang.lang()" target="_blank" rel="noopener">
-    <mat-icon>public</mat-icon>{{ 'account.website' | translate }}
-  </a>
-  <mat-divider />
-  <button mat-menu-item type="button" (click)="$event.stopPropagation(); lang.toggle()">
-    <mat-icon>translate</mat-icon>{{ 'common.language' | translate }}: {{ 'common.switchLanguage' | translate }}
-  </button>
-  <button mat-menu-item type="button" (click)="$event.stopPropagation(); theme.toggle()">
-    <mat-icon>{{ theme.dark() ? 'light_mode' : 'dark_mode' }}</mat-icon>{{ (theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate }}
-  </button>
-  <mat-divider />
-  <button mat-menu-item type="button" (click)="auth.logout()"><mat-icon>logout</mat-icon>{{ 'account.logout' | translate }}</button>
-</mat-menu>
+  </ng-template>
+</p-menu>

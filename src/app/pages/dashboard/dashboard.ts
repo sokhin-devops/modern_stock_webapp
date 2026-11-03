@@ -2,11 +2,10 @@ import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressBar } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
+import { ProgressBar } from 'primeng/progressbar';
 
 import { environment } from '../../../environments/environment';
 import { Billing, StockRow, StockSummary } from '../../core/api/models';
@@ -22,7 +21,9 @@ const API = environment.apiUrl;
  */
 @Component({
   selector: 'ms-dashboard',
-  imports: [RouterLink, TranslatePipe, CurrencyPipe, DecimalPipe, DatePipe, MatButton, MatIcon, MatProgressBar],
+  imports: [
+    RouterLink, TranslatePipe, CurrencyPipe, DecimalPipe, DatePipe, ButtonDirective, ButtonIcon, ButtonLabel, ProgressBar,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -36,18 +37,18 @@ export class Dashboard {
   private readonly scope = computed(() => ({ business: this.business.businessId(), branch: this.business.branchId() }));
 
   protected readonly summary = rxResource({
-    params: () => (this.business.can('stock:view') ? this.scope() : undefined),
-    stream: () => this.http.get<StockSummary>(`${API}/stock/summary`),
+    request: () => (this.business.can('stock:view') ? this.scope() : undefined),
+    loader: () => this.http.get<StockSummary>(`${API}/stock/summary`),
   });
 
   protected readonly low = rxResource({
-    params: () => (this.business.can('stock:view') ? this.scope() : undefined),
-    stream: () => this.http.get<StockRow[]>(`${API}/stock/low`),
+    request: () => (this.business.can('stock:view') ? this.scope() : undefined),
+    loader: () => this.http.get<StockRow[]>(`${API}/stock/low`),
   });
 
   protected readonly billing = rxResource({
-    params: () => (this.business.can('billing:manage') ? this.scope().business : undefined),
-    stream: () => this.http.get<Billing>(`${API}/billing`),
+    request: () => (this.business.can('billing:manage') ? this.scope().business : undefined),
+    loader: () => this.http.get<Billing>(`${API}/billing`),
   });
 
   protected readonly trialDaysLeft = computed(() => {
@@ -64,5 +65,4 @@ export class Dashboard {
   protected usagePercent(used: number, limit: number | null): number {
     return limit ? Math.min(100, Math.round((used / limit) * 100)) : 0;
   }
-
 }

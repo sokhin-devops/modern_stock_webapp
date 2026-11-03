@@ -60,9 +60,16 @@
   gap: 12px;
 }
 
-// Red when the plan is almost full, like the prototype's .progress.danger.
+// Red when the plan is almost full, like the prototype's .progress.danger (PrimeNG reads its color from this token).
 .danger {
-  --mat-progress-bar-active-indicator-color: var(--danger);
+  --p-progressbar-value-background: var(--danger);
+}
+
+// A thin line under the numbers while they load.
+.kpis + p-progressbar {
+  display: block;
+  margin: -8px 0 16px;
+  --p-progressbar-height: 3px;
 }
 
 @media (max-width: 1000px) {

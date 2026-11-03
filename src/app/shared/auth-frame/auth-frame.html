@@ -1,7 +1,7 @@
 <main class="auth">
   <div class="auth-card">
     <div class="auth-side">
-      <span class="logo logo-lg"><mat-icon>inventory_2</mat-icon></span>
+      <span class="logo logo-lg"><i class="icon pi pi-box"></i></span>
       <h1 class="auth-title">{{ title() }}</h1>
       <p class="auth-sub">{{ sub() }}</p>
     </div>
@@ -11,13 +11,13 @@
   </div>
   <div class="auth-below">
     <a class="website-link" [href]="websiteUrl + '/' + lang.lang()">
-      <mat-icon>arrow_back</mat-icon>{{ 'account.website' | translate }}
+      <i class="icon pi pi-arrow-left"></i>{{ 'account.website' | translate }}
     </a>
     <span class="below-actions">
       <ms-lang-button />
-      <button matIconButton type="button" (click)="theme.toggle()"
+      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle()"
               [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate">
-        <mat-icon>{{ theme.dark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        <i class="pi" [class.pi-sun]="theme.dark()" [class.pi-moon]="!theme.dark()" pButtonIcon></i>
       </button>
     </span>
   </div>

@@ -1,129 +1,97 @@
 // Global styles shared by every screen. Styles that belong to one component live in its .scss file.
-@use '@angular/material' as mat;
-@use 'styles/theme-colors' as brand;
+// PrimeNG's own styles come from the theme preset (app/core/theme/modern-stock-preset.ts) in the "primeng" layer;
+// the rules below fit PrimeNG components into the prototype's layout and sizes.
 @use 'styles/prototype';
 
-// Angular Material 3 theme from the brand blue #1A73E8 (src/styles/_theme-colors.scss, made by
-// "ng generate @angular/material:theme-color"). Light and dark both come from one theme through the
-// CSS color-scheme, switched by the same .app-dark class the prototype uses.
-html {
-  color-scheme: light;
-  @include mat.theme((
-    color: (
-      primary: brand.$primary-palette,
-      tertiary: brand.$tertiary-palette,
-    ),
-    typography: (
-      plain-family: ('Roboto', 'Kantumruy Pro', 'Noto Sans Khmer', system-ui, sans-serif),
-      brand-family: ('Roboto', 'Kantumruy Pro', 'Noto Sans Khmer', system-ui, sans-serif),
-    ),
-    density: 0,
-  ));
-}
+// PrimeIcons in the prototype's icon box: <i class="icon pi pi-box"></i> takes a square of the prototype's size
+// (20 px, 18 px in buttons...). PrimeIcons glyphs fill their whole box, Material Symbols (which the prototype was
+// drawn with) about 80 %, so the glyph is drawn at 80 % to keep the same visual weight. Not layered: it must beat
+// the PrimeIcons stylesheet (.pi { display: inline-block }).
+.pi.icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1em;
+  height: 1em;
 
-html.app-dark {
-  color-scheme: dark;
-}
-
-// Material components speak the prototype's design language: its colors (which already switch for dark mode),
-// so buttons use the exact brand blue #1A73E8, menus and dialogs are plain white instead of tinted,
-// field borders are the prototype's light grey, and errors use its red.
-html {
-  @include mat.theme-overrides((
-    primary: var(--primary),
-    on-primary: var(--on-primary),
-    primary-container: var(--primary-container),
-    on-primary-container: var(--on-primary-container),
-    surface: var(--surface),
-    surface-container-lowest: var(--surface),
-    surface-container-low: var(--surface),
-    surface-container: var(--surface),
-    surface-container-high: var(--surface),
-    on-surface: var(--text),
-    on-surface-variant: var(--text-2),
-    outline: var(--border-strong),
-    outline-variant: var(--border),
-    error: var(--danger),
-  ));
-
-  // Same shapes as the prototype: 10 px fields, 24 px dialogs, 12 px menus.
-  @include mat.form-field-overrides((
-    outlined-container-shape: var(--radius-sm),
-    outlined-hover-outline-color: var(--muted),
-  ));
-  @include mat.dialog-overrides((
-    container-shape: var(--radius-xl),
-    headline-padding: 24px 24px 0,
-    content-padding: 16px 24px,
-    with-actions-content-padding: 16px 24px,
-    actions-padding: 8px 24px 24px,
-  ));
-  @include mat.menu-overrides((
-    container-shape: var(--radius-md),
-    item-label-text-size: 14px,
-  ));
-  @include mat.snack-bar-overrides((
-    container-shape: var(--radius-md),
-  ));
-
-  // The prototype's usage meter: 6 px, rounded, on a light grey track.
-  @include mat.progress-bar-overrides((
-    track-color: var(--surface-3),
-    active-indicator-color: var(--primary),
-    track-height: 6px,
-    active-indicator-height: 6px,
-    track-shape: 999px,
-  ));
-}
-
-// Dialog header like the prototype's .dialog-head (title left, close button right, on one line). The prototype
-// class already gives the padding, so the Material title drops its own padding and its 40 px baseline strut.
-.dialog-head {
-  .mat-mdc-dialog-title {
-    flex: 1;
-    margin: 0;
-    padding: 0;
-    font-size: 22px;
-    line-height: 28px;
-
-    &::before {
-      display: none;
-    }
-  }
-
-  .mat-mdc-icon-button {
-    margin-right: -8px;
+  &::before {
+    font-size: 0.8em;
   }
 }
 
-// Fields 48 px tall instead of 56 px, like the prototype's inputs (density -2 only affects form fields).
-.mat-mdc-form-field {
-  @include mat.form-field-density(-2);
-}
-
-// <mat-icon> uses the prototype's .icon class as its font set (app.config.ts), so icons get the Material Symbols
-// font and the prototype's sizes (20 px, 18 px in buttons...). Material fixes the box at 24 px; let it follow the font.
-.mat-icon.icon {
-  width: auto;
-  height: auto;
-}
-
-// Forms built with Angular Material fields: one column with even spacing, an error line and a success line.
 @layer components {
+  // Forms: one column with even spacing, an error line and a success line. Fields fill the width.
   .ms-form {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
 
-  .ms-form .mat-mdc-form-field {
-    width: 100%;
-  }
-
   .ms-form-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+  }
+
+  // One field: the floating-label input, then its hint or error line.
+  .ms-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .ms-field .p-floatlabel,
+  .ms-field .p-inputtext,
+  .ms-field .p-select,
+  .ms-field .p-inputnumber,
+  .ms-field .p-selectbutton {
+    width: 100%;
+  }
+
+  // A placeholder (an example such as "012 345 678") shows only in a focused field, once the label has moved up;
+  // otherwise it would sit on top of the label.
+  .p-floatlabel input::placeholder {
+    opacity: 0;
+    transition: opacity 0.15s var(--ease);
+  }
+
+  .p-floatlabel input:focus::placeholder {
+    opacity: 1;
+  }
+
+  // Choices as one row of equal buttons, like the prototype's segmented control.
+  .ms-field .p-selectbutton {
+    display: flex;
+  }
+
+  .ms-field .p-selectbutton .p-togglebutton {
+    flex: 1;
+  }
+
+  .field-hint,
+  .field-error {
+    padding: 0 14px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .field-hint {
+    color: var(--muted);
+  }
+
+  .field-error {
+    color: var(--danger);
+  }
+
+  // A checkbox or switch with its label on the right.
+  .ms-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    label {
+      cursor: pointer;
+    }
   }
 
   .form-error {
@@ -158,24 +126,59 @@ html {
   }
 }
 
-// Content of Angular Material menus (business switcher, branch selector, notifications), like the prototype popovers.
-.mat-mdc-menu-panel {
-  .pop-title {
-    padding: 10px 16px 4px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 500;
+// Password field: the show/hide button sits inside the input, on the right.
+.ms-password {
+  position: relative;
+
+  .p-inputtext {
+    padding-inline-end: 52px;
   }
 
-  .empty {
-    padding: 12px 16px 16px;
+  .reveal {
+    position: absolute;
+    top: 50%;
+    inset-inline-end: 4px;
+    transform: translateY(-50%);
   }
 }
 
-.mat-mdc-menu-item {
+// Buttons at the prototype's sizes: 14 px text, 40 px tall; .submit is the 48 px main button of a form.
+.p-button {
+  min-height: 40px;
+  font-size: 14px;
+}
+
+.p-button-icon-only {
+  min-height: 0;
+}
+
+.p-button.submit {
+  min-height: 48px;
+}
+
+// Inside a PrimeNG menu (business switcher, branch selector, account): rows with an avatar and two lines.
+.p-menu {
+  min-width: 240px;
+
+  .p-menu-item.active > .p-menu-item-content {
+    background: var(--primary-soft);
+  }
+
+  .p-menu-item-link {
+    text-decoration: none;
+  }
+
+  .biz-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 2px 0;
+  }
+
   .grow {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     line-height: 1.35;
   }
 
@@ -187,26 +190,41 @@ html {
     color: var(--muted);
     font-size: 12px;
   }
+}
 
-  .biz-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 6px 0;
+// The account menu's header (avatar, name, login) and empty notes in menus.
+.menu-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+
+  .avatar {
+    margin: 0;
+    cursor: default;
   }
 
-  &.active {
-    background: var(--primary-soft);
+  b {
+    font-weight: 500;
+  }
+
+  .small {
+    font-size: 12px;
   }
 }
 
-// Parts of menus that only phones need (the menu panel lives in an overlay, outside the components).
-.mat-mdc-menu-panel .phone-only {
-  display: none;
+.menu-empty {
+  padding: 4px 16px 12px;
+  color: var(--muted);
 }
 
-@media (max-width: 768px) {
-  .mat-mdc-menu-panel .phone-only {
-    display: block;
+// Toasts: one line of text, like the prototype's snack bar; full width on phones.
+.p-toast .p-toast-message-text {
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .p-toast.p-toast-bottom-center {
+    width: calc(100vw - 32px);
   }
 }

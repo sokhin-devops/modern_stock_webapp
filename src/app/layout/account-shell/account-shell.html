@@ -1,14 +1,14 @@
 <div class="shell no-sidebar">
   <header class="topbar">
     <a class="site-logo" routerLink="/businesses">
-      <span class="logo"><mat-icon>inventory_2</mat-icon></span><b>ModernStock</b>
+      <span class="logo"><i class="icon pi pi-box"></i></span><b>ModernStock</b>
     </a>
     <span class="spacer"></span>
     <div class="topbar-actions">
       <ms-lang-button />
-      <button matIconButton type="button" (click)="theme.toggle()"
+      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle()"
               [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate">
-        <mat-icon>{{ theme.dark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        <i class="pi" [class.pi-sun]="theme.dark()" [class.pi-moon]="!theme.dark()" pButtonIcon></i>
       </button>
       <ms-account-menu />
     </div>

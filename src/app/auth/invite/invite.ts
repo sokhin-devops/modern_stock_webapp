@@ -1,13 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
-import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonDirective, ButtonLabel } from 'primeng/button';
+import { FloatLabel } from 'primeng/floatlabel';
+import { InputText } from 'primeng/inputtext';
+import { ProgressSpinner } from 'primeng/progressspinner';
 import { switchMap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
@@ -17,6 +16,7 @@ import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
+import { revealErrors, showError } from '../../shared/forms';
 import { CAMBODIAN_PHONE, sameAs } from '../../shared/validators';
 
 /**
@@ -26,8 +26,8 @@ import { CAMBODIAN_PHONE, sameAs } from '../../shared/validators';
 @Component({
   selector: 'ms-invite',
   imports: [
-    ReactiveFormsModule, RouterLink, TranslatePipe, MatFormField, MatLabel, MatHint, MatError, MatInput, MatButton,
-    MatIcon, MatProgressSpinner, AuthFrame,
+    ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, ButtonDirective, ButtonLabel, ProgressSpinner,
+    AuthFrame,
   ],
   templateUrl: './invite.html',
   styleUrl: './invite.scss',
@@ -44,6 +44,7 @@ export class Invite implements OnInit {
 
   protected readonly details = signal<InvitationDetails | null>(null);
   protected readonly closed = signal(false);
+  protected readonly showError = showError;
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly form = inject(NonNullableFormBuilder).group(
@@ -70,7 +71,7 @@ export class Invite implements OnInit {
 
   protected join(): void {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     const value = this.form.getRawValue();
