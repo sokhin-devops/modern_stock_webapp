@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -11,10 +12,13 @@ import { NAV, NavItem, NavPage } from '../nav';
 /**
  * Side menu (prototype sidebar): Dashboard and POS, a thin line, then the groups. Only pages the member's role
  * allows are shown; a group with nothing allowed disappears. The group of the current page opens by itself.
+ * Collapsed to icons, a group's pages open in a flyout menu beside it (the prototype's pop-nav).
  */
 @Component({
   selector: 'ms-app-sidebar',
-  imports: [RouterLink, RouterLinkActive, TranslatePipe, MatIcon, MatTooltip],
+  imports: [
+    RouterLink, RouterLinkActive, TranslatePipe, MatIcon, MatTooltip, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
+  ],
   templateUrl: './app-sidebar.html',
   styleUrl: './app-sidebar.scss',
 })

@@ -39,13 +39,13 @@
         <a class="kpi link" routerLink="/inventory/stock">
           <div class="kpi-label"><mat-icon>trending_down</mat-icon>{{ 'dashboard.lowStock' | translate }}</div>
           <div class="kpi-value" [class.warn]="(summary.value()?.lowStockItems ?? 0) > 0">{{ summary.value()?.lowStockItems ?? 0 }}</div>
-          <div class="kpi-sub">{{ 'dashboard.items' | translate }}</div>
+          <div class="kpi-sub">{{ ((summary.value()?.lowStockItems ?? 0) === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
         </a>
         <a class="kpi link" routerLink="/inventory/stock">
           <div class="kpi-label"><mat-icon>event_busy</mat-icon>{{ 'dashboard.expiring' | translate }}</div>
           <div class="kpi-value">{{ summary.value()?.expiringIn30Days ?? 0 }}</div>
           <div class="kpi-sub">
-            {{ 'dashboard.batches' | translate }}
+            {{ (summary.value()?.expiringIn30Days === 1 ? 'dashboard.batch' : 'dashboard.batches') | translate }}
             @if (summary.value()?.expiredBatches) {
               · <span class="danger-text">{{ 'dashboard.expired' | translate: { n: summary.value()!.expiredBatches } }}</span>
             }
@@ -99,11 +99,18 @@
           @for (u of plan.usage; track u.key) {
             @if (u.key === 'branches' || u.key === 'members' || u.key === 'products') {
               <div class="usage">
-                <div class="usage-row">
+                <div class="usage-line">
                   <span>{{ 'dashboard.limit.' + u.key | translate }}</span>
-                  <span class="num muted">{{ u.used }} / {{ u.limit ?? '∞' }}</span>
+                  @if (u.limit === null) {
+                    <span class="num muted">{{ u.used }} · {{ 'dashboard.unlimited' | translate }}</span>
+                  } @else {
+                    <span class="num muted">{{ u.used }} / {{ u.limit }}</span>
+                  }
                 </div>
-                <mat-progress-bar mode="determinate" [value]="usagePercent(u.used, u.limit)" />
+                @if (u.limit !== null) {
+                  <mat-progress-bar mode="determinate" [value]="usagePercent(u.used, u.limit)"
+                                    [class.danger]="usagePercent(u.used, u.limit) >= 90" />
+                }
               </div>
             }
           }

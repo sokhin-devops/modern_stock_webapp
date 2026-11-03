@@ -6,7 +6,11 @@
   <div class="brand">
     <a class="logo" routerLink="/dashboard" aria-label="ModernStock"><mat-icon>inventory_2</mat-icon></a>
     <button class="business-btn" type="button" [matMenuTriggerFor]="businessMenu">
-      <span>{{ businessName() }}</span><mat-icon>expand_more</mat-icon>
+      <span class="names">
+        <span>{{ businessName() }}</span>
+        <small class="phone-only">{{ branchName() ?? ('shell.allBranches' | translate) }}</small>
+      </span>
+      <mat-icon>expand_more</mat-icon>
     </button>
   </div>
 
@@ -55,6 +59,21 @@
   }
   <mat-divider />
   <a mat-menu-item routerLink="/businesses"><mat-icon>apps</mat-icon>{{ 'shell.allMyBusinesses' | translate }}</a>
+  <!-- Phones have no room for the branch chip, so the branch is picked here -->
+  @if (business.canPickBranch() && business.branches().length > 1) {
+    <div class="phone-only">
+      <mat-divider />
+      <div class="pop-title">{{ 'shell.branch' | translate }}</div>
+      <button mat-menu-item type="button" (click)="business.selectBranch(null)" [class.active]="business.branchId() === null">
+        <mat-icon>select_all</mat-icon>{{ 'shell.allBranches' | translate }}
+      </button>
+      @for (b of business.branches(); track b.id) {
+        <button mat-menu-item type="button" (click)="business.selectBranch(b.id)" [class.active]="b.id === business.branchId()">
+          <mat-icon>storefront</mat-icon>{{ lang.name(b.nameEn, b.nameKm) }}
+        </button>
+      }
+    </div>
+  }
 </mat-menu>
 
 <mat-menu #branchMenu="matMenu">

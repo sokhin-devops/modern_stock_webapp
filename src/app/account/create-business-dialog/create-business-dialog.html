@@ -4,24 +4,26 @@
 </div>
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <mat-dialog-content class="ms-form">
-    <mat-form-field>
-      <mat-label>{{ 'account.nameEn' | translate }}</mat-label>
-      <input matInput formControlName="nameEn" placeholder="Sokha Mini-mart" />
-      <mat-error>{{ 'common.required' | translate }}</mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>{{ 'account.nameKm' | translate }} ({{ 'common.optional' | translate }})</mat-label>
-      <input matInput formControlName="nameKm" placeholder="ហាងសុខា មីនីម៉ាត" />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>{{ 'account.type' | translate }}</mat-label>
-      <mat-select formControlName="businessType">
-        @for (type of types; track type) {
-          <mat-option [value]="type">{{ 'account.types.' + type | translate }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+  <mat-dialog-content>
+    <div class="ms-form">
+      <mat-form-field>
+        <mat-label>{{ 'account.nameEn' | translate }}</mat-label>
+        <input matInput formControlName="nameEn" placeholder="Sokha Mini-mart" />
+        <mat-error>{{ 'common.required' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'account.nameKm' | translate }} ({{ 'common.optional' | translate }})</mat-label>
+        <input matInput formControlName="nameKm" placeholder="ហាងសុខា មីនីម៉ាត" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'account.type' | translate }}</mat-label>
+        <mat-select formControlName="businessType">
+          @for (type of types; track type) {
+            <mat-option [value]="type">{{ 'account.types.' + type | translate }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions>

@@ -2,7 +2,9 @@
   @for (item of items(); track item.id) {
     @if (item.children) {
       <div class="nav-group" [class.open]="isOpen(item)" [class.current]="isCurrent(item)">
-        <button class="nav-item" type="button" (click)="toggle(item)" [attr.aria-expanded]="isOpen(item)"
+        <!-- Collapsed to icons: the group's pages open in a flyout menu beside the icon -->
+        <button class="nav-item" type="button" (click)="collapsed() || toggle(item)" [attr.aria-expanded]="isOpen(item)"
+                [matMenuTriggerFor]="collapsed() ? flyout : null" [matMenuTriggerData]="{ item }"
                 [matTooltip]="collapsed() ? (item.label | translate) : ''" matTooltipPosition="right">
           <mat-icon>{{ item.icon }}</mat-icon>
           <span class="nav-label">{{ item.label | translate }}</span>
@@ -37,3 +39,14 @@
     </button>
   </div>
 </nav>
+
+<mat-menu #flyout="matMenu" xPosition="after" class="nav-flyout">
+  <ng-template matMenuContent let-item="item">
+    <div class="pop-title">{{ item.label | translate }}</div>
+    @for (page of item.children; track page.path) {
+      <a mat-menu-item [routerLink]="'/' + page.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        {{ page.label | translate }}
+      </a>
+    }
+  </ng-template>
+</mat-menu>

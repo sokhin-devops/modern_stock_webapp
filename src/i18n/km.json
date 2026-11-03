@@ -205,7 +205,10 @@
       "branches": "សាខា",
       "members": "សមាជិក",
       "products": "ទំនិញ"
-    }
+    },
+    "item": "ទំនិញ",
+    "batch": "បាច់",
+    "unlimited": "មិនកំណត់"
   },
   "comingSoon": {
     "title": "នឹងមកដល់បន្ទាប់",

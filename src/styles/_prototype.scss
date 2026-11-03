@@ -939,11 +939,12 @@ html[lang="km"] .auth-title { line-height: 1.5; }
     height: 100vh;
     padding-top: 16px;
     background: var(--surface);
-    box-shadow: var(--shadow-3);
     transform: translateX(-100%);
-    transition: transform .3s var(--ease-out);
+    visibility: hidden;
+    transition: transform .3s var(--ease-out), visibility 0s linear .3s;
   }
-  .nav-open .sidebar { transform: none; }
+  /* The shadow only while open (a hidden menu would cast it on the page edge), and hidden links are not tabbable. */
+  .nav-open .sidebar { transform: none; visibility: visible; box-shadow: var(--shadow-3); transition: transform .3s var(--ease-out); }
   .sidebar-footer { background: var(--surface); }
   .nav-open .scrim { opacity: 1; visibility: visible; }
   .branch-chip, .rate-chip, .hide-sm { display: none; }

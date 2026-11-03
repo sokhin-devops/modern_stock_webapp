@@ -25,17 +25,80 @@ html.app-dark {
   color-scheme: dark;
 }
 
-// Material components on the prototype's surfaces: dialogs and menus use the same radius as the prototype cards.
+// Material components speak the prototype's design language: its colors (which already switch for dark mode),
+// so buttons use the exact brand blue #1A73E8, menus and dialogs are plain white instead of tinted,
+// field borders are the prototype's light grey, and errors use its red.
 html {
+  @include mat.theme-overrides((
+    primary: var(--primary),
+    on-primary: var(--on-primary),
+    primary-container: var(--primary-container),
+    on-primary-container: var(--on-primary-container),
+    surface: var(--surface),
+    surface-container-lowest: var(--surface),
+    surface-container-low: var(--surface),
+    surface-container: var(--surface),
+    surface-container-high: var(--surface),
+    on-surface: var(--text),
+    on-surface-variant: var(--text-2),
+    outline: var(--border-strong),
+    outline-variant: var(--border),
+    error: var(--danger),
+  ));
+
+  // Same shapes as the prototype: 10 px fields, 24 px dialogs, 12 px menus.
+  @include mat.form-field-overrides((
+    outlined-container-shape: var(--radius-sm),
+    outlined-hover-outline-color: var(--muted),
+  ));
   @include mat.dialog-overrides((
     container-shape: var(--radius-xl),
+    headline-padding: 24px 24px 0,
+    content-padding: 16px 24px,
+    with-actions-content-padding: 16px 24px,
+    actions-padding: 8px 24px 24px,
   ));
   @include mat.menu-overrides((
     container-shape: var(--radius-md),
+    item-label-text-size: 14px,
   ));
   @include mat.snack-bar-overrides((
     container-shape: var(--radius-md),
   ));
+
+  // The prototype's usage meter: 6 px, rounded, on a light grey track.
+  @include mat.progress-bar-overrides((
+    track-color: var(--surface-3),
+    active-indicator-color: var(--primary),
+    track-height: 6px,
+    active-indicator-height: 6px,
+    track-shape: 999px,
+  ));
+}
+
+// Dialog header like the prototype's .dialog-head (title left, close button right, on one line). The prototype
+// class already gives the padding, so the Material title drops its own padding and its 40 px baseline strut.
+.dialog-head {
+  .mat-mdc-dialog-title {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 22px;
+    line-height: 28px;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .mat-mdc-icon-button {
+    margin-right: -8px;
+  }
+}
+
+// Fields 48 px tall instead of 56 px, like the prototype's inputs (density -2 only affects form fields).
+.mat-mdc-form-field {
+  @include mat.form-field-density(-2);
 }
 
 // <mat-icon> uses the prototype's .icon class as its font set (app.config.ts), so icons get the Material Symbols
@@ -134,5 +197,16 @@ html {
 
   &.active {
     background: var(--primary-soft);
+  }
+}
+
+// Parts of menus that only phones need (the menu panel lives in an overlay, outside the components).
+.mat-mdc-menu-panel .phone-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mat-mdc-menu-panel .phone-only {
+    display: block;
   }
 }

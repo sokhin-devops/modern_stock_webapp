@@ -205,7 +205,10 @@
       "branches": "Branches",
       "members": "Members",
       "products": "Products"
-    }
+    },
+    "item": "item",
+    "batch": "batch",
+    "unlimited": "Unlimited"
   },
   "comingSoon": {
     "title": "Coming next",

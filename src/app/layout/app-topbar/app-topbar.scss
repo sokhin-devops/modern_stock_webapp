@@ -5,6 +5,24 @@
 
 .business-btn {
   color: var(--text);
+
+  .names {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    line-height: 1.25;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
+
+.phone-only {
+  display: none;
 }
 
 .chip.branch-chip {
@@ -33,9 +51,17 @@
   }
 }
 
+// Phones (prototype: menu, business, notifications, account). Language and dark mode are in the account menu,
+// and the branch is picked in the business menu.
 @media (max-width: 768px) {
   .lang,
-  .dark-toggle {
+  .dark-toggle,
+  .chip.branch-chip,
+  .rate-chip {
     display: none;
+  }
+
+  .phone-only {
+    display: block;
   }
 }

@@ -2,3 +2,15 @@
 :host {
   display: contents;
 }
+
+// Collapsed to icons: no arrows (the prototype rule can't hide a mat-icon, whose own style sets its display).
+:host-context(.collapsed) .chev {
+  display: none;
+}
+
+// Phones always show the full menu (it slides in), whatever the desktop setting.
+@media (max-width: 768px) {
+  :host-context(.collapsed) .chev {
+    display: inline-block;
+  }
+}
