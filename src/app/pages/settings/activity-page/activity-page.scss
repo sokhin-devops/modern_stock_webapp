@@ -1,0 +1,59 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar {
+  flex-wrap: wrap;
+}
+
+.search {
+  width: min(280px, 100%);
+
+  input {
+    width: 100%;
+  }
+}
+
+.dates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.when {
+  width: 110px;
+  white-space: nowrap;
+}
+
+.changes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field {
+    color: var(--muted);
+  }
+
+  .old {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .pi {
+    color: var(--muted);
+    font-size: 11px;
+  }
+}

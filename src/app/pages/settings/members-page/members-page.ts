@@ -5,10 +5,12 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
+import { MultiSelect } from 'primeng/multiselect';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Tooltip } from 'primeng/tooltip';
 
 import { ApiService } from '../../../core/api/api.service';
@@ -18,6 +20,7 @@ import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { QrCode } from '../../../shared/qr-code/qr-code';
+import { PermissionInfo, RoleDialog, RoleDraft } from './role-dialog/role-dialog';
 
 interface Member {
   id: number;
@@ -30,7 +33,10 @@ interface Member {
   roleCode: string;
   roleNameEn: string;
   roleNameKm: string | null;
+  /** The first branch; null = all branches. */
   branchId: number | null;
+  /** Every branch the member works in; null = all branches. */
+  branchIds: number[] | null;
   status: 'ACTIVE' | 'DISABLED' | 'REMOVED';
   canResetPassword: boolean;
 }
@@ -51,17 +57,20 @@ interface Role {
   code: string;
   nameEn: string;
   nameKm: string | null;
+  builtIn: boolean;
+  permissions: string[];
 }
 
 /**
- * Users and roles (prototype members.html, PLAIN.md 11.12): who works in the business, their role and branch, and the
- * invitations. Inviting makes a link to share (email optional); staff without email get a reset link from here.
+ * Users and roles (prototype members.html, PLAIN.md 11.12): who works in the business, their role and branches, the
+ * invitations, and the roles. Inviting makes a link to share (email optional); staff without email get a reset link
+ * from here. The Owner can add custom roles (FR-6.24) and give a member several branches (FR-6.18).
  */
 @Component({
   selector: 'ms-members-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Dialog, InputText, Select,
-    ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel, QrCode,
+    ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel, QrCode, MultiSelect, ToggleSwitch, RoleDialog,
   ],
   templateUrl: './members-page.html',
   styleUrl: './members-page.scss',
@@ -75,7 +84,7 @@ export class MembersPage {
   private readonly confirm = inject(ConfirmationService);
   private readonly translate = inject(TranslateService);
 
-  protected readonly tab = signal<'members' | 'invitations'>('members');
+  protected readonly tab = signal<'members' | 'invitations' | 'roles'>('members');
   protected readonly members = signal<Member[]>([]);
   protected readonly invitations = signal<Invitation[]>([]);
   protected readonly roles = signal<Role[]>([]);
@@ -87,6 +96,9 @@ export class MembersPage {
     { value: null, label: this.translate.instant('settings.members.allBranches') },
     ...this.business.branches().map((b) => ({ value: b.id, label: this.lang.name(b.nameEn, b.nameKm) })),
   ]);
+  protected readonly branchChoices = computed(() =>
+    this.business.branches().map((b) => ({ value: b.id, label: this.lang.name(b.nameEn, b.nameKm) })),
+  );
 
   // Invite dialog
   protected readonly inviteOpen = signal(false);
@@ -99,14 +111,74 @@ export class MembersPage {
   // Edit dialog
   protected readonly editing = signal<Member | null>(null);
   protected readonly editRole = signal<number | null>(null);
-  protected readonly editBranch = signal<number | null>(null);
+  protected readonly editAll = signal(true);
+  protected readonly editBranches = signal<number[]>([]);
+
+  // Roles (FR-6.24)
+  protected readonly permissionList = signal<PermissionInfo[]>([]);
+  protected readonly roleDraft = signal<RoleDraft | null>(null);
+  protected readonly roleOpen = signal(false);
+  protected readonly customCount = computed(() => this.roles().filter((r) => !r.builtIn).length);
 
   // A link to show (reset link)
   protected readonly shownLink = signal<{ title: string; link: string } | null>(null);
 
   constructor() {
     this.load();
+    this.loadRoles();
+    this.api.get<PermissionInfo[]>('/permissions').subscribe({ next: (p) => this.permissionList.set(p) });
+  }
+
+  protected loadRoles(): void {
     this.api.get<Role[]>('/roles').subscribe({ next: (r) => this.roles.set(r) });
+  }
+
+  protected memberCount(role: Role): number {
+    return this.members().filter((m) => m.roleId === role.id).length;
+  }
+
+  /** A built-in role opens to look at; a custom one to change. */
+  protected openRole(role: Role): void {
+    this.roleDraft.set({
+      id: role.builtIn ? null : role.id,
+      nameEn: role.nameEn,
+      nameKm: role.nameKm,
+      permissions: role.permissions,
+      readOnly: role.builtIn || !this.canManage(),
+    });
+    this.roleOpen.set(true);
+  }
+
+  /** A new role, empty or as a copy of another (without owner-only permissions). */
+  protected newRole(from?: Role): void {
+    const ownerOnly = new Set(this.permissionList().filter((p) => p.ownerOnly).map((p) => p.code));
+    this.roleDraft.set({
+      id: null,
+      nameEn: from ? this.translate.instant('roles.copyOf', { name: from.nameEn }) : '',
+      nameKm: from?.nameKm ? this.translate.instant('roles.copyOf', { name: from.nameKm }) : null,
+      permissions: (from?.permissions ?? []).filter((p) => !ownerOnly.has(p)),
+      readOnly: false,
+    });
+    this.roleOpen.set(true);
+  }
+
+  protected deleteRole(role: Role): void {
+    this.confirm.confirm({
+      header: this.translate.instant('roles.delete'),
+      message: this.translate.instant('roles.deleteConfirm', { name: this.lang.name(role.nameEn, role.nameKm) }),
+      acceptLabel: this.translate.instant('roles.delete'),
+      rejectLabel: this.translate.instant('common.cancel'),
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { text: true },
+      accept: () =>
+        this.api.delete(`/roles/${role.id}`).subscribe({
+          next: () => {
+            this.notify.showKey('roles.deleted');
+            this.loadRoles();
+          },
+          error: (e) => this.notify.error(e),
+        }),
+    });
   }
 
   protected load(): void {
@@ -116,12 +188,16 @@ export class MembersPage {
     }
   }
 
-  protected branchName(id: number | null): string {
-    if (id == null) {
+  /** "All branches", or the names of the member's branches. */
+  protected branchNames(ids: number[] | null): string {
+    if (ids == null) {
       return this.translate.instant('settings.members.allBranches');
     }
-    const b = this.business.branches().find((x) => x.id === id);
-    return b ? this.lang.name(b.nameEn, b.nameKm) : '';
+    return ids
+      .map((id) => this.business.branches().find((x) => x.id === id))
+      .filter((b) => !!b)
+      .map((b) => this.lang.name(b!.nameEn, b!.nameKm))
+      .join(', ');
   }
 
   protected openInvite(): void {
@@ -156,7 +232,8 @@ export class MembersPage {
   protected openEdit(m: Member): void {
     this.editing.set(m);
     this.editRole.set(m.roleId);
-    this.editBranch.set(m.branchId);
+    this.editAll.set(m.branchIds == null);
+    this.editBranches.set(m.branchIds ?? (this.business.branchId() != null ? [this.business.branchId()!] : []));
   }
 
   protected saveEdit(): void {
@@ -164,7 +241,7 @@ export class MembersPage {
     if (!m) {
       return;
     }
-    this.patch(m, { roleId: this.editRole(), branchId: this.editBranch(), allBranches: this.editBranch() == null });
+    this.patch(m, this.editAll() ? { roleId: this.editRole(), allBranches: true } : { roleId: this.editRole(), branchIds: this.editBranches() });
   }
 
   protected toggleStatus(m: Member): void {

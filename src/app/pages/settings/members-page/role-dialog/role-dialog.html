@@ -1,0 +1,44 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(720px, 96vw)' }"
+          [header]="(readOnly() ? 'roles.view' : draft()?.id ? 'roles.edit' : 'roles.new') | translate">
+  <div class="ms-form dialog-form">
+    @if (readOnly()) {
+      <p class="form-note"><i class="icon pi pi-lock"></i>{{ 'roles.builtInNote' | translate }}</p>
+    }
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="role-en" required>{{ 'roles.nameEn' | translate }}</label>
+        <input pInputText id="role-en" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" [disabled]="readOnly()" maxlength="60" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="role-km" optional>{{ 'roles.nameKm' | translate }}</label>
+        <input pInputText id="role-km" [ngModel]="nameKm()" (ngModelChange)="nameKm.set($event)" [disabled]="readOnly()" maxlength="60" />
+      </div>
+    </div>
+    <p class="muted small">{{ 'roles.permissionsLead' | translate: { n: ticked().size } }}</p>
+    <div class="areas">
+      @for (a of areas(); track a.area) {
+        <section class="area">
+          <h4>{{ 'roles.areas.' + a.area | translate }}</h4>
+          @for (p of a.list; track p.code) {
+            <label class="perm" [class.locked]="p.ownerOnly">
+              <p-checkbox [binary]="true" [ngModel]="ticked().has(p.code)" (ngModelChange)="toggle(p.code, $event)"
+                          [disabled]="readOnly() || p.ownerOnly" />
+              <span>{{ 'roles.perm.' + p.code | translate }}</span>
+              @if (p.ownerOnly) {
+                <span class="tag owner-tag"><i class="pi pi-lock"></i> {{ 'roles.ownerOnly' | translate }}</span>
+              }
+            </label>
+          }
+        </section>
+      }
+    </div>
+  </div>
+  <ng-template #footer>
+    @if (readOnly()) {
+      <button pButton type="button" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+    } @else {
+      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+      <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !nameEn().trim()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+    }
+  </ng-template>
+</p-dialog>

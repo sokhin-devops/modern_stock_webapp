@@ -1,5 +1,5 @@
 <div class="account-wrap narrow">
-  <form class="page" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <form class="page" [formGroup]="form" (ngSubmit)="step() === steps.length - 1 ? submit() : next()" novalidate>
     <div class="page-head">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a routerLink="/businesses">{{ 'account.myBusinesses' | translate }}</a>
@@ -9,67 +9,146 @@
     </div>
 
     <div class="page-body">
-      <section class="setup-section">
-        <span class="setup-num">1</span>
-        <div class="grow">
-          <h2 class="section-title mb-16">{{ 'setup.branch' | translate }}</h2>
-          <div class="ms-form">
-            <div class="ms-form-row">
-              <div class="ms-field">
-                <label msLabel for="branchName" control="branchName">{{ 'setup.branchName' | translate }}</label>
-                <input pInputText id="branchName" formControlName="branchName" placeholder="Toul Kork" />
-                <small class="field-hint">{{ 'setup.branchNameHint' | translate }}</small>
-              </div>
-              <div class="ms-field">
-                <label msLabel for="phone" control="phone" optional error="errors.phone">{{ 'setup.phone' | translate }}</label>
-                <input pInputText id="phone" type="tel" formControlName="phone" placeholder="012 345 678" />
-              </div>
-            </div>
-            <div class="ms-field">
-              <label msLabel for="address" control="address" optional>{{ 'setup.address' | translate }}</label>
-              <input pInputText id="address" formControlName="address" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <ol class="wizard-steps" [attr.aria-label]="'setup.stepsLabel' | translate">
+        @for (s of steps; track s; let i = $index) {
+          <li [class.done]="i < step()" [class.current]="i === step()" [attr.aria-current]="i === step() ? 'step' : null">
+            <button type="button" (click)="goTo(i)" [disabled]="i >= step()">
+              <span class="setup-num">
+                @if (i < step()) { <i class="pi pi-check"></i> } @else { {{ i + 1 }} }
+              </span>
+              <span class="step-name">{{ s | translate }}</span>
+            </button>
+          </li>
+        }
+      </ol>
 
-      <section class="setup-section">
-        <span class="setup-num">2</span>
-        <div class="grow">
-          <h2 class="section-title mb-16">{{ 'setup.money' | translate }}</h2>
-          <div class="ms-form">
-            <div class="ms-form-row">
-              <div class="ms-field">
-                <label msLabel for="rate" control="rate" error="1,000 – 10,000">{{ 'setup.rate' | translate }}</label>
-                <p-inputnumber inputId="rate" formControlName="rate" prefix="$1 = ៛" [min]="1000" [max]="10000"
-                               [useGrouping]="true" locale="en-US" />
+      @switch (step()) {
+        @case (0) {
+          <section class="step">
+            <h2 class="section-title">{{ 'setup.branch' | translate }}</h2>
+            <p class="muted">{{ 'setup.branchLead' | translate }}</p>
+            <div class="ms-form">
+              <div class="ms-form-row">
+                <div class="ms-field">
+                  <label msLabel for="branchName" control="branchName">{{ 'setup.branchName' | translate }}</label>
+                  <input pInputText id="branchName" formControlName="branchName" placeholder="Toul Kork" />
+                  <small class="field-hint">{{ 'setup.branchNameHint' | translate }}</small>
+                </div>
+                <div class="ms-field">
+                  <label msLabel for="phone" control="phone" optional error="errors.phone">{{ 'setup.phone' | translate }}</label>
+                  <input pInputText id="phone" type="tel" formControlName="phone" placeholder="012 345 678" />
+                </div>
               </div>
               <div class="ms-field">
-                <span msLabel id="rounding-label">{{ 'setup.round' | translate }}</span>
-                <p-selectbutton formControlName="rounding" [options]="roundings" optionLabel="label" optionValue="value"
-                                [allowEmpty]="false" ariaLabelledBy="rounding-label" />
+                <label msLabel for="address" control="address" optional>{{ 'setup.address' | translate }}</label>
+                <input pInputText id="address" formControlName="address" />
               </div>
             </div>
-            <div class="ms-check">
-              <p-toggleswitch formControlName="vat" inputId="vat" />
-              <label for="vat">{{ 'setup.vat' | translate }}</label>
+          </section>
+        }
+        @case (1) {
+          <section class="step">
+            <h2 class="section-title">{{ 'setup.money' | translate }}</h2>
+            <p class="muted">{{ 'setup.moneyLead' | translate }}</p>
+            <div class="ms-form">
+              <div class="ms-form-row">
+                <div class="ms-field">
+                  <label msLabel for="rate" control="rate" error="1,000 – 10,000">{{ 'setup.rate' | translate }}</label>
+                  <p-inputnumber inputId="rate" formControlName="rate" prefix="$1 = ៛" [min]="1000" [max]="10000"
+                                 [useGrouping]="true" locale="en-US" />
+                </div>
+                <div class="ms-field">
+                  <span msLabel id="rounding-label">{{ 'setup.round' | translate }}</span>
+                  <p-selectbutton formControlName="rounding" [options]="roundings" optionLabel="label" optionValue="value"
+                                  [allowEmpty]="false" ariaLabelledBy="rounding-label" />
+                </div>
+              </div>
+              <div class="ms-check">
+                <p-toggleswitch formControlName="vat" inputId="vat" />
+                <label for="vat">{{ 'setup.vat' | translate }}</label>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="setup-section">
-        <span class="setup-num">3</span>
-        <div class="grow">
-          <h2 class="section-title mb-16">{{ 'setup.starter' | translate }}</h2>
-          <p class="muted">{{ 'setup.starterText' | translate }}</p>
-        </div>
-      </section>
+          </section>
+        }
+        @case (2) {
+          <section class="step">
+            <h2 class="section-title">{{ 'setup.starter' | translate }}</h2>
+            <p class="muted">{{ 'setup.starterLead' | translate }}</p>
+            <div class="ms-form">
+              <div class="ms-field narrow">
+                <label msLabel for="starterType">{{ 'setup.starterType' | translate }}</label>
+                <p-select inputId="starterType" [options]="types()" optionLabel="label" optionValue="value" [ngModel]="starterType()"
+                          (ngModelChange)="starterType.set($event)" [ngModelOptions]="{ standalone: true }" appendTo="body" />
+              </div>
+            </div>
+            @if (starter(); as set) {
+              <div class="starter-block">
+                <h3>{{ 'setup.units' | translate }}</h3>
+                <div class="chips">
+                  @for (u of set.units; track u.symbol) {
+                    <span class="tag">{{ lang.name(u.nameEn, u.nameKm) }} <small class="muted">· {{ u.symbol }}</small></span>
+                  }
+                </div>
+              </div>
+              <div class="starter-block">
+                <h3>{{ 'setup.categories' | translate }}</h3>
+                <div class="chips">
+                  @for (c of set.categories; track c.nameEn) {
+                    <span class="tag">{{ lang.name(c.nameEn, c.nameKm) }}</span>
+                  }
+                </div>
+              </div>
+              <div class="starter-block">
+                <div class="ms-check">
+                  <p-toggleswitch inputId="samples" [ngModel]="samples()" (ngModelChange)="samples.set($event)" [ngModelOptions]="{ standalone: true }" />
+                  <label for="samples">{{ 'setup.samples' | translate: { n: set.products.length } }}</label>
+                </div>
+                <small class="field-hint">{{ 'setup.samplesHint' | translate }}</small>
+                @if (samples()) {
+                  <ul class="samples">
+                    @for (p of set.products; track p.nameEn) {
+                      <li>
+                        <span>{{ lang.name(p.nameEn, p.nameKm) }}</span>
+                        <span class="muted">{{ p.price | currency: 'USD' }} / {{ p.unit }}@if (p.packUnit) { · {{ p.packUnit }} = {{ p.packFactor }} }</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            }
+          </section>
+        }
+        @case (3) {
+          <section class="step">
+            <h2 class="section-title">{{ 'setup.ready' | translate }}</h2>
+            <p class="muted">{{ 'setup.readyLead' | translate }}</p>
+            <dl class="summary">
+              <dt>{{ 'setup.branchName' | translate }}</dt><dd>{{ form.controls.branchName.value }}</dd>
+              <dt>{{ 'setup.rate' | translate }}</dt><dd>$1 = ៛{{ form.controls.rate.value.toLocaleString('en-US') }}</dd>
+              <dt>{{ 'setup.round' | translate }}</dt><dd>៛{{ form.controls.rounding.value.toLocaleString('en-US') }}</dd>
+              <dt>{{ 'setup.vatShort' | translate }}</dt><dd>{{ (form.controls.vat.value ? 'common.yes' : 'common.no') | translate }}</dd>
+              <dt>{{ 'setup.starterType' | translate }}</dt>
+              <dd>{{ typeName(starterType()) }}@if (samples()) { · {{ 'setup.withSamples' | translate }} }</dd>
+            </dl>
+            <p class="muted small">{{ 'setup.marketNote' | translate }}</p>
+          </section>
+        }
+      }
 
       <div class="finish">
-        <button pButton type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
-          <i class="pi pi-check" pButtonIcon></i><span pButtonLabel>{{ 'setup.finish' | translate }}</span>
-        </button>
+        @if (step() > 0) {
+          <button pButton type="button" [text]="true" (click)="back()" [disabled]="busy()">
+            <i class="pi pi-arrow-left" pButtonIcon></i><span pButtonLabel>{{ 'setup.back' | translate }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+        @if (step() < steps.length - 1) {
+          <button pButton type="submit" class="submit"><span pButtonLabel>{{ 'setup.next' | translate }}</span><i class="pi pi-arrow-right" pButtonIcon></i></button>
+        } @else {
+          <button pButton type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
+            <i class="pi pi-check" pButtonIcon></i><span pButtonLabel>{{ 'setup.finish' | translate }}</span>
+          </button>
+        }
       </div>
     </div>
   </form>

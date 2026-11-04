@@ -53,8 +53,10 @@ export interface MyBusiness {
   roleCode: string;
   roleNameEn: string;
   roleNameKm: string | null;
-  /** null = all branches. */
+  /** The member's first branch; null = all branches. */
   branchId: number | null;
+  /** Every branch the member works in (FR-6.18); null = all branches. */
+  branchIds: number[] | null;
   subscriptionStatus: SubscriptionStatus | null;
   trialEndsAt: string | null;
   permissions: string[];

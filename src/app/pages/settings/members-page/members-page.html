@@ -5,7 +5,11 @@
       <span class="current">{{ 'nav.members' | translate }}</span>
     </nav>
     <div class="page-actions">
-      @if (canManage()) {
+      @if (canManage() && tab() === 'roles') {
+        <button pButton type="button" (click)="newRole()" [disabled]="customCount() >= 10">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'roles.new' | translate }}</span>
+        </button>
+      } @else if (canManage()) {
         <button pButton type="button" (click)="openInvite()">
           <i class="pi pi-user-plus" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.invite' | translate }}</span>
         </button>
@@ -19,6 +23,7 @@
         @if (canManage()) {
           <p-tab value="invitations">{{ 'settings.members.tabInvitations' | translate }}<span class="count">{{ invitations().length }}</span></p-tab>
         }
+        <p-tab value="roles">{{ 'roles.tab' | translate }}<span class="count">{{ roles().length }}</span></p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="members">
@@ -44,7 +49,7 @@
                   </div>
                 </td>
                 <td>{{ lang.name(m.roleNameEn, m.roleNameKm) }}</td>
-                <td>{{ branchName(m.branchId) }}</td>
+                <td>{{ branchNames(m.branchIds) }}</td>
                 <td><span class="tag" [class.tag-primary]="m.status === 'ACTIVE'">{{ 'settings.members.' + m.status | translate }}</span></td>
                 <td class="actions">
                   @if (canManage() && m.userId !== myId() && m.roleCode !== 'OWNER') {
@@ -98,6 +103,40 @@
             </ng-template>
             <ng-template #emptymessage>
               <tr><td colspan="5" class="empty-cell">{{ 'settings.members.emptyInvites' | translate }}</td></tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="roles">
+          <p-table class="ms-table" [value]="roles()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+            <ng-template #header>
+              <tr>
+                <th>{{ 'settings.members.role' | translate }}</th>
+                <th>{{ 'roles.kind' | translate }}</th>
+                <th class="num">{{ 'roles.permissions' | translate }}</th>
+                <th class="num">{{ 'settings.members.tabMembers' | translate }}</th>
+                <th class="actions"></th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-r>
+              <tr class="clickable" tabindex="0" (click)="openRole(r)" (keydown.enter)="openRole(r)">
+                <td class="strong">{{ lang.name(r.nameEn, r.nameKm) }}</td>
+                <td><span class="tag" [class.tag-primary]="!r.builtIn">{{ (r.builtIn ? 'roles.builtIn' : 'roles.custom') | translate }}</span></td>
+                <td class="num">{{ r.permissions.length }}</td>
+                <td class="num">{{ memberCount(r) }}</td>
+                <td class="actions">
+                  @if (canManage()) {
+                    @if (r.code !== 'OWNER') {
+                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary"
+                              (click)="$event.stopPropagation(); newRole(r)" [disabled]="customCount() >= 10"
+                              [attr.aria-label]="'roles.duplicate' | translate" [pTooltip]="'roles.duplicate' | translate" tooltipPosition="top"><i class="pi pi-copy" pButtonIcon></i></button>
+                    }
+                    @if (!r.builtIn) {
+                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="$event.stopPropagation(); deleteRole(r)"
+                              [attr.aria-label]="'roles.delete' | translate" [pTooltip]="'roles.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
+                    }
+                  }
+                </td>
+              </tr>
             </ng-template>
           </p-table>
         </p-tabpanel>
@@ -156,15 +195,23 @@
       <p-select inputId="ed-role" [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="editRole()"
                 (ngModelChange)="editRole.set($event)" appendTo="body" />
     </div>
-    <div class="ms-field">
-      <label msLabel for="ed-branch">{{ 'settings.members.branch' | translate }}</label>
-      <p-select inputId="ed-branch" [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="editBranch()"
-                (ngModelChange)="editBranch.set($event)" appendTo="body" />
+    <div class="ms-check">
+      <p-toggleswitch inputId="ed-all" [ngModel]="editAll()" (ngModelChange)="editAll.set($event)" />
+      <label for="ed-all">{{ 'settings.members.allBranches' | translate }}</label>
     </div>
+    @if (!editAll()) {
+      <div class="ms-field">
+        <label msLabel for="ed-branches">{{ 'settings.members.branches' | translate }}</label>
+        <p-multiselect inputId="ed-branches" [options]="branchChoices()" optionLabel="label" optionValue="value" [ngModel]="editBranches()"
+                       (ngModelChange)="editBranches.set($event ?? [])" [showToggleAll]="false" [filter]="false" display="chip"
+                       [placeholder]="'settings.members.pickBranches' | translate" appendTo="body" />
+        <small class="field-hint">{{ 'settings.members.branchesHint' | translate }}</small>
+      </div>
+    }
   </div>
   <ng-template #footer>
     <button pButton type="button" [text]="true" (click)="editing.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
-    <button pButton type="button" (click)="saveEdit()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+    <button pButton type="button" (click)="saveEdit()" [disabled]="!editAll() && !editBranches().length"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>
 
@@ -187,3 +234,5 @@
     <button pButton type="button" (click)="shownLink.set(null)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
   </ng-template>
 </p-dialog>
+
+<ms-role-dialog [draft]="roleDraft()" [permissions]="permissionList()" [(visible)]="roleOpen" (saved)="loadRoles()" />

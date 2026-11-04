@@ -13,6 +13,7 @@ const BUILT: Record<string, () => Promise<Type<unknown>>> = {
   'settings/profile': () => import('./pages/settings/profile-page/profile-page').then((m) => m.ProfilePage),
   'settings/branches': () => import('./pages/settings/branches-page/branches-page').then((m) => m.BranchesPage),
   'settings/members': () => import('./pages/settings/members-page/members-page').then((m) => m.MembersPage),
+  'settings/activity': () => import('./pages/settings/activity-page/activity-page').then((m) => m.ActivityPage),
   'settings/rates': () => import('./pages/settings/rates-page/rates-page').then((m) => m.RatesPage),
   'settings/tax': () => import('./pages/settings/rules-page/rules-page').then((m) => m.RulesPage),
   'settings/sales-rules': () => import('./pages/settings/rules-page/rules-page').then((m) => m.RulesPage),

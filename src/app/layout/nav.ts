@@ -55,6 +55,7 @@ export const NAV: NavItem[] = [
       { path: 'settings/profile', label: 'nav.profile', permissions: ['business:manage'] },
       { path: 'settings/branches', label: 'nav.branches', permissions: ['business:manage'] },
       { path: 'settings/members', label: 'nav.members', permissions: ['member:view'] },
+      { path: 'settings/activity', label: 'nav.activity', permissions: ['activity:view'] },
       { path: 'settings/rates', label: 'nav.rates', permissions: ['exchange_rate:manage'] },
       { path: 'settings/tax', label: 'nav.tax', permissions: ['business:manage'] },
       { path: 'settings/sales-rules', label: 'nav.salesRules', permissions: ['business:manage'] },

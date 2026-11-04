@@ -26,6 +26,10 @@ export interface OnboardingRequest {
   usdToKhr: number;
   vatEnabled: boolean;
   rielRounding: number;
+  /** Starter units and categories for this kind of shop (FR-6.23); empty = the business's type. */
+  starterType?: string | null;
+  /** Also add the starter set's sample products. */
+  sampleProducts?: boolean;
 }
 
 /**
@@ -50,8 +54,18 @@ export class BusinessService {
 
   readonly current = computed(() => this.businesses()?.find((b) => b.id === this.businessId()) ?? null);
   readonly branch = computed(() => this.branches().find((b) => b.id === this.branchId()) ?? null);
-  /** A member with one branch always works in it; others may pick any branch or All branches. */
-  readonly canPickBranch = computed(() => this.current()?.branchId == null);
+  /** The branches the member works in (FR-6.18); null = all branches. */
+  readonly workBranchIds = computed(() => this.current()?.branchIds ?? null);
+  /** A member with one branch always works in it; others pick one of theirs or All (all of theirs). */
+  readonly canPickBranch = computed(() => {
+    const ids = this.workBranchIds();
+    return ids == null || ids.length > 1;
+  });
+  /** The branches in the top bar's picker. */
+  readonly pickableBranches = computed(() => {
+    const ids = this.workBranchIds();
+    return ids == null ? this.branches() : this.branches().filter((b) => ids.includes(b.id));
+  });
 
   can(permission: string): boolean {
     return this.current()?.permissions.includes(permission) ?? false;
@@ -126,14 +140,16 @@ export class BusinessService {
         this.branches.set(branches.filter((b) => b.active));
         this.rate.set(rate);
         this.setProfile(profile);
-        const fixed = this.current()?.branchId;
+        const mine = this.workBranchIds();
+        const usable = mine == null ? branches : branches.filter((b) => mine.includes(b.id));
+        const first = (usable.find((b) => b.main) ?? usable[0])?.id ?? null;
         const saved = this.branchId();
-        if (fixed != null) {
-          this.selectBranch(fixed);
-        } else if (saved != null && !branches.some((b) => b.id === saved)) {
-          this.selectBranch(branches.find((b) => b.main)?.id ?? null);
+        if (mine != null && mine.length === 1) {
+          this.selectBranch(mine[0]);
+        } else if (saved != null && !usable.some((b) => b.id === saved)) {
+          this.selectBranch(first);
         } else if (saved == null && sessionStorageSafe()?.getItem(BRANCH_KEY) == null) {
-          this.selectBranch(branches.find((b) => b.main)?.id ?? null);
+          this.selectBranch(first);
         }
       }),
       map(() => undefined),

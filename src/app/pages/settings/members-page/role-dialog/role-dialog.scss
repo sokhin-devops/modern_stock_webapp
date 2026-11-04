@@ -1,0 +1,48 @@
+.dialog-form {
+  padding-top: 6px;
+}
+
+.small {
+  margin: 0;
+  font-size: 13px;
+}
+
+// Permissions in two columns of areas on wide screens
+.areas {
+  columns: 2 280px;
+  column-gap: 24px;
+}
+
+.area {
+  break-inside: avoid;
+  margin-bottom: 14px;
+
+  h4 {
+    margin: 0 0 6px;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+.perm {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+
+  &.locked {
+    color: var(--muted);
+    cursor: default;
+  }
+}
+
+.owner-tag {
+  margin-inline-start: auto;
+  white-space: nowrap;
+}

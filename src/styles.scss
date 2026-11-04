@@ -510,10 +510,17 @@
 }
 
 // Buttons at the foot of a form drawer: a delete-type action on the left, Cancel and Save on the right.
+// On a phone, buttons that don't fit move to a second line whole, instead of squeezing their labels.
 .drawer-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
+
+  .p-button {
+    white-space: nowrap;
+  }
 }
 
 // Date pickers in a field fill it, like the other inputs.

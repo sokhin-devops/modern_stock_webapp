@@ -74,7 +74,7 @@ export class AppTopbar {
         ],
       },
     ];
-    if (this.screen.phone() && this.business.canPickBranch() && this.business.branches().length > 1) {
+    if (this.screen.phone() && this.business.canPickBranch() && this.business.pickableBranches().length > 1) {
       items.push({ separator: true }, { label: this.t('shell.branch'), items: this.branchEntries() });
     }
     return items;
@@ -115,7 +115,7 @@ export class AppTopbar {
         styleClass: selected === null ? 'active' : undefined,
         command: () => this.business.selectBranch(null),
       },
-      ...this.business.branches().map((b) => ({
+      ...this.business.pickableBranches().map((b) => ({
         label: this.lang.name(b.nameEn, b.nameKm) + (b.main ? ` · ${this.t('shell.mainBranch')}` : '')
           + (b.readOnly ? ` · ${this.t('shell.readOnly')}` : ''),
         icon: b.readOnly ? 'pi pi-lock' : 'pi pi-shop',

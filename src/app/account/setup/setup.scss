@@ -4,13 +4,142 @@
   min-height: 0;
 }
 
+// 1 Branch — 2 Money — 3 Starter set — 4 Ready
+.wizard-steps {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    flex: 1;
+    border-bottom: 3px solid var(--border);
+
+    &.done,
+    &.current {
+      border-color: var(--primary);
+    }
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 0 12px;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  .current button,
+  .done button {
+    color: var(--text);
+  }
+
+  li:not(.done, .current) .setup-num {
+    background: var(--surface-2, var(--border));
+    color: var(--muted);
+  }
+}
+
+.step {
+  padding: 16px 0 24px;
+
+  .section-title {
+    margin-bottom: 4px;
+  }
+
+  > .muted {
+    margin: 0 0 16px;
+  }
+}
+
+.starter-block {
+  margin-top: 18px;
+
+  h3 {
+    margin: 0 0 8px;
+    color: var(--text-2);
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.samples {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2, var(--primary-soft));
+  }
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 24px;
+  margin: 0 0 16px;
+
+  dt {
+    color: var(--muted);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+.small {
+  font-size: 13px;
+}
+
 .finish {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
+
+  .spacer {
+    flex: 1;
+  }
 }
 
 .submit {
   min-width: 160px;
+}
+
+@media (max-width: 600px) {
+  .step-name {
+    display: none;
+  }
+
+  .current .step-name {
+    display: inline;
+  }
 }
