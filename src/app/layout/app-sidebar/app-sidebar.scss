@@ -12,3 +12,45 @@ p-menu {
 .rail .chev {
   display: none;
 }
+
+// A closed group that holds the page you are on keeps a light highlight, so you still see where you are
+// (the rail uses the prototype's stronger highlight instead).
+.sidebar:not(.rail) .nav-group.current:not(.open) > .nav-item {
+  background: var(--primary-soft);
+  color: var(--on-primary-container);
+}
+
+// The scrollbar: a thin rounded bar that shows while the pointer is over the side menu (or keyboard focus is in it)
+// and stays out of sight otherwise, like Google's side menus. It gets bolder under the pointer, to grab it.
+.nav-scroll::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
+
+.nav-scroll::-webkit-scrollbar-track {
+  margin: 6px 0;
+}
+
+.sidebar:hover .nav-scroll::-webkit-scrollbar-thumb,
+.nav-scroll:has(:focus-visible)::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+}
+
+.nav-scroll::-webkit-scrollbar-thumb:hover,
+.nav-scroll::-webkit-scrollbar-thumb:active {
+  border-width: 2px;
+  background-color: var(--muted);
+}
+
+// Firefox has no ::-webkit-scrollbar, so the standard properties do the same there. Chrome would drop the styled bar
+// above if it saw them, hence the @supports.
+@supports not selector(::-webkit-scrollbar) {
+  .nav-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .sidebar:hover .nav-scroll,
+  .nav-scroll:has(:focus-visible) {
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}

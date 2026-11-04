@@ -1,5 +1,5 @@
-<button pButton type="button" class="lang-btn" [rounded]="true" [text]="true" severity="secondary" (click)="lang.toggle()"
+<button pButton type="button" class="lang-btn" [rounded]="true" [text]="true" severity="secondary" (click)="switch()"
         [attr.aria-label]="'common.switchLanguage' | translate" [pTooltip]="'common.switchLanguage' | translate"
         tooltipPosition="bottom">
-  <ms-flag [lang]="lang.lang()" pButtonIcon />
+  <ms-flag [lang]="lang.lang()" [class.turn]="turned()" pButtonIcon />
 </button>

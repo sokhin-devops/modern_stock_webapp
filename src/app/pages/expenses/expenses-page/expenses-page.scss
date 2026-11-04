@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.filter {
+  min-width: 200px;
+}
+
+.total b {
+  font-weight: 500;
+}
+
+.dialog-form {
+  padding-top: 6px;
+}
+
+// A voided expense stays listed, dimmed.
+.voided td {
+  color: var(--muted);
+  text-decoration: line-through;
+}

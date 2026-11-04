@@ -15,62 +15,47 @@
   } @else {
     <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <div class="ms-field">
-        <p-floatlabel variant="on">
-          <input pInputText id="fullName" formControlName="fullName" autocomplete="name" />
-          <label for="fullName">{{ 'auth.fullName' | translate }} *</label>
-        </p-floatlabel>
-        @if (showError(form.controls.fullName)) {
-          <small class="field-error">{{ 'common.required' | translate }}</small>
-        }
+        <label msLabel for="fullName" control="fullName">{{ 'auth.fullName' | translate }}</label>
+        <input pInputText id="fullName" formControlName="fullName" autocomplete="name" />
       </div>
 
       <div class="ms-field">
-        <p-floatlabel variant="on">
-          <input pInputText id="email" type="email" formControlName="email" autocomplete="email" />
-          <label for="email">{{ 'auth.email' | translate }} *</label>
-        </p-floatlabel>
-        @if (showError(form.controls.email)) {
-          <small class="field-error">{{ (form.controls.email.hasError('required') ? 'common.required' : 'errors.email') | translate }}</small>
-        }
+        <label msLabel for="email" control="email" error="errors.email">{{ 'auth.email' | translate }}</label>
+        <input pInputText id="email" type="email" formControlName="email" autocomplete="email" />
       </div>
 
       <div class="ms-field">
-        <p-floatlabel variant="on">
-          <input pInputText id="phone" type="tel" formControlName="phone" autocomplete="tel" placeholder="012 345 678" />
-          <label for="phone">{{ 'auth.phone' | translate }} ({{ 'common.optional' | translate }})</label>
-        </p-floatlabel>
-        @if (showError(form.controls.phone)) {
-          <small class="field-error">{{ 'errors.phone' | translate }}</small>
-        }
+        <label msLabel for="phone" control="phone" optional error="errors.phone">{{ 'auth.phone' | translate }}</label>
+        <input pInputText id="phone" type="tel" formControlName="phone" autocomplete="tel" placeholder="012 345 678" />
       </div>
 
       <div class="ms-field">
-        <p-floatlabel variant="on" class="ms-password">
+        <label msLabel for="password" control="password" error="errors.passwordShort">{{ 'auth.password' | translate }}</label>
+        <div class="ms-password">
           <input pInputText id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                  autocomplete="new-password" />
-          <label for="password">{{ 'auth.password' | translate }} *</label>
           <button pButton type="button" class="reveal" [rounded]="true" [text]="true" severity="secondary"
                   (click)="showPassword.set(!showPassword())" [attr.aria-pressed]="showPassword()"
                   [attr.aria-label]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | translate">
             <i class="pi" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()" pButtonIcon></i>
           </button>
-        </p-floatlabel>
-        <small [class]="showError(form.controls.password) ? 'field-error' : 'field-hint'">{{ 'errors.passwordShort' | translate }}</small>
+        </div>
+        <small class="field-hint">{{ 'errors.passwordShort' | translate }}</small>
       </div>
 
       <div class="ms-field">
         <div class="ms-check">
           <p-checkbox formControlName="acceptTerms" [binary]="true" inputId="acceptTerms" />
-          <label for="acceptTerms">
+          <label for="acceptTerms" [class.danger-text]="showError(form.controls.acceptTerms)">
             {{ 'auth.agreePrefix' | translate }}
             <a [href]="websiteUrl + '/' + lang$() + '/terms'" target="_blank" rel="noopener">{{ 'auth.terms' | translate }}</a>
             {{ 'auth.and' | translate }}
             <a [href]="websiteUrl + '/' + lang$() + '/privacy'" target="_blank" rel="noopener">{{ 'auth.privacy' | translate }}</a>
+            @if (showError(form.controls.acceptTerms)) {
+              <span> · {{ 'auth.agreeRequired' | translate }}</span>
+            }
           </label>
         </div>
-        @if (showError(form.controls.acceptTerms)) {
-          <small class="field-error">{{ 'auth.agreeRequired' | translate }}</small>
-        }
       </div>
 
       @if (error()) {

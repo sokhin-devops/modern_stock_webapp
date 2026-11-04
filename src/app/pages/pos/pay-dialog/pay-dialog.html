@@ -1,0 +1,76 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog pay-dialog" [header]="'pos.payTitle' | translate">
+  <div class="pay-grid">
+    <div class="stack">
+      <div class="due-box">
+        <div class="due-usd">${{ total() | number: '1.2-2' }}</div>
+        <div class="due-khr">៛{{ totalKhr() | number: '1.0-0' }}</div>
+      </div>
+
+      <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
+                      class="methods">
+        <ng-template #item let-option>{{ option.label | translate }}</ng-template>
+      </p-selectbutton>
+
+      @switch (method()) {
+        @case ('CASH') {
+          <div class="money-row">
+            <div class="field">
+              <label msLabel for="paid-usd">USD</label>
+              <p-inputnumber inputId="paid-usd" [ngModel]="usd()" (ngModelChange)="usd.set($event)" mode="currency" currency="USD"
+                             locale="en-US" [min]="0" [fluid]="true" inputStyleClass="input-xl" />
+              <div class="quick">
+                @for (n of usdQuick; track n) {
+                  <button type="button" (click)="addUsd(n)">+{{ n }}</button>
+                }
+                <button type="button" (click)="exact()">=</button>
+              </div>
+            </div>
+            <div class="field">
+              <label msLabel for="paid-khr">KHR</label>
+              <p-inputnumber inputId="paid-khr" [ngModel]="khr()" (ngModelChange)="khr.set($event)" prefix="៛" locale="en-US"
+                             [min]="0" [step]="100" [fluid]="true" inputStyleClass="input-xl" />
+              <div class="quick">
+                @for (n of khrQuick; track n) {
+                  <button type="button" (click)="addKhr(n)">+{{ n | number }}</button>
+                }
+              </div>
+            </div>
+          </div>
+          @if (shortKhr() > 0 && tenderedKhr() > 0) {
+            <div class="change-box short"><span>{{ 'pos.short' | translate }}</span><b>៛{{ shortKhr() | number: '1.0-0' }}</b></div>
+          } @else {
+            <div class="change-box"><span>{{ 'pos.change' | translate }}</span><b>៛{{ changeKhr() | number: '1.0-0' }}</b></div>
+          }
+        }
+        @case ('KHQR') {
+          <p class="form-note"><i class="icon pi pi-qrcode"></i>{{ 'pos.khqrLead' | translate }}</p>
+        }
+        @case ('BANK') {
+          <div class="ms-field">
+            <label msLabel for="pay-ref">{{ 'pos.reference' | translate }}</label>
+            <input pInputText id="pay-ref" [ngModel]="reference()" (ngModelChange)="reference.set($event)" />
+          </div>
+        }
+      }
+    </div>
+
+    <div class="receipt-wrap">
+      <div class="receipt">
+        @for (line of lines(); track $index) {
+          <div class="r-row"><span>{{ line.name }} × {{ line.qty | number: '1.0-3' }}</span><span>{{ line.total | number: '1.2-2' }}</span></div>
+        }
+        <hr />
+        <div class="r-row r-big"><span>{{ 'pos.total' | translate }}</span><span>${{ total() | number: '1.2-2' }}</span></div>
+        <div class="r-row"><span></span><span>៛{{ totalKhr() | number: '1.0-0' }}</span></div>
+        <div class="r-row r-small"><span>$1 = ៛{{ rate() | number: '1.0-0' }}</span><span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" size="large" (click)="complete()" [disabled]="!canComplete()" [loading]="busy()">
+      <span pButtonLabel>{{ 'pos.complete' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

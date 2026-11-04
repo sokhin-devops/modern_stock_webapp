@@ -1,0 +1,56 @@
+:host {
+  display: contents;
+}
+
+// Room above the first field for its floating label.
+.ms-form {
+  padding-top: 6px;
+}
+
+.form-section {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.small {
+  margin-top: -8px;
+  font-size: 13px;
+}
+
+// Average cost (read-only) beside the delivery days.
+.cost {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 14px;
+
+  small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+}
+
+// One bigger unit per row: unit, pieces in it, price, remove.
+.unit-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.unit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.add-unit {
+  align-self: flex-start;
+}
+
+.drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

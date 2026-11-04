@@ -1,0 +1,61 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [closable]="false" styleClass="ms-dialog receipt-dialog"
+          [header]="(sale()?.documentType === 'INVOICE' ? 'pos.invoiceTitle' : 'pos.paidTitle') | translate">
+  @if (sale(); as s) {
+    <div class="receipt-wrap">
+      <div class="receipt print-receipt">
+        <div class="r-center">
+          <b>{{ shop()?.nameKm || shop()?.nameEn }}</b>
+          @if (shop()?.nameKm) {
+            <br />{{ shop()?.nameEn }}
+          }
+          @if (branch(); as b) {
+            <br /><span class="r-small">{{ b.nameEn }}@if (b.phone) { · {{ b.phone }} }</span>
+          }
+        </div>
+        <hr />
+        <div class="r-row r-small"><span>{{ s.number }}</span><span>{{ now | date: 'dd/MM/yyyy HH:mm' }}</span></div>
+        <hr />
+        @for (line of s.lines; track $index) {
+          <div class="r-row">
+            <span>{{ line.productName }} × {{ line.qty | number: '1.0-3' }} {{ line.unitSymbol }}</span>
+            <span>{{ line.lineTotal | number: '1.2-2' }}</span>
+          </div>
+        }
+        <hr />
+        @if (s.discount > 0) {
+          <div class="r-row"><span>−</span><span>{{ s.discount | number: '1.2-2' }}</span></div>
+        }
+        @if (s.vat > 0) {
+          <div class="r-row"><span>VAT</span><span>{{ s.vat | number: '1.2-2' }}</span></div>
+        }
+        <div class="r-row r-big"><span>{{ 'pos.total' | translate }}</span><span>${{ s.total | number: '1.2-2' }}</span></div>
+        <div class="r-row"><span></span><span>៛{{ s.totalKhr | number: '1.0-0' }}</span></div>
+        <div class="r-row r-small"><span>$1 = ៛{{ s.exchangeRate | number: '1.0-0' }}</span><span></span></div>
+        @if (s.payments.length) {
+          <div class="r-row">
+            <span>{{ 'pos.paid' | translate }}</span>
+            <span>
+              @for (p of s.payments; track $index; let last = $last) {
+                {{ p.currency === 'USD' ? '$' + (p.amount | number: '1.2-2') : '៛' + (p.amount | number: '1.0-0') }}@if (!last) { + }
+              }
+            </span>
+          </div>
+        }
+        @if (s.changeKhr > 0) {
+          <div class="r-row"><b>{{ 'pos.change' | translate }}</b><b>៛{{ s.changeKhr | number: '1.0-0' }}</b></div>
+        }
+        @if (s.balanceDue > 0) {
+          <div class="r-row"><b>{{ 'pos.balanceDue' | translate }}</b><b>${{ s.balanceDue | number: '1.2-2' }}</b></div>
+        }
+        <hr />
+        <div class="r-center r-small">{{ receiptFooter() || ('pos.thanks' | translate) }}</div>
+      </div>
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [outlined]="true" (click)="print()">
+      <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'pos.print' | translate }}</span>
+    </button>
+    <button pButton type="button" (click)="next()"><span pButtonLabel>{{ 'pos.newSale' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

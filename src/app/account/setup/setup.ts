@@ -3,7 +3,6 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { FloatLabel } from 'primeng/floatlabel';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { SelectButton } from 'primeng/selectbutton';
@@ -13,7 +12,8 @@ import { switchMap } from 'rxjs';
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
-import { revealErrors, showError } from '../../shared/forms';
+import { FieldLabel } from '../../shared/field-label/field-label';
+import { revealErrors } from '../../shared/forms';
 import { CAMBODIAN_PHONE } from '../../shared/validators';
 
 /**
@@ -23,8 +23,8 @@ import { CAMBODIAN_PHONE } from '../../shared/validators';
 @Component({
   selector: 'ms-setup',
   imports: [
-    ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, InputNumber, SelectButton, ToggleSwitch,
-    ButtonDirective, ButtonIcon, ButtonLabel,
+    ReactiveFormsModule, RouterLink, TranslatePipe, InputText, InputNumber, SelectButton, ToggleSwitch,
+    ButtonDirective, ButtonIcon, ButtonLabel, FieldLabel,
   ],
   templateUrl: './setup.html',
   styleUrl: './setup.scss',
@@ -35,7 +35,6 @@ export class Setup {
   private readonly router = inject(Router);
   private readonly notify = inject(NotifyService);
 
-  protected readonly showError = showError;
   protected readonly busy = signal(false);
   /** Riel rounding steps (PLAIN.md 11.6). */
   protected readonly roundings = [

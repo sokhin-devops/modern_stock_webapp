@@ -6,3 +6,17 @@
   display: inline-grid;
   place-items: center;
 }
+
+// Hover shows the button's round background, like the bell and moon beside it; the flag grows a little, and
+// shrinks a little while pressed.
+ms-flag {
+  transition: transform 0.2s var(--ease);
+}
+
+.lang-btn:hover ms-flag {
+  transform: scale(1.08);
+}
+
+.lang-btn:active ms-flag {
+  transform: scale(0.94);
+}

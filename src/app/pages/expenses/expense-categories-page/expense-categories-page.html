@@ -1,0 +1,47 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.settings' | translate }}</span>
+      <span class="current">{{ 'nav.expenseCategories' | translate }}</span>
+    </nav>
+    <div class="page-actions">
+      <button pButton type="button" (click)="edit(null)"><i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'expenses.newCategory' | translate }}</span></button>
+    </div>
+  </div>
+  <div class="page-body list-page">
+    <p class="muted lead">{{ 'expenses.categoriesLead' | translate }}</p>
+    <p-table class="ms-table" [value]="categories()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+      <ng-template #header>
+        <tr><th>{{ 'products.catName' | translate }}</th><th>{{ 'common.status' | translate }}</th><th class="actions"></th></tr>
+      </ng-template>
+      <ng-template #body let-c>
+        <tr>
+          <td class="strong">{{ lang.name(c.nameEn, c.nameKm) }}</td>
+          <td><span class="tag" [class.tag-primary]="c.active">{{ (c.active ? 'common.active' : 'partners.inactive') | translate }}</span></td>
+          <td class="actions">
+            <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="edit(c)" [attr.aria-label]="'common.edit' | translate" [pTooltip]="'common.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
+            <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove(c)" [attr.aria-label]="'common.delete' | translate" [pTooltip]="'common.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog [visible]="open()" (visibleChange)="open.set($event)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [header]="(editing() ? 'expenses.editCategory' : 'expenses.newCategory') | translate">
+  <div class="ms-form dialog-form">
+    <div class="ms-field">
+      <label msLabel for="ec-en" required>{{ 'products.catName' | translate }}</label>
+      <input pInputText id="ec-en" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" />
+    </div>
+    <div class="ms-field">
+      <label msLabel for="ec-km">{{ 'products.catNameKm' | translate }}</label>
+      <input pInputText id="ec-km" [ngModel]="nameKm()" (ngModelChange)="nameKm.set($event)" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="open.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="save()" [disabled]="!nameEn().trim()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

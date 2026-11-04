@@ -1,0 +1,32 @@
+:host {
+  display: contents;
+}
+
+// Room above the first field for its floating label.
+.ms-form {
+  padding-top: 6px;
+}
+
+// What should be in the drawer now (opening cash + cash sales − change ± cash moved).
+.expected {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  small {
+    color: var(--muted);
+  }
+
+  b {
+    font-weight: 500;
+  }
+}

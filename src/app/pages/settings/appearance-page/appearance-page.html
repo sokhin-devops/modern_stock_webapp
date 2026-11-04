@@ -1,0 +1,33 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.settings' | translate }}</span>
+      <span class="current">{{ 'nav.appearance' | translate }}</span>
+    </nav>
+  </div>
+  <div class="page-body">
+    <div class="settings-card ms-form">
+      <p class="muted">{{ 'settings.appearance.lead' | translate }}</p>
+      <div class="ms-field">
+        <span msLabel>{{ 'settings.appearance.color' | translate }}</span>
+        <div class="swatches" role="radiogroup" [attr.aria-label]="'settings.appearance.color' | translate">
+          @for (p of palettes; track p.name) {
+            <button type="button" class="swatch" [class.selected]="selected() === p.name" role="radio"
+                    [attr.aria-checked]="selected() === p.name" [disabled]="!canManage() || busy()" (click)="pick(p.name)"
+                    [style.--sw]="p.color">
+              <i><span class="icon pi pi-check"></span></i>
+              <span>{{ 'settings.appearance.colors.' + p.name | translate }}</span>
+            </button>
+          }
+        </div>
+      </div>
+      <div class="ms-field">
+        <span msLabel id="ap-mode">{{ 'settings.appearance.mode' | translate }}</span>
+        <p-selectbutton [options]="modes" optionValue="value" [ngModel]="theme.dark() ? 'dark' : 'light'" (ngModelChange)="setMode($event)"
+                        [allowEmpty]="false" ariaLabelledBy="ap-mode">
+          <ng-template #item let-option><i [class]="option.icon"></i>&nbsp;{{ option.label | translate }}</ng-template>
+        </p-selectbutton>
+      </div>
+    </div>
+  </div>
+</div>

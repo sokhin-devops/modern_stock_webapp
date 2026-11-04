@@ -1,0 +1,10 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+// Short numbers (a percentage) don't need the full width.
+.narrow {
+  max-width: 320px;
+}

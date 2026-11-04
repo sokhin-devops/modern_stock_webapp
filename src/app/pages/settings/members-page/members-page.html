@@ -1,0 +1,176 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.settings' | translate }}</span>
+      <span class="current">{{ 'nav.members' | translate }}</span>
+    </nav>
+    <div class="page-actions">
+      @if (canManage()) {
+        <button pButton type="button" (click)="openInvite()">
+          <i class="pi pi-user-plus" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.invite' | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+  <div class="page-body list-page">
+    <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))" class="ms-tabs">
+      <p-tablist>
+        <p-tab value="members">{{ 'settings.members.tabMembers' | translate }}<span class="count">{{ members().length }}</span></p-tab>
+        @if (canManage()) {
+          <p-tab value="invitations">{{ 'settings.members.tabInvitations' | translate }}<span class="count">{{ invitations().length }}</span></p-tab>
+        }
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="members">
+          <p-table class="ms-table" [value]="members()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+            <ng-template #header>
+              <tr>
+                <th>{{ 'settings.members.name' | translate }}</th>
+                <th>{{ 'settings.members.role' | translate }}</th>
+                <th>{{ 'settings.members.branch' | translate }}</th>
+                <th>{{ 'settings.members.status' | translate }}</th>
+                <th class="actions"></th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-m>
+              <tr>
+                <td>
+                  <div class="prod-cell">
+                    <span class="biz-avatar">{{ m.fullName.slice(0, 1).toUpperCase() }}</span>
+                    <div>
+                      <div class="strong">{{ m.fullName }}@if (m.userId === myId()) { <span class="muted"> · {{ 'settings.members.you' | translate }}</span> }</div>
+                      <small>{{ m.email ?? m.username }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ lang.name(m.roleNameEn, m.roleNameKm) }}</td>
+                <td>{{ branchName(m.branchId) }}</td>
+                <td><span class="tag" [class.tag-primary]="m.status === 'ACTIVE'">{{ 'settings.members.' + m.status | translate }}</span></td>
+                <td class="actions">
+                  @if (canManage() && m.userId !== myId() && m.roleCode !== 'OWNER') {
+                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="openEdit(m)"
+                            [attr.aria-label]="'settings.members.edit' | translate" [pTooltip]="'settings.members.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
+                    @if (m.canResetPassword) {
+                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="resetLink(m)"
+                              [attr.aria-label]="'settings.members.resetLink' | translate" [pTooltip]="'settings.members.resetLink' | translate" tooltipPosition="top"><i class="pi pi-key" pButtonIcon></i></button>
+                    }
+                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="toggleStatus(m)"
+                            [attr.aria-label]="(m.status === 'ACTIVE' ? 'settings.members.disable' : 'settings.members.enable') | translate" [pTooltip]="(m.status === 'ACTIVE' ? 'settings.members.disable' : 'settings.members.enable') | translate" tooltipPosition="top">
+                      <i class="pi" [class.pi-ban]="m.status === 'ACTIVE'" [class.pi-check-circle]="m.status !== 'ACTIVE'" pButtonIcon></i>
+                    </button>
+                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove(m)"
+                            [attr.aria-label]="'settings.members.remove' | translate" [pTooltip]="'settings.members.remove' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
+                  }
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="invitations">
+          <p-table class="ms-table" [value]="invitations()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+            <ng-template #header>
+              <tr>
+                <th>{{ 'settings.members.role' | translate }}</th>
+                <th>{{ 'settings.members.branch' | translate }}</th>
+                <th>{{ 'settings.members.email' | translate }}</th>
+                <th>{{ 'settings.members.status' | translate }}</th>
+                <th class="actions"></th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-i>
+              <tr>
+                <td class="strong">{{ lang.name(i.roleNameEn, i.roleNameKm) }}</td>
+                <td>{{ i.branchName ?? ('settings.members.allBranches' | translate) }}</td>
+                <td class="muted">{{ i.email }}</td>
+                <td>
+                  <span class="tag" [class.tag-primary]="i.status === 'PENDING'">{{ 'settings.members.' + i.status | translate }}</span>
+                  <small class="muted"> {{ 'settings.members.expires' | translate: { date: (i.expiresAt | date: 'dd/MM/yyyy') } }}</small>
+                </td>
+                <td class="actions">
+                  @if (i.status === 'PENDING' || i.status === 'EXPIRED') {
+                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="resend(i)"
+                            [attr.aria-label]="'settings.members.resend' | translate" [pTooltip]="'settings.members.resend' | translate" tooltipPosition="top"><i class="pi pi-refresh" pButtonIcon></i></button>
+                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="cancelInvite(i)"
+                            [attr.aria-label]="'settings.members.cancel' | translate" [pTooltip]="'settings.members.cancel' | translate" tooltipPosition="top"><i class="pi pi-times" pButtonIcon></i></button>
+                  }
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr><td colspan="5" class="empty-cell">{{ 'settings.members.emptyInvites' | translate }}</td></tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+
+<p-dialog [visible]="inviteOpen()" (visibleChange)="inviteOpen.set($event)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [header]="'settings.members.invite' | translate">
+  @if (inviteLink(); as link) {
+    <div class="ms-form">
+      <p>{{ 'settings.members.link' | translate }}</p>
+      <div class="link-box"><code>{{ link }}</code></div>
+    </div>
+  } @else {
+    <div class="ms-form dialog-form">
+      <div class="ms-field">
+        <label msLabel for="iv-role">{{ 'settings.members.role' | translate }}</label>
+        <p-select inputId="iv-role" [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="inviteRole()"
+                  (ngModelChange)="inviteRole.set($event)" appendTo="body" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="iv-branch">{{ 'settings.members.branch' | translate }}</label>
+        <p-select inputId="iv-branch" [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="inviteBranch()"
+                  (ngModelChange)="inviteBranch.set($event)" appendTo="body" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="iv-email">{{ 'settings.members.email' | translate }}</label>
+        <input pInputText id="iv-email" type="email" [ngModel]="inviteEmail()" (ngModelChange)="inviteEmail.set($event)" />
+        <small class="field-hint">{{ 'settings.members.emailHint' | translate }}</small>
+      </div>
+    </div>
+  }
+  <ng-template #footer>
+    @if (inviteLink(); as link) {
+      <button pButton type="button" [outlined]="true" (click)="copy(link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
+      <button pButton type="button" (click)="inviteOpen.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+    } @else {
+      <button pButton type="button" [text]="true" (click)="inviteOpen.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+      <button pButton type="button" (click)="sendInvite()" [loading]="busy()" [disabled]="busy() || !inviteRole()"><span pButtonLabel>{{ 'settings.members.invite' | translate }}</span></button>
+    }
+  </ng-template>
+</p-dialog>
+
+<p-dialog [visible]="!!editing()" (visibleChange)="!$event && editing.set(null)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [header]="editing()?.fullName ?? ''">
+  <div class="ms-form dialog-form">
+    <div class="ms-field">
+      <label msLabel for="ed-role">{{ 'settings.members.role' | translate }}</label>
+      <p-select inputId="ed-role" [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="editRole()"
+                (ngModelChange)="editRole.set($event)" appendTo="body" />
+    </div>
+    <div class="ms-field">
+      <label msLabel for="ed-branch">{{ 'settings.members.branch' | translate }}</label>
+      <p-select inputId="ed-branch" [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="editBranch()"
+                (ngModelChange)="editBranch.set($event)" appendTo="body" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="editing.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="saveEdit()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [visible]="!!shownLink()" (visibleChange)="!$event && shownLink.set(null)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [header]="'settings.members.link' | translate">
+  @if (shownLink(); as s) {
+    <p>{{ s.title }}</p>
+    <div class="link-box"><code>{{ s.link }}</code></div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [outlined]="true" (click)="copy(shownLink()!.link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
+    <button pButton type="button" (click)="shownLink.set(null)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

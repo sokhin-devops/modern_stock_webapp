@@ -1,0 +1,23 @@
+:host {
+  display: contents;
+}
+
+.dialog-form {
+  padding-top: 6px;
+}
+
+.small {
+  margin: 0;
+  font-size: 13px;
+}
+
+.party-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+
+  b {
+    font-weight: 500;
+  }
+}

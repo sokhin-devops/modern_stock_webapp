@@ -3,19 +3,19 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
-import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { NotifyService } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
-import { revealErrors, showError } from '../../shared/forms';
+import { FieldLabel } from '../../shared/field-label/field-label';
+import { revealErrors } from '../../shared/forms';
 import { sameAs } from '../../shared/validators';
 
 /** Opened from a reset link (email, or one the Owner made for staff without email): /reset-password?token=… */
 @Component({
   selector: 'ms-reset-password',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, ButtonDirective, ButtonLabel, AuthFrame],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputText, ButtonDirective, ButtonLabel, AuthFrame, FieldLabel],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.scss',
 })
@@ -25,7 +25,6 @@ export class ResetPassword {
   private readonly auth = inject(AuthService);
   private readonly notify = inject(NotifyService);
 
-  protected readonly showError = showError;
   protected readonly busy = signal(false);
   protected readonly done = signal(false);
   protected readonly error = signal<string | null>(null);

@@ -200,5 +200,14 @@ export const ModernStockPreset = definePreset(Material, {
     floatlabel: {
       root: { fontWeight: '400' },
     },
+    // Segmented choices (riel rounding, Monthly / Yearly): the chosen one in the brand's light container.
+    togglebutton: {
+      root: { checkedColor: 'var(--on-primary-container)', checkedBorderColor: 'var(--border-strong)' },
+      icon: { checkedColor: 'var(--on-primary-container)' },
+      colorScheme: {
+        light: { root: { hoverBackground: 'var(--surface-3)', checkedBackground: 'var(--primary-container)' } },
+        dark: { root: { hoverBackground: 'var(--surface-3)', checkedBackground: 'var(--primary-container)' } },
+      },
+    },
   },
 });

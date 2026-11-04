@@ -1,0 +1,70 @@
+:host {
+  display: block;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+// Product, unit, quantity, remove; cost, batch and expiry columns appear when asked for.
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr) minmax(0, 1fr) 40px;
+  gap: 8px;
+  align-items: center;
+}
+
+.with-cost .line {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) 40px;
+}
+
+.with-cost.with-batch .line {
+  grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1.4fr) 40px;
+}
+
+.head {
+  padding: 0 4px;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.num {
+  text-align: right;
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 8px 52px 0 0;
+  font-size: 15px;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+
+  b {
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 768px) {
+  .line,
+  .with-cost .line,
+  .with-cost.with-batch .line {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
+  }
+
+  .line > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .head {
+    display: none;
+  }
+}

@@ -4,7 +4,6 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
-import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 
 import { environment } from '../../../environments/environment';
@@ -12,6 +11,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
+import { FieldLabel } from '../../shared/field-label/field-label';
 import { revealErrors, showError } from '../../shared/forms';
 import { CAMBODIAN_PHONE } from '../../shared/validators';
 
@@ -19,8 +19,8 @@ import { CAMBODIAN_PHONE } from '../../shared/validators';
 @Component({
   selector: 'ms-sign-up',
   imports: [
-    ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, Checkbox, ButtonDirective, ButtonIcon,
-    ButtonLabel, AuthFrame,
+    ReactiveFormsModule, RouterLink, TranslatePipe, InputText, Checkbox, ButtonDirective, ButtonIcon,
+    ButtonLabel, AuthFrame, FieldLabel,
   ],
   templateUrl: './sign-up.html',
   styleUrl: './sign-up.scss',

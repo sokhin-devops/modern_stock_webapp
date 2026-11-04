@@ -1,0 +1,20 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+// Room above the first field for its floating label.
+.dialog-form {
+  padding-top: 6px;
+}
+
+// A link to copy and share, shown whole.
+.link-box {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: 13px;
+  word-break: break-all;
+}

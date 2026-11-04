@@ -1,0 +1,52 @@
+:host {
+  display: contents;
+}
+
+.ms-form {
+  padding-top: 6px;
+}
+
+.section {
+  margin-top: 24px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.small {
+  margin: 4px 0 12px;
+  font-size: 13px;
+}
+
+.warehouses {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// One warehouse per row: its name, then what it does, then save.
+.warehouse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+
+  input[pInputText] {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .ms-check {
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  &.off input[pInputText] {
+    color: var(--muted);
+  }
+
+  &.add {
+    border-bottom: 0;
+  }
+}

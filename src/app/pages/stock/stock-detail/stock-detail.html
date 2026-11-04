@@ -1,0 +1,92 @@
+<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-form-drawer"
+          [header]="row() ? lang.name(row()!.nameEn, row()!.nameKm) : ''" [ariaCloseLabel]="'common.close' | translate">
+  <!-- Rebuilt for each product, so the stock card loads that product's movements -->
+  @for (r of current(); track r.productId) {
+    <div class="summary">
+      <div>
+        <small>{{ 'stock.onHand' | translate }}</small>
+        <b class="num" [class.danger-text]="r.low">{{ r.qtyOnHand | number: '1.0-3' }} {{ r.unitSymbol }}</b>
+      </div>
+      <div>
+        <small>{{ 'stock.reorderAt' | translate }}</small>
+        <b class="num">{{ r.reorderLevel | number: '1.0-3' }}</b>
+      </div>
+      @if (r.value != null) {
+        <div>
+          <small>{{ 'stock.value' | translate }}</small>
+          <b class="num">${{ r.value | number: '1.2-2' }}</b>
+        </div>
+      }
+    </div>
+
+    <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))">
+      <p-tablist>
+        <p-tab value="warehouses">{{ 'stock.byWarehouse' | translate }}</p-tab>
+        <p-tab value="card">{{ 'stock.card' | translate }}</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="warehouses">
+          @if (detail(); as d) {
+            @for (w of d.warehouses; track w.warehouseId) {
+              <section class="warehouse">
+                <div class="warehouse-head">
+                  <i class="icon pi pi-warehouse"></i>
+                  <b>{{ w.warehouseName }}</b>
+                  <span class="spacer"></span>
+                  <b class="num">{{ w.qtyOnHand | number: '1.0-3' }} {{ r.unitSymbol }}</b>
+                </div>
+                @if (w.batches.length) {
+                  <ul class="batches">
+                    @for (b of w.batches; track b.id) {
+                      <li>
+                        <span>{{ b.batchNo ?? ('stock.batch' | translate) }}</span>
+                        @if (b.expiryDate) {
+                          <span class="muted" [class.danger-text]="b.expired">
+                            {{ (b.expired ? 'stock.expired' : 'stock.expiry') | translate }} {{ b.expiryDate | date: 'dd/MM/yyyy' }}
+                          </span>
+                        }
+                        <span class="spacer"></span>
+                        <span class="num">{{ b.qtyOnHand | number: '1.0-3' }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </section>
+            } @empty {
+              <p class="muted empty">{{ 'stock.noBatches' | translate }}</p>
+            }
+          } @else {
+            <p-progressbar mode="indeterminate" />
+          }
+        </p-tabpanel>
+        <p-tabpanel value="card">
+          <p-table class="ms-table" [value]="movements()" [lazy]="true" (onLazyLoad)="loadMovements($event)" [loading]="loading()"
+                   [paginator]="total() > 20" [rows]="20" [totalRecords]="total()" dataKey="id">
+            <ng-template #header>
+              <tr>
+                <th>{{ 'stock.date' | translate }}</th>
+                <th>{{ 'stock.movement' | translate }}</th>
+                <th class="num">{{ 'stock.qty' | translate }}</th>
+                <th class="num">{{ 'stock.balance' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-m>
+              <tr>
+                <td>
+                  <div>{{ m.at | date: 'dd/MM/yyyy HH:mm' }}</div>
+                  <small class="muted">{{ m.warehouseName }}</small>
+                </td>
+                <td>{{ 'stock.types.' + m.type | translate }}</td>
+                <td class="num" [class.danger-text]="m.qty < 0">{{ m.qty > 0 ? '+' : '' }}{{ m.qty | number: '1.0-3' }}</td>
+                <td class="num">{{ m.balanceAfter | number: '1.0-3' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr><td colspan="4" class="empty-cell">{{ 'stock.noMovements' | translate }}</td></tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  }
+</p-drawer>

@@ -1,0 +1,167 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.supplierMenu' | translate }}</span>
+      <span class="current">{{ 'nav.supplierTransactions' | translate }}</span>
+    </nav>
+    <div class="page-actions">
+      @if (canBills()) {
+        <button pButton type="button" [outlined]="true" (click)="payOpen.set(true)">
+          <i class="pi pi-wallet" pButtonIcon></i><span pButtonLabel>{{ 'purchase.pay' | translate }}</span>
+        </button>
+      }
+      @if (canOrder()) {
+        <button pButton type="button" [outlined]="true" (click)="openForm('order')">
+          <i class="pi pi-file" pButtonIcon></i><span pButtonLabel>{{ 'purchase.newOrder' | translate }}</span>
+        </button>
+      }
+      @if (canQuick()) {
+        <button pButton type="button" (click)="openForm('quick')">
+          <i class="pi pi-bolt" pButtonIcon></i><span pButtonLabel>{{ 'purchase.quick' | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+  <div class="page-body list-page">
+    <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))" class="ms-tabs">
+      <p-tablist>
+        <p-tab value="orders">{{ 'purchase.tabOrders' | translate }}</p-tab>
+        <p-tab value="receipts">{{ 'purchase.tabReceipts' | translate }}</p-tab>
+        @if (canBills()) {
+          <p-tab value="bills">{{ 'purchase.tabBills' | translate }}</p-tab>
+          <p-tab value="payments">{{ 'purchase.tabPayments' | translate }}</p-tab>
+        }
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="orders">
+          <p-table class="ms-table" [value]="orders.rows()" [lazy]="true" (onLazyLoad)="orders.load($event)" [loading]="orders.loading()"
+                   [paginator]="true" [rows]="20" [first]="orders.first()" [totalRecords]="orders.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+            <ng-template #header>
+              <tr>
+                <th>{{ 'common.number' | translate }}</th><th>{{ 'purchase.supplier' | translate }}</th><th>{{ 'purchase.orderDate' | translate }}</th>
+                <th>{{ 'common.warehouse' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th><th>{{ 'common.status' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-o>
+              <tr class="clickable" tabindex="0" (click)="viewing.set(o)" (keydown.enter)="viewing.set(o)">
+                <td class="strong">{{ o.number }}</td><td>{{ o.supplierName }}</td><td>{{ o.orderDate | date: 'dd/MM/yyyy' }}</td>
+                <td class="muted">{{ o.receiveWarehouseName }}</td><td class="num">{{ o.total | currency: 'USD' }}</td>
+                <td><span class="tag" [class]="'status-' + o.status">{{ 'docs.status.' + o.status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="receipts">
+          <p-table class="ms-table" [value]="receipts.rows()" [lazy]="true" (onLazyLoad)="receipts.load($event)" [loading]="receipts.loading()"
+                   [paginator]="true" [rows]="20" [first]="receipts.first()" [totalRecords]="receipts.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.warehouse' | translate }}</th>
+                <th>{{ 'purchase.tabBills' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
+            </ng-template>
+            <ng-template #body let-g>
+              <tr>
+                <td class="strong">{{ g.number }}</td><td>{{ $any(g).receivedAt | date: 'dd/MM/yyyy HH:mm' }}</td><td class="muted">{{ $any(g).warehouseName }}</td>
+                <td class="muted">{{ $any(g).billNumber }}</td><td class="num">{{ $any(g).total | currency: 'USD' }}</td>
+                <td><span class="tag" [class]="'status-' + $any(g).status">{{ 'docs.status.' + $any(g).status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="bills">
+          <p-table class="ms-table" [value]="bills.rows()" [lazy]="true" (onLazyLoad)="bills.load($event)" [loading]="bills.loading()"
+                   [paginator]="true" [rows]="20" [first]="bills.first()" [totalRecords]="bills.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'purchase.supplier' | translate }}</th><th>{{ 'purchase.due' | translate }}</th>
+                <th class="num">{{ 'common.total' | translate }}</th><th class="num">{{ 'purchase.balance' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
+            </ng-template>
+            <ng-template #body let-b>
+              <tr>
+                <td class="strong">{{ b.number }}@if ($any(b).supplierInvoiceNo) { <small class="muted"> · {{ $any(b).supplierInvoiceNo }}</small> }</td>
+                <td>{{ $any(b).supplierName }}</td>
+                <td [class.danger-text]="$any(b).overdue">{{ $any(b).dueDate | date: 'dd/MM/yyyy' }}</td>
+                <td class="num">{{ $any(b).total | currency: 'USD' }}</td>
+                <td class="num strong">{{ $any(b).balance | currency: 'USD' }}</td>
+                <td><span class="tag" [class]="'status-' + $any(b).status">{{ 'docs.status.' + $any(b).status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="payments">
+          <p-table class="ms-table" [value]="payments.rows()" [lazy]="true" (onLazyLoad)="payments.load($event)" [loading]="payments.loading()"
+                   [paginator]="true" [rows]="20" [first]="payments.first()" [totalRecords]="payments.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.method' | translate }}</th>
+                <th class="num">{{ 'common.amount' | translate }}</th><th class="num">USD</th></tr>
+            </ng-template>
+            <ng-template #body let-p>
+              <tr>
+                <td class="strong">{{ p.number }}</td><td>{{ $any(p).paidAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ 'docs.methods.' + $any(p).method | translate }}</td>
+                <td class="num">{{ $any(p).currency === 'USD' ? '$' : '៛' }}{{ $any(p).amount | number: ($any(p).currency === 'USD' ? '1.2-2' : '1.0-0') }}</td>
+                <td class="num strong">{{ $any(p).amountUsd | currency: 'USD' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="5" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+
+<ms-purchase-form [mode]="formMode()" [(visible)]="formOpen" (saved)="reloadAll()" />
+<ms-payment-dialog kind="supplier" [(visible)]="payOpen" (saved)="reloadAll()" />
+
+<p-drawer [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" position="right" styleClass="ms-doc-drawer"
+          [header]="viewing()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+  @if (viewing(); as o) {
+    <div class="doc-facts">
+      <div><small>{{ 'purchase.supplier' | translate }}</small><b>{{ o.supplierName }}</b></div>
+      <div><small>{{ 'purchase.orderDate' | translate }}</small><b>{{ o.orderDate | date: 'dd/MM/yyyy' }}</b></div>
+      <div><small>{{ 'common.warehouse' | translate }}</small><b>{{ o.receiveWarehouseName }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + o.status">{{ 'docs.status.' + o.status | translate }}</span></b></div>
+    </div>
+    <p-table class="ms-table" [value]="o.lines" dataKey="id">
+      <ng-template #header>
+        <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'docs.status.ORDERED' | translate }}</th>
+          <th class="num">{{ 'docs.status.RECEIVED' | translate }}</th><th class="num">{{ 'common.unitCost' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th></tr>
+      </ng-template>
+      <ng-template #body let-l>
+        <tr>
+          <td class="strong">{{ l.productName }}</td>
+          <td class="num">{{ l.qtyOrdered | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+          <td class="num">{{ l.qtyReceived | number: '1.0-3' }}</td>
+          <td class="num">{{ l.unitCost | currency: 'USD' : 'symbol' : '1.2-4' }}</td>
+          <td class="num">{{ l.lineTotal | currency: 'USD' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr><td colspan="4" class="num">{{ 'common.total' | translate }}</td><td class="num strong">{{ o.total | currency: 'USD' }}</td></tr>
+      </ng-template>
+    </p-table>
+  }
+  <ng-template #footer>
+    @if (viewing(); as o) {
+      @if (canOrder()) {
+        <div class="drawer-actions">
+          @if (o.status === 'DRAFT' || o.status === 'ORDERED') {
+            <button pButton type="button" [text]="true" severity="danger" (click)="act(o, 'cancel')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.cancel' | translate }}</span></button>
+          }
+          @if (o.status === 'PARTIALLY_RECEIVED') {
+            <button pButton type="button" [text]="true" (click)="act(o, 'close')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.close' | translate }}</span></button>
+          }
+          <span class="spacer"></span>
+          @if (o.status === 'DRAFT') {
+            <button pButton type="button" [outlined]="true" (click)="act(o, 'order')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.order' | translate }}</span></button>
+          }
+          @if (o.status === 'DRAFT' || o.status === 'ORDERED' || o.status === 'PARTIALLY_RECEIVED') {
+            <button pButton type="button" (click)="act(o, 'receive')" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.receiveAll' | translate }}</span></button>
+          }
+        </div>
+      }
+    }
+  </ng-template>
+</p-drawer>

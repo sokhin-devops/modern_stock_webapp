@@ -1,0 +1,51 @@
+<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-doc-drawer" [header]="'transfer.new' | translate"
+          [ariaCloseLabel]="'common.close' | translate">
+  <div class="ms-form">
+    <p-selectbutton [options]="kinds" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" [allowEmpty]="false">
+      <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+    </p-selectbutton>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="tr-from">{{ 'docs.warehouseFrom' | translate }}</label>
+        <p-select inputId="tr-from" [options]="fromOptions()" optionLabel="label" optionValue="value" [ngModel]="fromId()"
+                  (ngModelChange)="fromId.set($event)" appendTo="body" />
+      </div>
+      @if (kind() === 'MOVE') {
+        <div class="ms-field">
+          <label msLabel for="tr-to">{{ 'docs.warehouseTo' | translate }}</label>
+          <p-select inputId="tr-to" [options]="toWarehouseOptions()" optionLabel="label" optionValue="value" [ngModel]="toWarehouseId()"
+                    (ngModelChange)="toWarehouseId.set($event)" appendTo="body" />
+        </div>
+      } @else {
+        <div class="ms-field">
+          <label msLabel for="tr-branch">{{ 'docs.branchTo' | translate }}</label>
+          <p-select inputId="tr-branch" [options]="toBranchOptions()" optionLabel="label" optionValue="value" [ngModel]="toBranchId()"
+                    (ngModelChange)="toBranchId.set($event)" appendTo="body" />
+        </div>
+      }
+    </div>
+    <ms-lines-editor [(lines)]="lines" />
+    <div class="ms-form-row">
+      @if (kind() === 'BRANCH') {
+        <div class="ms-field">
+          <label msLabel for="tr-carrier">{{ 'transfer.carrier' | translate }}</label>
+          <input pInputText id="tr-carrier" [ngModel]="carrier()" (ngModelChange)="carrier.set($event)" />
+        </div>
+      }
+      <div class="ms-field">
+        <label msLabel for="tr-note">{{ 'common.note' | translate }}</label>
+        <input pInputText id="tr-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
+      </div>
+    </div>
+  </div>
+  <ng-template #footer>
+    <div class="drawer-actions">
+      <span class="spacer"></span>
+      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+      <button pButton type="button" [outlined]="true" (click)="submit(false)" [disabled]="busy()"><span pButtonLabel>{{ 'docs.status.DRAFT' | translate }}</span></button>
+      <button pButton type="button" (click)="submit(true)" [loading]="busy()" [disabled]="busy()">
+        <span pButtonLabel>{{ (kind() === 'MOVE' ? 'transfer.moveNow' : 'transfer.sendNow') | translate }}</span>
+      </button>
+    </div>
+  </ng-template>
+</p-drawer>

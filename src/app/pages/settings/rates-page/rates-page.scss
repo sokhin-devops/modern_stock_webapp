@@ -1,0 +1,46 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+// Today's rate beside the form to set a day's rate.
+.rate-top {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.current {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  b {
+    font-size: 28px;
+    font-weight: 500;
+  }
+}
+
+.set-rate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: none;
+
+  .ms-field {
+    flex: 1;
+    min-width: 180px;
+  }
+}
+
+.lead {
+  margin: 16px 0;
+}
+
+@media (max-width: 768px) {
+  .rate-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,52 @@
+<div class="lines" [class.with-cost]="showCost()" [class.with-batch]="showBatch()">
+  <div class="line head">
+    <span>{{ 'common.product' | translate }}</span>
+    <span>{{ 'pos.unit' | translate }}</span>
+    <span class="num">{{ 'common.qty' | translate }}</span>
+    @if (showCost()) {
+      <span class="num">{{ 'common.unitCost' | translate }}</span>
+    }
+    @if (showBatch()) {
+      <span>{{ 'stock.batch' | translate }}</span>
+      <span>{{ 'stock.expiry' | translate }}</span>
+    }
+    <span></span>
+  </div>
+  @for (line of lines(); track $index; let i = $index) {
+    <div class="line">
+      <p-autocomplete [ngModel]="line.product" (ngModelChange)="pick(i, $event)" [suggestions]="results()" (completeMethod)="find($event)"
+                      [optionLabel]="'nameEn'" [placeholder]="'common.searchProduct' | translate" [forceSelection]="true" [fluid]="true"
+                      [disabled]="disabled()" appendTo="body" [ariaLabel]="'common.product' | translate">
+        <ng-template #selecteditem let-p>{{ label(p) }}</ng-template>
+        <ng-template #item let-p>
+          <div class="option"><b>{{ lang.name(p.nameEn, p.nameKm) }}</b><small class="muted">{{ p.sku }} · {{ p.qtyOnHand | number: '1.0-3' }} {{ p.baseUnitSymbol }}</small></div>
+        </ng-template>
+      </p-autocomplete>
+      <p-select [options]="unitOptions(line.product)" optionLabel="label" optionValue="value" [ngModel]="line.unitId"
+                (ngModelChange)="update(i, { unitId: $event })" [disabled]="disabled() || !line.product" [fluid]="true" appendTo="body"
+                [ariaLabel]="'pos.unit' | translate" />
+      <p-inputnumber [ngModel]="line.qty" (ngModelChange)="update(i, { qty: $event })" [maxFractionDigits]="3" locale="en-US"
+                     [min]="allowNegative() ? undefined : 0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.qty' | translate" />
+      @if (showCost()) {
+        <p-inputnumber [ngModel]="line.unitCost" (ngModelChange)="update(i, { unitCost: $event })" mode="currency" currency="USD" locale="en-US"
+                       [maxFractionDigits]="4" [min]="0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.unitCost' | translate" />
+      }
+      @if (showBatch()) {
+        <input pInputText [ngModel]="line.batchNo" (ngModelChange)="update(i, { batchNo: $event })" [disabled]="disabled() || !line.product?.trackExpiry"
+               [attr.aria-label]="'stock.batch' | translate" />
+        <p-datepicker [ngModel]="line.expiryDate" (ngModelChange)="update(i, { expiryDate: $event })" dateFormat="dd/mm/yy" appendTo="body"
+                      [disabled]="disabled() || !line.product?.trackExpiry" [fluid]="true" [ariaLabel]="'stock.expiry' | translate" />
+      }
+      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove(i)" [disabled]="disabled()"
+              [attr.aria-label]="'pos.remove' | translate" [pTooltip]="'pos.remove' | translate" tooltipPosition="top">
+        <i class="pi pi-trash" pButtonIcon></i>
+      </button>
+    </div>
+  }
+  @if (showCost() && total() > 0) {
+    <div class="line foot">
+      <span>{{ 'common.total' | translate }}</span>
+      <b class="num">${{ total() | number: '1.2-2' }}</b>
+    </div>
+  }
+</div>

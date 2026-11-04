@@ -1,0 +1,81 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.billing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1000px;
+
+  .settings-card {
+    max-width: none;
+  }
+}
+
+.plan-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  font-size: 26px;
+  font-weight: 500;
+}
+
+h3 {
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.usage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.usage-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.plans-title {
+  margin-top: 28px;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid transparent;
+
+  &.current {
+    border-color: var(--primary);
+  }
+
+  .price {
+    font-size: 26px;
+    font-weight: 500;
+  }
+}
+
+.form-note {
+  max-width: 1000px;
+}
+
+@media (max-width: 768px) {
+  .billing-grid,
+  .plans {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

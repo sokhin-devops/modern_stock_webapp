@@ -191,10 +191,7 @@ td.num, th.num, .right { text-align: right; }
 .business-btn:hover { background: var(--surface-3); }
 .topbar .branch-chip { height: 36px; border-color: transparent; border-radius: 999px; background: var(--page); }
 .topbar .segmented { border-color: var(--border); background: var(--surface); }
-/* Language switch: round button showing the flag of the current language (app.js fills .flag). */
-.flag { width: 24px; height: 24px; overflow: hidden; border-radius: 50%; box-shadow: 0 0 0 1px var(--border-strong); display: block; }
-.flag svg { display: block; width: 100%; height: 100%; }
-.lang-btn:hover .flag { box-shadow: 0 0 0 2px var(--primary-container); }
+/* Language switch: round button showing the flag of the current language (styled in the Flag and LangButton components). */
 .kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 6px; background: var(--surface-3); color: var(--muted); font-size: 12px; font-weight: 500; }
 .kbd-on-primary { background: rgba(255, 255, 255, .22); color: inherit; }
 .topbar-actions { display: flex; align-items: center; gap: 4px; }
@@ -232,12 +229,24 @@ td.num, th.num, .right { text-align: right; }
 
 .sidebar {
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* The menu scrolls on its own, so its scrollbar stops above the footer (Collapse sidebar) instead of running behind it.
+   The scrollbar's 10 px gutter is kept even when nothing scrolls, so items never get narrower when a group opens;
+   with the 6 px padding it matches the 16 px on the left. */
+.nav-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 12px 0 16px;
+  padding: 8px 6px 8px 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 .nav-item {
   display: flex;
@@ -272,8 +281,8 @@ td.num, th.num, .right { text-align: right; }
 .nav-sep { height: 1px; margin: 8px 14px; background: var(--border); opacity: .5; }
 .shell.collapsed .nav-sep { margin: 8px 6px; }
 /* Items keep their height when an open group makes the menu taller than the screen; the menu scrolls instead. */
-.sidebar > * { flex-shrink: 0; }
-.sidebar-footer { position: sticky; bottom: 0; margin-top: auto; padding: 8px 0 12px; border-top: 1px solid var(--border); background: var(--canvas); }
+.nav-scroll > * { flex-shrink: 0; }
+.sidebar-footer { flex-shrink: 0; margin: 0 16px; padding: 8px 0 12px; border-top: 1px solid var(--border); }
 .main { min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: 0 16px 16px 0; }
 .no-sidebar .main { padding: 0 16px 16px; }
 /* The content card: the header (breadcrumb and actions) stays put, and only the body under it scrolls. */
@@ -316,7 +325,9 @@ td.num, th.num, .right { text-align: right; }
 .shell.collapsed .brand { min-width: auto; }
 .shell.collapsed .nav-label, .shell.collapsed .chev, .shell.collapsed .nav-sub { display: none; }
 .shell.collapsed .nav-item { justify-content: center; padding: 0; }
-.shell.collapsed .sidebar { padding: 8px 10px 0; }
+/* The 10 px on the left matches the scrollbar gutter on the right, so the icons stay centred. */
+.shell.collapsed .nav-scroll { padding: 8px 0 8px 10px; }
+.shell.collapsed .sidebar-footer { margin: 0 10px; }
 /* Icons only: the group of the current page is highlighted, since its pages are hidden. */
 .shell.collapsed .nav-group.current > .nav-item { background: var(--primary-container); color: var(--on-primary-container); }
 
@@ -906,7 +917,8 @@ html[lang="km"] .auth-title { line-height: 1.5; }
   .shell .brand { min-width: auto; }
   .shell .nav-label, .shell .chev, .shell .nav-sub { display: none; }
   .shell .nav-item { justify-content: center; padding: 0; }
-  .shell .sidebar { padding: 8px 10px 0; }
+  .shell .nav-scroll { padding: 8px 0 8px 10px; }
+  .shell .sidebar-footer { margin: 0 10px; }
   .shell .nav-group.current > .nav-item { background: var(--primary-container); color: var(--on-primary-container); }
   .rate-chip { display: none; }
 }
@@ -929,7 +941,7 @@ html[lang="km"] .auth-title { line-height: 1.5; }
     z-index: 60;
     width: 288px;
     height: 100vh;
-    padding-top: 16px;
+    padding-top: 8px;
     background: var(--surface);
     transform: translateX(-100%);
     visibility: hidden;
@@ -937,7 +949,8 @@ html[lang="km"] .auth-title { line-height: 1.5; }
   }
   /* The shadow only while open (a hidden menu would cast it on the page edge), and hidden links are not tabbable. */
   .nav-open .sidebar { transform: none; visibility: visible; box-shadow: var(--shadow-3); transition: transform .3s var(--ease-out); }
-  .sidebar-footer { background: var(--surface); }
+  /* Phones lay the scrollbar over the content, so no gutter: the same 16 px on both sides. */
+  .nav-scroll { padding-right: 16px; scrollbar-gutter: auto; }
   .nav-open .scrim { opacity: 1; visibility: visible; }
   .branch-chip, .rate-chip, .hide-sm { display: none; }
   /* Phone top bar: menu, business, notifications, account. Language and dark mode move into the account menu. */

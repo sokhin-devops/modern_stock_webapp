@@ -1,0 +1,129 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'nav.reports' | translate }}</span></nav>
+    <div class="page-actions period">
+      <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" [ariaLabel]="'reports.from' | translate" />
+      <span class="muted">–</span>
+      <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" [ariaLabel]="'reports.to' | translate" />
+    </div>
+  </div>
+  <div class="page-body">
+    <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))">
+      <p-tablist>
+        <p-tab value="sales">{{ 'reports.tabSales' | translate }}</p-tab>
+        <p-tab value="profit">{{ 'reports.tabProfit' | translate }}</p-tab>
+        <p-tab value="debts">{{ 'reports.tabDebts' | translate }}</p-tab>
+        <p-tab value="stock">{{ 'reports.tabStock' | translate }}</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="sales">
+          @if (sales(); as s) {
+            <div class="kpis">
+              <div class="kpi"><div class="kpi-label">{{ 'reports.sales' | translate }}</div><div class="kpi-value">{{ s.sales | currency: 'USD' }}</div><div class="kpi-sub">{{ s.documents }} · {{ 'reports.documents' | translate }}</div></div>
+              <div class="kpi"><div class="kpi-label">{{ 'reports.grossProfit' | translate }}</div><div class="kpi-value">{{ s.grossProfit | currency: 'USD' }}</div><div class="kpi-sub">{{ 'reports.margin' | translate: { pct: margin() } }}</div></div>
+              <div class="kpi"><div class="kpi-label">{{ 'reports.cost' | translate }}</div><div class="kpi-value">{{ s.cost | currency: 'USD' }}</div></div>
+              <div class="kpi"><div class="kpi-label">{{ 'reports.vat' | translate }}</div><div class="kpi-value">{{ s.vat | currency: 'USD' }}</div></div>
+            </div>
+            <section class="card">
+              <h2 class="card-title">{{ 'reports.byDay' | translate }}</h2>
+              @if (s.days.length) {
+                <div class="bars" role="img" [attr.aria-label]="'reports.byDay' | translate">
+                  @for (d of s.days; track d.day) {
+                    <div class="bar-col" [title]="(d.day | date: 'dd/MM') + ' · $' + (d.sales | number: '1.2-2')">
+                      <span class="bar" [style.height.%]="(d.sales / maxDay()) * 100"></span>
+                      <small>{{ d.day | date: 'dd' }}</small>
+                    </div>
+                  }
+                </div>
+                <!-- The same numbers as a table, for screen readers -->
+                <table class="tw:sr-only">
+                  <caption>{{ 'reports.byDay' | translate }}</caption>
+                  @for (d of s.days; track d.day) {
+                    <tr><th>{{ d.day | date: 'dd/MM/yyyy' }}</th><td>{{ d.sales | currency: 'USD' }}</td><td>{{ d.profit | currency: 'USD' }}</td></tr>
+                  }
+                </table>
+              } @else {
+                <p class="muted empty">{{ 'reports.noData' | translate }}</p>
+              }
+            </section>
+            <section class="card">
+              <h2 class="card-title">{{ 'reports.topProducts' | translate }}</h2>
+              <p-table class="ms-table" [value]="s.topProducts">
+                <ng-template #header>
+                  <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th><th class="num">{{ 'reports.sales' | translate }}</th><th class="num">{{ 'reports.grossProfit' | translate }}</th></tr>
+                </ng-template>
+                <ng-template #body let-p>
+                  <tr><td class="strong">{{ p.name }}</td><td class="num">{{ p.qty | number: '1.0-3' }}</td><td class="num">{{ p.sales | currency: 'USD' }}</td><td class="num" [class.danger-text]="p.profit < 0">{{ p.profit | currency: 'USD' }}</td></tr>
+                </ng-template>
+                <ng-template #emptymessage><tr><td colspan="4" class="empty-cell">{{ 'reports.noData' | translate }}</td></tr></ng-template>
+              </p-table>
+            </section>
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="profit">
+          @if (profit(); as p) {
+            <section class="card statement">
+              <div class="line"><span>{{ 'reports.revenue' | translate }}</span><b>{{ p.revenue | currency: 'USD' }}</b></div>
+              <div class="line"><span>− {{ 'reports.cost' | translate }}</span><b>{{ p.costOfGoods | currency: 'USD' }}</b></div>
+              <div class="line total"><span>{{ 'reports.grossProfit' | translate }}</span><b>{{ p.grossProfit | currency: 'USD' }}</b></div>
+              <div class="line"><span>− {{ 'reports.expenses' | translate }}</span><b>{{ p.expenses | currency: 'USD' }}</b></div>
+              @for (e of p.expensesByCategory; track e.category) {
+                <div class="line sub"><span>{{ e.category }}</span><span>{{ e.amount | currency: 'USD' }}</span></div>
+              }
+              <div class="line total grand"><span>{{ 'reports.netProfit' | translate }}</span><b [class.danger-text]="p.netProfit < 0">{{ p.netProfit | currency: 'USD' }}</b></div>
+            </section>
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="debts">
+          @if (debts(); as d) {
+            <div class="two">
+              <section class="card">
+                <h2 class="card-title">{{ 'reports.customersOwe' | translate }} · {{ d.customersOwe | currency: 'USD' }}</h2>
+                <p-table class="ms-table" [value]="d.customers">
+                  <ng-template #body let-c><tr><td class="strong">{{ c.name }}<br /><small class="muted">{{ c.phone }}</small></td><td class="num danger-text">{{ c.balance | currency: 'USD' }}</td></tr></ng-template>
+                  <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'partners.settled' | translate }}</td></tr></ng-template>
+                </p-table>
+              </section>
+              <section class="card">
+                <h2 class="card-title">{{ 'reports.weOwe' | translate }} · {{ d.weOwe | currency: 'USD' }}</h2>
+                <p-table class="ms-table" [value]="d.suppliers">
+                  <ng-template #body let-s><tr><td class="strong">{{ s.name }}<br /><small class="muted">{{ s.phone }}</small></td><td class="num">{{ s.balance | currency: 'USD' }}</td></tr></ng-template>
+                  <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'partners.settled' | translate }}</td></tr></ng-template>
+                </p-table>
+              </section>
+            </div>
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="stock">
+          @if (summary(); as s) {
+            <div class="kpis">
+              <div class="kpi"><div class="kpi-label">{{ 'reports.stockValue' | translate }}</div><div class="kpi-value">{{ s.onHandValue | currency: 'USD' }}</div></div>
+              <div class="kpi"><div class="kpi-label">{{ 'reports.lowStock' | translate }}</div><div class="kpi-value">{{ s.lowStockItems }}</div></div>
+              <div class="kpi"><div class="kpi-label">{{ 'reports.expiring' | translate }}</div><div class="kpi-value">{{ s.expiringIn30Days }}</div></div>
+            </div>
+          }
+          <div class="two">
+            <section class="card">
+              <h2 class="card-title">{{ 'reports.lowStock' | translate }}</h2>
+              <p-table class="ms-table" [value]="low()">
+                <ng-template #body let-r><tr><td class="strong">{{ r.nameEn }}</td><td class="num danger-text">{{ r.qtyOnHand | number: '1.0-3' }} {{ r.unitSymbol }}</td></tr></ng-template>
+                <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'dashboard.lowStockEmpty' | translate }}</td></tr></ng-template>
+              </p-table>
+            </section>
+            <section class="card">
+              <h2 class="card-title">{{ 'reports.expiring' | translate }}</h2>
+              <p-table class="ms-table" [value]="expiring()">
+                <ng-template #body let-b><tr><td class="strong">{{ b.productName }}<br /><small class="muted">{{ b.warehouseName }}</small></td>
+                  <td class="num" [class.danger-text]="b.expired">{{ b.expiryDate | date: 'dd/MM/yyyy' }}</td><td class="num">{{ b.qtyOnHand | number: '1.0-3' }}</td></tr></ng-template>
+                <ng-template #emptymessage><tr><td colspan="3" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+              </p-table>
+            </section>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>

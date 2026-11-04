@@ -1,0 +1,39 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.settings' | translate }}</span>
+      <span class="current">{{ 'nav.telegram' | translate }}</span>
+    </nav>
+  </div>
+  <div class="page-body">
+    <div class="settings-card ms-form">
+      <p class="muted">{{ 'telegram.lead' | translate }}</p>
+      @if (!s().botConfigured) {
+        <p class="form-note"><i class="icon pi pi-info-circle"></i>{{ 'telegram.noBot' | translate }}</p>
+      }
+      <div class="ms-field">
+        <label msLabel for="tg-chat">{{ 'telegram.chatId' | translate }}</label>
+        <input pInputText id="tg-chat" [ngModel]="s().chatId" (ngModelChange)="set('chatId', $event)" />
+        <small class="field-hint">{{ 'telegram.chatIdHint' | translate }}</small>
+      </div>
+      <div class="ms-check">
+        <p-toggleswitch inputId="tg-daily" [ngModel]="s().dailySummary" (ngModelChange)="set('dailySummary', $event)" />
+        <label for="tg-daily">{{ 'telegram.daily' | translate }}</label>
+      </div>
+      <div class="ms-check">
+        <p-toggleswitch inputId="tg-low" [ngModel]="s().lowStockAlerts" (ngModelChange)="set('lowStockAlerts', $event)" />
+        <label for="tg-low">{{ 'telegram.lowStock' | translate }}</label>
+      </div>
+      <div class="ms-check">
+        <p-toggleswitch inputId="tg-expiry" [ngModel]="s().expiryAlerts" (ngModelChange)="set('expiryAlerts', $event)" />
+        <label for="tg-expiry">{{ 'telegram.expiry' | translate }}</label>
+      </div>
+      <div class="settings-actions">
+        <button pButton type="button" [outlined]="true" (click)="test()" [disabled]="!s().chatId">
+          <i class="pi pi-telegram" pButtonIcon></i><span pButtonLabel>{{ 'telegram.test' | translate }}</span>
+        </button>
+        <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+      </div>
+    </div>
+  </div>
+</div>

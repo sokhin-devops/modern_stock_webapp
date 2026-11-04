@@ -32,31 +32,45 @@
     gap: 16px;
   }
 
-  // One field: the floating-label input, then its hint or error line.
+  // One field: its label above (the FieldLabel component, which also says what is wrong), the input, then a hint.
   .ms-field {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     min-width: 0;
   }
 
-  .ms-field .p-floatlabel,
+  // Two fields side by side line up: their labels share a grid row, then their inputs, then their hints. A label
+  // that wraps (a long message such as "Phone · Use a Cambodian number…") moves both inputs down together, and each
+  // label stays right above its input. Without hints in the row, there is no hint row.
+  @media (min-width: 769px) {
+    .ms-form-row {
+      row-gap: 6px;
+    }
+
+    .ms-form-row > * {
+      grid-row: span 3;
+    }
+
+    .ms-form-row:not(:has(> .ms-field > .field-hint)) > * {
+      grid-row: span 2;
+    }
+
+    .ms-form-row > .ms-field {
+      display: grid;
+      grid-template-rows: subgrid;
+    }
+
+    .ms-form-row > .ms-field > .ms-label {
+      align-self: end;
+    }
+  }
+
   .ms-field .p-inputtext,
   .ms-field .p-select,
   .ms-field .p-inputnumber,
   .ms-field .p-selectbutton {
     width: 100%;
-  }
-
-  // A placeholder (an example such as "012 345 678") shows only in a focused field, once the label has moved up;
-  // otherwise it would sit on top of the label.
-  .p-floatlabel input::placeholder {
-    opacity: 0;
-    transition: opacity 0.15s var(--ease);
-  }
-
-  .p-floatlabel input:focus::placeholder {
-    opacity: 1;
   }
 
   // Choices as one row of equal buttons, like the prototype's segmented control.
@@ -68,19 +82,11 @@
     flex: 1;
   }
 
-  .field-hint,
-  .field-error {
-    padding: 0 14px;
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
+  // A hint under a field, lined up with its label. (Mistakes are said in the label, not here.)
   .field-hint {
     color: var(--muted);
-  }
-
-  .field-error {
-    color: var(--danger);
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   // A checkbox or switch with its label on the right.
@@ -226,5 +232,304 @@
 @media (max-width: 640px) {
   .p-toast.p-toast-bottom-center {
     width: calc(100vw - 32px);
+  }
+}
+
+// List pages: PrimeNG tabs, then a toolbar, then a table that fills the height left; only its rows scroll.
+.list-page .ms-tabs {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+
+  .p-tablist {
+    flex: none;
+    margin: 12px 0 20px;
+  }
+
+  .p-tablist-tab-list {
+    background: transparent;
+  }
+
+  .p-tabpanels {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  .p-tabpanel[data-p-active='true'] {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
+
+// PrimeNG 19 keeps an empty element for every tab that is not shown (it only drops the content). Hidden, it takes no
+// share of a page's height (which pushed the shown table down, or cut it short) and screen readers skip it.
+.p-tabpanel[data-p-active='false'] {
+  display: none;
+}
+
+// The number beside a tab's name, like the prototype's .tab .count.
+.p-tab {
+  gap: 8px;
+
+  .count {
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    color: var(--text-2);
+    font-size: 12px;
+  }
+
+  &.p-tab-active .count {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+  }
+}
+
+// Tables: PrimeNG's DataTable (paging, sorting, loading) drawn like the prototype's .table.
+.ms-table {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ms-table .p-datatable {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+
+  .p-datatable-table-container {
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .p-datatable-thead > tr > th {
+    height: 40px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--primary-soft);
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .p-datatable-tbody > tr > td {
+    height: 52px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: 0;
+  }
+
+  .p-datatable-tbody > tr.clickable {
+    cursor: pointer;
+  }
+
+  th:first-child,
+  td:first-child {
+    padding-left: 20px;
+  }
+
+  th:last-child,
+  td:last-child {
+    padding-right: 20px;
+  }
+
+  .num {
+    text-align: right;
+  }
+
+  th.num .p-datatable-column-header-content {
+    justify-content: flex-end;
+  }
+
+  .actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .actions .p-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .strong {
+    font-weight: 500;
+  }
+
+  .empty-cell {
+    height: 120px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .p-paginator {
+    padding: 12px 4px 0;
+    background: transparent;
+  }
+}
+
+// Forms in a drawer beside a list (product, customer...): wide enough for two fields per row.
+.p-drawer.ms-form-drawer {
+  width: min(600px, 100vw);
+}
+
+.p-dialog.ms-dialog {
+  width: min(520px, calc(100vw - 32px));
+}
+
+// Toolbars above lists: 40 px controls like the prototype's search box and chips.
+.toolbar {
+  .p-inputtext {
+    height: 40px;
+    padding-block: 0;
+    font-size: 14px;
+  }
+
+  .p-select {
+    height: 40px;
+    align-items: center;
+  }
+
+  .p-select-label {
+    padding-block: 0;
+    font-size: 14px;
+  }
+
+  .p-togglebutton {
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+// POS payment: wide, with the receipt preview beside the amounts.
+.p-dialog.pay-dialog {
+  width: min(860px, calc(100vw - 32px));
+}
+
+.methods .p-togglebutton {
+  flex: 1;
+}
+
+// Printing from the receipt dialog prints the receipt only.
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-receipt,
+  .print-receipt * {
+    visibility: visible;
+  }
+
+  .print-receipt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-shadow: none;
+  }
+}
+
+// Buttons at the foot of a form drawer: a delete-type action on the left, Cancel and Save on the right.
+.drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// Date pickers in a field fill it, like the other inputs.
+.ms-field .p-datepicker {
+  width: 100%;
+}
+
+// Settings pages: one white card of fields, at a readable width, with Save at the bottom right.
+.settings-card {
+  max-width: 760px;
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+// Documents with product lines (adjustment, transfer, purchase) need a wider drawer.
+.p-drawer.ms-doc-drawer {
+  width: min(1000px, 100vw);
+}
+
+// A document's header facts (number, date, warehouse...) as small label/value pairs.
+.doc-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  b {
+    font-weight: 500;
+  }
+}
+
+// Status tags for documents: done (primary), waiting (plain), stopped (danger).
+.tag.status-POSTED, .tag.status-RECEIVED, .tag.status-MOVED, .tag.status-PAID, .tag.status-CLOSED {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.tag.status-VOID, .tag.status-REJECTED, .tag.status-CANCELLED, .tag.status-RETURNED {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+// Tabs placed straight on a page (Reports): no panel of their own, so cards and tiles sit on the page color.
+// Every tab's content starts 20 px under the tabs, as on the list pages, whatever its first block is.
+.page-body > p-tabs {
+  .p-tablist {
+    margin-bottom: 20px;
+  }
+
+  .p-tablist-tab-list,
+  .p-tabpanels {
+    background: transparent;
+  }
+
+  .p-tabpanels {
+    padding: 0;
+  }
+
+  .p-tabpanel > :first-child {
+    margin-top: 0;
   }
 }

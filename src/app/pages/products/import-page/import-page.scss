@@ -1,0 +1,41 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.wide {
+  max-width: 1000px;
+}
+
+.small {
+  margin: -8px 0 0;
+  font-size: 13px;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+// A real file input, hidden behind a PrimeNG-looking button (the label opens it, keyboard included).
+.file-btn {
+  position: relative;
+
+  input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  input:focus-visible + .p-button {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+.preview {
+  align-self: center;
+}

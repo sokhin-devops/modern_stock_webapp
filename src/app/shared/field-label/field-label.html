@@ -1,0 +1,19 @@
+<ng-content />
+@if (star()) {
+  <span class="star" aria-hidden="true">*</span>
+}
+@if (optional() && shown() === null) {
+  <span class="optional">({{ 'common.optional' | translate }})</span>
+}
+@switch (shown()) {
+  @case ('required') {
+    <span class="message">{{ 'common.isRequired' | translate }}</span>
+  }
+  @case ('other') {
+    @if (error(); as error) {
+      <span class="message detail">· {{ error | translate }}</span>
+    } @else {
+      <span class="message">{{ 'common.isInvalid' | translate }}</span>
+    }
+  }
+}

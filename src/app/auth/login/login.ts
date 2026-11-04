@@ -3,7 +3,6 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 import { switchMap } from 'rxjs';
 
@@ -11,7 +10,8 @@ import { AuthService } from '../../core/auth/auth.service';
 import { BusinessService } from '../../core/business/business.service';
 import { NotifyService } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
-import { revealErrors, showError } from '../../shared/forms';
+import { FieldLabel } from '../../shared/field-label/field-label';
+import { revealErrors } from '../../shared/forms';
 
 /**
  * Sign in with email or username (PLAIN.md 11.12). Afterwards: back to the page asked for, or the only/last business,
@@ -20,8 +20,8 @@ import { revealErrors, showError } from '../../shared/forms';
 @Component({
   selector: 'ms-login',
   imports: [
-    ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, ButtonDirective, ButtonIcon, ButtonLabel,
-    AuthFrame,
+    ReactiveFormsModule, RouterLink, TranslatePipe, InputText, ButtonDirective, ButtonIcon, ButtonLabel,
+    AuthFrame, FieldLabel,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
@@ -36,7 +36,6 @@ export class Login {
   private readonly router = inject(Router);
   private readonly notify = inject(NotifyService);
 
-  protected readonly showError = showError;
   protected readonly showPassword = signal(false);
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);

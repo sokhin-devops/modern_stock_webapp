@@ -4,7 +4,6 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
-import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { switchMap } from 'rxjs';
@@ -16,7 +15,8 @@ import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
-import { revealErrors, showError } from '../../shared/forms';
+import { FieldLabel } from '../../shared/field-label/field-label';
+import { revealErrors } from '../../shared/forms';
 import { CAMBODIAN_PHONE, sameAs } from '../../shared/validators';
 
 /**
@@ -26,8 +26,8 @@ import { CAMBODIAN_PHONE, sameAs } from '../../shared/validators';
 @Component({
   selector: 'ms-invite',
   imports: [
-    ReactiveFormsModule, RouterLink, TranslatePipe, FloatLabel, InputText, ButtonDirective, ButtonLabel, ProgressSpinner,
-    AuthFrame,
+    ReactiveFormsModule, RouterLink, TranslatePipe, InputText, ButtonDirective, ButtonLabel, ProgressSpinner,
+    AuthFrame, FieldLabel,
   ],
   templateUrl: './invite.html',
   styleUrl: './invite.scss',
@@ -44,7 +44,6 @@ export class Invite implements OnInit {
 
   protected readonly details = signal<InvitationDetails | null>(null);
   protected readonly closed = signal(false);
-  protected readonly showError = showError;
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly form = inject(NonNullableFormBuilder).group(

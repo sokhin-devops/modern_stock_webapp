@@ -1,0 +1,74 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.inventory' | translate }}</span>
+      <span class="current">{{ 'stock.title' | translate }}</span>
+    </nav>
+  </div>
+
+  <div class="page-body list-page">
+    <div class="toolbar">
+      <p-iconfield class="search">
+        <p-inputicon class="pi pi-search" />
+        <input pInputText type="search" [placeholder]="'stock.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
+               (input)="onSearch($any($event.target).value)" />
+      </p-iconfield>
+      @if (!onlyLow()) {
+        <p-select [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
+                  (ngModelChange)="setCategory($event)" [showClear]="true" [placeholder]="'products.allCategories' | translate"
+                  [ariaLabel]="'products.category' | translate" class="category-filter" appendTo="body" />
+      }
+      <p-togglebutton [ngModel]="onlyLow()" (ngModelChange)="setOnlyLow($event)"
+                      [onLabel]="'products.low' | translate" [offLabel]="'products.low' | translate"
+                      onIcon="pi pi-arrow-down" offIcon="pi pi-arrow-down" />
+    </div>
+
+    <p-table class="ms-table" [value]="rows()" [lazy]="!onlyLow()" (onLazyLoad)="load($event)" [loading]="loading()"
+             [paginator]="true" [rows]="20" [first]="first()" [totalRecords]="total()" [rowsPerPageOptions]="[20, 50, 100]"
+             [showCurrentPageReport]="true" [currentPageReportTemplate]="'{first}–{last} / {totalRecords}'"
+             [scrollable]="true" scrollHeight="flex" sortField="nameEn" [sortOrder]="1" dataKey="productId" [rowHover]="true">
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="nameEn">{{ 'products.colProduct' | translate }} <p-sortIcon field="nameEn" /></th>
+          <th pSortableColumn="sku">{{ 'products.colSku' | translate }} <p-sortIcon field="sku" /></th>
+          <th class="num">{{ 'stock.onHand' | translate }}</th>
+          <th class="num">{{ 'stock.reorderAt' | translate }}</th>
+          @if (showValue()) {
+            <th class="num">{{ 'stock.value' | translate }}</th>
+          }
+          <th>{{ 'products.colStatus' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-r>
+        <tr class="clickable" tabindex="0" (click)="open(r)" (keydown.enter)="open(r)">
+          <td>
+            <div class="prod-cell">
+              <span class="thumb-sm"><i class="icon pi pi-box"></i></span>
+              <span class="strong">{{ lang.name(r.nameEn, r.nameKm) }}</span>
+            </div>
+          </td>
+          <td class="muted">{{ r.sku }}</td>
+          <td class="num" [class.danger-text]="r.low">{{ r.qtyOnHand | number: '1.0-3' }} {{ r.unitSymbol }}</td>
+          <td class="num muted">{{ r.reorderLevel | number: '1.0-3' }}</td>
+          @if (showValue()) {
+            <td class="num">{{ r.value | currency: 'USD' }}</td>
+          }
+          <td>
+            @if (r.qtyOnHand <= 0) {
+              <span class="tag tag-danger">{{ 'products.out' | translate }}</span>
+            } @else if (r.low) {
+              <span class="tag tag-primary">{{ 'products.low' | translate }}</span>
+            } @else {
+              <span class="tag">{{ 'products.inStock' | translate }}</span>
+            }
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td colspan="6" class="empty-cell">{{ (q() || onlyLow() ? 'common.noResults' : 'stock.empty') | translate }}</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<ms-stock-detail [row]="selected()" [(visible)]="detailOpen" />

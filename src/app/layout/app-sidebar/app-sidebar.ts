@@ -1,10 +1,11 @@
-import { Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { Tooltip } from 'primeng/tooltip';
-import { filter } from 'rxjs';
+import { filter, map } from 'rxjs';
 
 import { BusinessService } from '../../core/business/business.service';
 import { ScreenService } from '../../core/screen.service';
@@ -12,9 +13,10 @@ import { NAV, NavItem, NavPage } from '../nav';
 
 /**
  * Side menu (prototype sidebar): Dashboard and POS, a thin line, then the groups. Only pages the member's role
- * allows are shown; a group with nothing allowed disappears. The group of the current page opens by itself.
- * As a rail of icons (collapsed by hand, or always on tablets), a group's pages open in a flyout menu beside it
- * (the prototype's pop-nav).
+ * allows are shown; a group with nothing allowed disappears.
+ * Groups work like the prototype's accordion: one is open at a time, any of them (also the current one) can be
+ * closed, and going to a page in another group opens that group. As a rail of icons (collapsed by hand, or always
+ * on tablets), a group's pages open in a flyout menu beside it (the prototype's pop-nav).
  */
 @Component({
   selector: 'ms-app-sidebar',
@@ -34,9 +36,18 @@ export class AppSidebar {
   private readonly translate = inject(TranslateService);
   private readonly flyout = viewChild.required<Menu>('flyout');
 
-  /** Groups opened by hand; the group of the current page is always open. */
-  private readonly opened = signal<Set<string>>(new Set());
-  private readonly url = signal(this.router.url);
+  /** The one open group (null = all closed). */
+  protected readonly openGroup = signal<string | null>(null);
+  /** The page's path, without query or fragment. */
+  private readonly path = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map(() => pathOf(this.router.url)),
+    ),
+    { initialValue: pathOf(this.router.url) },
+  );
+  /** The group of the page shown last, to open a group only when the page moves to another one. */
+  private lastCurrent: string | null = null;
 
   /** The pages of the group whose flyout is open, and the icon it opened from. */
   protected readonly flyoutItems = signal<MenuItem[]>([]);
@@ -49,24 +60,38 @@ export class AppSidebar {
   });
 
   constructor() {
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => this.url.set(this.router.url));
+    // Opens the group of the page when the page moves into another group (also once the role's pages are known);
+    // inside one group, it stays open or closed as the member left it.
+    effect(() => {
+      const current = this.items().find((item) => this.isCurrent(item))?.id ?? null;
+      if (current !== this.lastCurrent) {
+        this.lastCurrent = current;
+        if (current) {
+          this.openGroup.set(current);
+        }
+      }
+    });
   }
 
   protected isOpen(item: NavItem): boolean {
-    return this.opened().has(item.id) || this.isCurrent(item);
+    return this.openGroup() === item.id;
   }
 
-  /** The group holding the current page (highlighted when the menu shows icons only). */
+  /** The group holding the current page (highlighted when closed, and when the menu shows icons only). */
   protected isCurrent(item: NavItem): boolean {
-    return !!item.children?.some((p) => this.url().startsWith('/' + p.path));
+    const path = this.path();
+    return !!item.children?.some((p) => path === '/' + p.path || path.startsWith('/' + p.path + '/'));
   }
 
-  protected toggle(item: NavItem): void {
-    this.opened.update((set) => {
-      const next = new Set(set);
-      next.has(item.id) ? next.delete(item.id) : next.add(item.id);
-      return next;
-    });
+  /** Opens a group (closing the one that was open) or closes it; an opened group scrolls into view. */
+  protected toggle(item: NavItem, event: Event): void {
+    const opening = this.openGroup() !== item.id;
+    this.openGroup.set(opening ? item.id : null);
+    if (opening) {
+      const group = (event.currentTarget as HTMLElement).parentElement;
+      // After the opening animation (0.28 s), so the whole group is measured.
+      setTimeout(() => group?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 300);
+    }
   }
 
   protected openFlyout(event: MouseEvent, item: NavItem): void {
@@ -103,4 +128,8 @@ export class AppSidebar {
   private allowed(page: NavPage): boolean {
     return !page.permissions?.length || page.permissions.some((p) => this.business.can(p));
   }
+}
+
+function pathOf(url: string): string {
+  return url.split(/[?#]/)[0];
 }

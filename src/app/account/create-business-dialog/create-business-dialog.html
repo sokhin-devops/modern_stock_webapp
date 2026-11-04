@@ -1,25 +1,16 @@
 <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div class="ms-field">
-    <p-floatlabel variant="on">
-      <input pInputText id="nameEn" formControlName="nameEn" placeholder="Sokha Mini-mart" />
-      <label for="nameEn">{{ 'account.nameEn' | translate }} *</label>
-    </p-floatlabel>
-    @if (showError(form.controls.nameEn)) {
-      <small class="field-error">{{ 'common.required' | translate }}</small>
-    }
+    <label msLabel for="nameEn" control="nameEn">{{ 'account.nameEn' | translate }}</label>
+    <input pInputText id="nameEn" formControlName="nameEn" placeholder="Sokha Mini-mart" />
   </div>
   <div class="ms-field">
-    <p-floatlabel variant="on">
-      <input pInputText id="nameKm" formControlName="nameKm" placeholder="ហាងសុខា មីនីម៉ាត" />
-      <label for="nameKm">{{ 'account.nameKm' | translate }} ({{ 'common.optional' | translate }})</label>
-    </p-floatlabel>
+    <label msLabel for="nameKm" control="nameKm" optional>{{ 'account.nameKm' | translate }}</label>
+    <input pInputText id="nameKm" formControlName="nameKm" placeholder="ហាងសុខា មីនីម៉ាត" />
   </div>
   <div class="ms-field">
-    <p-floatlabel variant="on">
-      <p-select inputId="businessType" formControlName="businessType" [options]="types()" optionLabel="label"
-                optionValue="value" appendTo="body" />
-      <label for="businessType">{{ 'account.type' | translate }} *</label>
-    </p-floatlabel>
+    <label msLabel for="businessType" control="businessType">{{ 'account.type' | translate }}</label>
+    <p-select inputId="businessType" formControlName="businessType" [options]="types()" optionLabel="label"
+              optionValue="value" appendTo="body" />
   </div>
 
   <div class="dialog-actions">

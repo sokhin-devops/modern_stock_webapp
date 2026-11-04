@@ -1,0 +1,116 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.customerMenu' | translate }}</span>
+      <span class="current">{{ 'nav.customerTransactions' | translate }}</span>
+    </nav>
+    <div class="page-actions">
+      @if (canSell()) {
+        <button pButton type="button" (click)="payOpen.set(true)">
+          <i class="pi pi-wallet" pButtonIcon></i><span pButtonLabel>{{ 'sales.receivePayment' | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+  <div class="page-body list-page">
+    <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))" class="ms-tabs">
+      <p-tablist>
+        @if (canSell()) {
+          <p-tab value="receipts">{{ 'sales.tabReceipts' | translate }}</p-tab>
+        }
+        <p-tab value="invoices">{{ 'sales.tabInvoices' | translate }}</p-tab>
+        @if (canSell()) {
+          <p-tab value="payments">{{ 'sales.tabPayments' | translate }}</p-tab>
+        }
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="receipts">
+          <p-table class="ms-table" [value]="receipts.rows()" [lazy]="true" (onLazyLoad)="receipts.load($event)" [loading]="receipts.loading()"
+                   [paginator]="true" [rows]="20" [first]="receipts.first()" [totalRecords]="receipts.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'sales.soldAt' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th>
+                <th class="num">KHR</th><th>{{ 'common.status' | translate }}</th></tr>
+            </ng-template>
+            <ng-template #body let-r>
+              <tr class="clickable" tabindex="0" (click)="viewing.set(r)" (keydown.enter)="viewing.set(r)">
+                <td class="strong">{{ r.number }}</td><td>{{ r.soldAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td class="num">{{ r.total | currency: 'USD' }}</td><td class="num muted">៛{{ r.totalKhr | number: '1.0-0' }}</td>
+                <td><span class="tag" [class]="'status-' + r.status">{{ 'docs.status.' + r.status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="5" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="invoices">
+          <p-table class="ms-table" [value]="invoices.rows()" [lazy]="true" (onLazyLoad)="invoices.load($event)" [loading]="invoices.loading()"
+                   [paginator]="true" [rows]="20" [first]="invoices.first()" [totalRecords]="invoices.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'sales.customer' | translate }}</th><th>{{ 'common.date' | translate }}</th>
+                <th>{{ 'sales.due' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th><th class="num">{{ 'sales.balance' | translate }}</th>
+                <th>{{ 'common.status' | translate }}</th></tr>
+            </ng-template>
+            <ng-template #body let-i>
+              <tr>
+                <td class="strong">{{ i.number }}</td><td>{{ $any(i).customerName }}</td><td>{{ $any(i).invoiceDate | date: 'dd/MM/yyyy' }}</td>
+                <td [class.danger-text]="$any(i).overdue">{{ $any(i).dueDate | date: 'dd/MM/yyyy' }}</td>
+                <td class="num">{{ $any(i).total | currency: 'USD' }}</td><td class="num strong">{{ $any(i).balance | currency: 'USD' }}</td>
+                <td><span class="tag" [class]="'status-' + $any(i).status">{{ 'docs.status.' + $any(i).status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="7" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="payments">
+          <p-table class="ms-table" [value]="payments.rows()" [lazy]="true" (onLazyLoad)="payments.load($event)" [loading]="payments.loading()"
+                   [paginator]="true" [rows]="20" [first]="payments.first()" [totalRecords]="payments.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.method' | translate }}</th>
+                <th class="num">{{ 'common.amount' | translate }}</th><th class="num">USD</th></tr>
+            </ng-template>
+            <ng-template #body let-p>
+              <tr>
+                <td class="strong">{{ p.number }}</td><td>{{ $any(p).paidAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ 'docs.methods.' + $any(p).method | translate }}</td>
+                <td class="num">{{ $any(p).currency === 'USD' ? '$' : '៛' }}{{ $any(p).amount | number: ($any(p).currency === 'USD' ? '1.2-2' : '1.0-0') }}</td>
+                <td class="num strong">{{ $any(p).amountUsd | currency: 'USD' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="5" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+
+<ms-payment-dialog kind="customer" [(visible)]="payOpen" (saved)="reloadAll()" />
+
+<p-drawer [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" position="right" styleClass="ms-form-drawer"
+          [header]="viewing()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+  @if (viewing(); as r) {
+    <div class="doc-facts">
+      <div><small>{{ 'sales.soldAt' | translate }}</small><b>{{ r.soldAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
+      <div><small>$1 =</small><b>៛{{ r.exchangeRate | number: '1.0-0' }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + r.status">{{ 'docs.status.' + r.status | translate }}</span></b></div>
+    </div>
+    <p-table class="ms-table" [value]="r.lines">
+      <ng-template #header>
+        <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th></tr>
+      </ng-template>
+      <ng-template #body let-l>
+        <tr><td class="strong">{{ l.productName }}</td><td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td><td class="num">{{ l.lineTotal | currency: 'USD' }}</td></tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr><td colspan="2" class="num">{{ 'common.total' | translate }}</td><td class="num strong">{{ r.total | currency: 'USD' }}<br /><small class="muted">៛{{ r.totalKhr | number: '1.0-0' }}</small></td></tr>
+      </ng-template>
+    </p-table>
+  }
+  <ng-template #footer>
+    @if (viewing()?.status === 'POSTED' && canVoid()) {
+      <div class="drawer-actions">
+        <span class="spacer"></span>
+        <button pButton type="button" [outlined]="true" severity="danger" (click)="voidSale(viewing()!)"><span pButtonLabel>{{ 'sales.voidSale' | translate }}</span></button>
+      </div>
+    }
+  </ng-template>
+</p-drawer>

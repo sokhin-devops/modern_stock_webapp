@@ -1,0 +1,67 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.catalog' | translate }}</span>
+      <span class="current">{{ 'nav.import' | translate }}</span>
+    </nav>
+  </div>
+  <div class="page-body">
+    <div class="settings-card ms-form wide">
+      <p>{{ 'import.lead' | translate }}</p>
+      <p class="muted small">{{ 'import.columns' | translate }}</p>
+      <div class="row-actions">
+        <button pButton type="button" [outlined]="true" (click)="downloadTemplate()">
+          <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'import.template' | translate }}</span>
+        </button>
+        <label class="file-btn">
+          <input type="file" accept=".xlsx,.csv" (change)="choose($event)" [disabled]="running()" />
+          <span class="p-button p-component"><i class="pi pi-upload"></i>&nbsp;{{ 'import.choose' | translate }}</span>
+        </label>
+      </div>
+
+      @if (rows().length) {
+        <div class="ms-form-row">
+          <p class="strong preview">{{ 'import.preview' | translate: { n: rows().length } }}</p>
+          <div class="ms-field">
+            <label msLabel for="im-unit">{{ 'import.unit' | translate }}</label>
+            <p-select inputId="im-unit" [options]="unitOptions()" optionLabel="label" optionValue="value" [ngModel]="unitId()"
+                      (ngModelChange)="unitId.set($event)" appendTo="body" />
+          </div>
+        </div>
+        @if (running() || done()) {
+          <p-progressbar [value]="(done() / rows().length) * 100" [showValue]="false" />
+          @if (!running()) {
+            <p class="form-note"><i class="icon pi pi-check-circle"></i>{{ 'import.done' | translate: { ok: ok(), failed: failed() } }}</p>
+          }
+        }
+        <p-table class="ms-table" [value]="rows()" [scrollable]="true" scrollHeight="420px" [rows]="200">
+          <ng-template #header>
+            <tr><th>{{ 'import.row' | translate }}</th><th>{{ 'products.nameEn' | translate }}</th><th>{{ 'products.sku' | translate }}</th>
+              <th>{{ 'products.barcode' | translate }}</th><th class="num">{{ 'products.sellPrice' | translate }}</th><th>{{ 'import.result' | translate }}</th></tr>
+          </ng-template>
+          <ng-template #body let-r>
+            <tr>
+              <td class="muted">{{ r.row }}</td>
+              <td><div class="strong">{{ r.nameEn }}</div>@if (r.nameKm) { <small class="muted">{{ r.nameKm }}</small> }</td>
+              <td class="muted">{{ r.sku }}</td>
+              <td class="muted">{{ r.barcode }}</td>
+              <td class="num">{{ r.sellPrice | currency: 'USD' }}</td>
+              <td>
+                @if (r.result === 'ok') {
+                  <span class="tag tag-primary">{{ 'import.ok' | translate }}</span>
+                } @else if (r.result) {
+                  <small class="danger-text">{{ r.result }}</small>
+                }
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+        <div class="settings-actions">
+          <button pButton type="button" (click)="run()" [loading]="running()" [disabled]="running() || !unitId()">
+            <i class="pi pi-upload" pButtonIcon></i><span pButtonLabel>{{ 'import.run' | translate }}</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

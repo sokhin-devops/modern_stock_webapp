@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+// The prototype's .swatch circles, as a row of radio buttons.
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.swatch {
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}

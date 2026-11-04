@@ -1,0 +1,13 @@
+:host {
+  display: contents;
+}
+
+// Cash, KHQR and Bank as three equal buttons.
+.methods {
+  display: flex;
+}
+
+// The amount still missing, in the danger color instead of the change color.
+.change-box.short b {
+  color: var(--danger);
+}

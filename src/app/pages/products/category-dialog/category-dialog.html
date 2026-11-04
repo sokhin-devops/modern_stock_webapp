@@ -1,0 +1,24 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [dismissableMask]="true" styleClass="ms-dialog"
+          [header]="(category() ? 'products.editCategory' : 'products.newCategory') | translate">
+  <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="category-form">
+    <div class="ms-field">
+      <label msLabel for="c-nameEn" control="nameEn">{{ 'products.catName' | translate }}</label>
+      <input pInputText id="c-nameEn" formControlName="nameEn" />
+    </div>
+    <div class="ms-field">
+      <label msLabel for="c-nameKm" control="nameKm" optional>{{ 'products.catNameKm' | translate }}</label>
+      <input pInputText id="c-nameKm" formControlName="nameKm" />
+    </div>
+    <div class="ms-field">
+      <label msLabel for="c-parent" control="parentId" optional>{{ 'products.parent' | translate }}</label>
+      <p-select inputId="c-parent" formControlName="parentId" [options]="parents()" optionLabel="label" optionValue="value"
+                [showClear]="true" appendTo="body" />
+    </div>
+  </form>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="submit" form="category-form" [loading]="busy()" [disabled]="busy()">
+      <span pButtonLabel>{{ 'common.save' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

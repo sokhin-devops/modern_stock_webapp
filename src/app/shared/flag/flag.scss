@@ -1,3 +1,45 @@
+// A round flag about the size of the icons beside it. A hairline just inside its edge keeps it crisp on any
+// background (the prototype's grey ring outside made it look like a coin).
 :host {
-  display: inline-block;
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+:host::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%);
+}
+
+:host-context(.app-dark)::after {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%);
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// After a switch (not when the page opens), the new flag turns in like a coin showing its other side.
+:host(.turn) svg {
+  animation: flag-turn 0.4s var(--ease-out);
+}
+
+@keyframes flag-turn {
+  from {
+    transform: rotateY(90deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.turn) svg {
+    animation: none;
+  }
 }

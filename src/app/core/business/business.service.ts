@@ -1,11 +1,14 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Branch, MyBusiness, MyInvitation, Rate } from '../api/models';
+import { Branch, BusinessProfile, MyBusiness, MyInvitation, Rate } from '../api/models';
 
 const API = environment.apiUrl;
+/** The business colors of the prototype (Settings: Appearance). */
+export const PALETTES = ['blue', 'indigo', 'purple', 'teal', 'green'];
 const OPEN_KEY = 'ms-business';
 const BRANCH_KEY = 'ms-branch';
 const LAST_KEY = 'ms-last-business';
@@ -33,6 +36,7 @@ export interface OnboardingRequest {
 @Injectable({ providedIn: 'root' })
 export class BusinessService {
   private readonly http = inject(HttpClient);
+  private readonly document = inject(DOCUMENT);
 
   readonly businesses = signal<MyBusiness[] | null>(null);
   readonly invitations = signal<MyInvitation[]>([]);
@@ -41,6 +45,8 @@ export class BusinessService {
   readonly branchId = signal<number | null>(readNumber(sessionStorageSafe(), BRANCH_KEY));
   readonly branches = signal<Branch[]>([]);
   readonly rate = signal<Rate | null>(null);
+  /** The open business's profile (name, contacts, color). */
+  readonly profile = signal<BusinessProfile | null>(null);
 
   readonly current = computed(() => this.businesses()?.find((b) => b.id === this.businessId()) ?? null);
   readonly branch = computed(() => this.branches().find((b) => b.id === this.branchId()) ?? null);
@@ -90,7 +96,23 @@ export class BusinessService {
   close(): void {
     this.businessId.set(null);
     this.branches.set([]);
+    this.setProfile(null);
     sessionStorageSafe()?.removeItem(OPEN_KEY);
+  }
+
+  /**
+   * The business profile, and its color on <html data-palette> (the prototype's palettes, which PrimeNG follows
+   * through the theme preset). Blue is the default and needs no attribute.
+   */
+  setProfile(profile: BusinessProfile | null): void {
+    this.profile.set(profile);
+    const color = profile?.themeColor;
+    const root = this.document.documentElement;
+    if (color && color !== 'blue' && PALETTES.includes(color)) {
+      root.setAttribute('data-palette', color);
+    } else {
+      root.removeAttribute('data-palette');
+    }
   }
 
   /** Branches and today's rate for the top bar. The member's own branch, else the main branch, is selected first. */
@@ -98,10 +120,12 @@ export class BusinessService {
     return forkJoin([
       this.http.get<Branch[]>(`${API}/branches`),
       this.http.get<Rate>(`${API}/exchange-rates/current`).pipe(catchError(() => of(null))),
+      this.http.get<BusinessProfile>(`${API}/business`).pipe(catchError(() => of(null))),
     ]).pipe(
-      tap(([branches, rate]) => {
+      tap(([branches, rate, profile]) => {
         this.branches.set(branches.filter((b) => b.active));
         this.rate.set(rate);
+        this.setProfile(profile);
         const fixed = this.current()?.branchId;
         const saved = this.branchId();
         if (fixed != null) {

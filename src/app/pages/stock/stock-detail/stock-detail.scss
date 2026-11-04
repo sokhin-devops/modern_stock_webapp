@@ -1,0 +1,64 @@
+:host {
+  display: contents;
+}
+
+// The three numbers at the top of the drawer.
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  b {
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+.warehouse {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.warehouse-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  b {
+    font-weight: 500;
+  }
+}
+
+.batches {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0 0 30px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+
+  li {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.empty {
+  padding: 24px 0;
+  text-align: center;
+}

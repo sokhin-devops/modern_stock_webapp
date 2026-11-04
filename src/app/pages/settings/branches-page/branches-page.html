@@ -1,0 +1,57 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.settings' | translate }}</span>
+      <span class="current">{{ 'nav.branches' | translate }}</span>
+    </nav>
+    <div class="page-actions">
+      @if (canManage()) {
+        <button pButton type="button" (click)="open(null)">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'settings.branches.new' | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+  <div class="page-body list-page">
+    <p-table class="ms-table" [value]="branches()" [loading]="loading()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'settings.branches.nameEn' | translate }}</th>
+          <th>{{ 'settings.branches.code' | translate }}</th>
+          <th>{{ 'settings.branches.phone' | translate }}</th>
+          <th>{{ 'settings.branches.warehouses' | translate }}</th>
+          <th>{{ 'common.status' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-b>
+        <tr class="clickable" tabindex="0" (click)="open(b)" (keydown.enter)="open(b)">
+          <td>
+            <div class="prod-cell">
+              <span class="thumb-sm"><i class="icon pi pi-shop"></i></span>
+              <div>
+                <div class="strong">{{ lang.name(b.nameEn, b.nameKm) }}</div>
+                @if (b.address) {
+                  <small>{{ b.address }}</small>
+                }
+              </div>
+            </div>
+          </td>
+          <td class="muted">{{ b.code }}</td>
+          <td class="muted">{{ b.phone }}</td>
+          <td>{{ warehouseNames(b) }}</td>
+          <td>
+            @if (b.main) {
+              <span class="tag tag-primary">{{ 'settings.branches.main' | translate }}</span>
+            }
+            <span class="tag">{{ (b.active ? 'common.active' : 'partners.inactive') | translate }}</span>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td colspan="5" class="empty-cell">{{ 'settings.branches.empty' | translate }}</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<ms-branch-form [branch]="editing()" [(visible)]="formOpen" (saved)="load()" />

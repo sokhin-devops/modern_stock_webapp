@@ -1,0 +1,54 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.settings' | translate }}</span>
+      <span class="current">{{ 'nav.billing' | translate }}</span>
+    </nav>
+  </div>
+  <div class="page-body">
+    @if (billing(); as b) {
+      <div class="billing-grid">
+        <section class="settings-card">
+          <small class="muted">{{ 'settings.billing.plan' | translate }}</small>
+          <h2 class="plan-name">{{ b.planName }} <span class="tag tag-primary">{{ 'settings.billing.' + b.status | translate }}</span></h2>
+          <p class="muted">
+            {{ 'settings.billing.' + b.billingCycle | translate }} ·
+            @if (b.status === 'TRIALING' && b.trialEndsAt) {
+              {{ 'settings.billing.trialEnds' | translate: { date: (b.trialEndsAt | date: 'dd/MM/yyyy') } }}
+            } @else if (b.currentPeriodEnd) {
+              {{ 'settings.billing.periodEnds' | translate: { date: (b.currentPeriodEnd | date: 'dd/MM/yyyy') } }}
+            }
+          </p>
+        </section>
+        <section class="settings-card">
+          <h3>{{ 'settings.billing.usage' | translate }}</h3>
+          @for (u of b.usage; track u.key) {
+            <div class="usage">
+              <div class="usage-line">
+                <span>{{ 'dashboard.limit.' + u.key | translate }}</span>
+                <span class="num muted">{{ u.used }} / {{ u.limit ?? '∞' }}</span>
+              </div>
+              @if (u.limit !== null) {
+                <p-progressbar [value]="percent(u.used, u.limit)" [showValue]="false" />
+              }
+            </div>
+          }
+        </section>
+      </div>
+
+      <h3 class="plans-title">{{ 'settings.billing.plans' | translate }}</h3>
+      <div class="plans">
+        @for (p of plans(); track p.code) {
+          <div class="settings-card plan" [class.current]="p.code === b.planCode">
+            <b>{{ p.name }}</b>
+            <div class="price">${{ p.priceMonthly }} <small class="muted">{{ 'settings.billing.perMonth' | translate }}</small></div>
+            @if (p.code === b.planCode) {
+              <span class="tag tag-primary">{{ 'settings.billing.current' | translate }}</span>
+            }
+          </div>
+        }
+      </div>
+      <p class="form-note"><i class="icon pi pi-info-circle"></i>{{ 'settings.billing.changeNote' | translate }}</p>
+    }
+  </div>
+</div>

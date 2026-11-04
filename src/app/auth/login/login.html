@@ -5,29 +5,21 @@
     }
 
     <div class="ms-field">
-      <p-floatlabel variant="on">
-        <input pInputText id="login" formControlName="login" autocomplete="username" autocapitalize="off" />
-        <label for="login">{{ 'auth.login' | translate }} *</label>
-      </p-floatlabel>
-      @if (showError(form.controls.login)) {
-        <small class="field-error">{{ 'common.required' | translate }}</small>
-      }
+      <label msLabel for="login" control="login">{{ 'auth.login' | translate }}</label>
+      <input pInputText id="login" formControlName="login" autocomplete="username" autocapitalize="off" />
     </div>
 
     <div class="ms-field">
-      <p-floatlabel variant="on" class="ms-password">
+      <label msLabel for="password" control="password">{{ 'auth.password' | translate }}</label>
+      <div class="ms-password">
         <input pInputText id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                autocomplete="current-password" />
-        <label for="password">{{ 'auth.password' | translate }} *</label>
         <button pButton type="button" class="reveal" [rounded]="true" [text]="true" severity="secondary"
                 (click)="showPassword.set(!showPassword())" [attr.aria-pressed]="showPassword()"
                 [attr.aria-label]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | translate">
           <i class="pi" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()" pButtonIcon></i>
         </button>
-      </p-floatlabel>
-      @if (showError(form.controls.password)) {
-        <small class="field-error">{{ 'common.required' | translate }}</small>
-      }
+      </div>
     </div>
 
     @if (error()) {

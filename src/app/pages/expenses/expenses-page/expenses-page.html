@@ -1,0 +1,100 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.supplierMenu' | translate }}</span>
+      <span class="current">{{ 'nav.expenses' | translate }}</span>
+    </nav>
+    <div class="page-actions">
+      <button pButton type="button" (click)="openForm()">
+        <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'expenses.new' | translate }}</span>
+      </button>
+    </div>
+  </div>
+  <div class="page-body list-page">
+    <div class="toolbar">
+      <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true"
+                    appendTo="body" [ariaLabel]="'reports.from' | translate" />
+      <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true"
+                    appendTo="body" [ariaLabel]="'reports.to' | translate" />
+      <p-select [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
+                (ngModelChange)="setCategory($event)" [showClear]="true"
+                [placeholder]="'docs.all' | translate" [ariaLabel]="'expenses.category' | translate" class="filter" appendTo="body" />
+      <span class="spacer"></span>
+      <span class="total">{{ 'expenses.total' | translate }}: <b>{{ pageTotal() | currency: 'USD' }}</b></span>
+    </div>
+    <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'common.number' | translate }}</th>
+          <th>{{ 'common.date' | translate }}</th>
+          <th>{{ 'expenses.category' | translate }}</th>
+          <th>{{ 'common.method' | translate }}</th>
+          <th class="num">{{ 'common.amount' | translate }}</th>
+          <th class="num">USD</th>
+          <th>{{ 'common.status' | translate }}</th>
+          <th class="actions"></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-e>
+        <tr [class.voided]="e.status === 'VOID'">
+          <td class="strong">{{ e.number }}</td>
+          <td>{{ e.expenseDate | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ e.categoryName }}@if (e.note) { <small class="muted"> · {{ e.note }}</small> }</td>
+          <td>{{ 'docs.methods.' + e.method | translate }}</td>
+          <td class="num">{{ e.currency === 'USD' ? '$' : '៛' }}{{ e.amount | number: (e.currency === 'USD' ? '1.2-2' : '1.0-0') }}</td>
+          <td class="num strong">{{ e.amountUsd | currency: 'USD' }}</td>
+          <td><span class="tag" [class]="'status-' + e.status">{{ 'docs.status.' + e.status | translate }}</span></td>
+          <td class="actions">
+            @if (e.status === 'POSTED') {
+              <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="voidExpense(e)"
+                      [attr.aria-label]="'common.void' | translate" [pTooltip]="'common.void' | translate" tooltipPosition="top"><i class="pi pi-ban" pButtonIcon></i></button>
+            }
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage><tr><td colspan="8" class="empty-cell">{{ 'expenses.empty' | translate }}</td></tr></ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog [visible]="formOpen()" (visibleChange)="formOpen.set($event)" [modal]="true" [draggable]="false" styleClass="ms-dialog" [header]="'expenses.new' | translate">
+  <div class="ms-form dialog-form">
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="ex-cat" required>{{ 'expenses.category' | translate }}</label>
+        <p-select inputId="ex-cat" [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="fCategory()"
+                  (ngModelChange)="fCategory.set($event)" appendTo="body" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="ex-date">{{ 'common.date' | translate }}</label>
+        <p-datepicker inputId="ex-date" [ngModel]="fDate()" (ngModelChange)="fDate.set($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" />
+      </div>
+    </div>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="ex-amount" required>{{ 'common.amount' | translate }}</label>
+        <p-inputnumber inputId="ex-amount" [ngModel]="fAmount()" (ngModelChange)="fAmount.set($event)" [min]="0" locale="en-US"
+                       [maxFractionDigits]="fCurrency() === 'USD' ? 2 : 0" [prefix]="fCurrency() === 'USD' ? '$' : '៛'" />
+      </div>
+      <p-selectbutton [options]="currencies" optionLabel="label" optionValue="value" [ngModel]="fCurrency()" (ngModelChange)="fCurrency.set($event)" [allowEmpty]="false" />
+    </div>
+    <p-selectbutton [options]="methods" optionValue="value" [ngModel]="fMethod()" (ngModelChange)="fMethod.set($event)" [allowEmpty]="false">
+      <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+    </p-selectbutton>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="ex-ref">{{ 'common.reference' | translate }}</label>
+        <input pInputText id="ex-ref" [ngModel]="fReference()" (ngModelChange)="fReference.set($event)" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="ex-note">{{ 'common.note' | translate }}</label>
+        <input pInputText id="ex-note" [ngModel]="fNote()" (ngModelChange)="fNote.set($event)" />
+      </div>
+    </div>
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="formOpen.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !fCategory() || !fAmount()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

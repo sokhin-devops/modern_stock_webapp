@@ -1,0 +1,32 @@
+// One size for every field label (the prototype's .label): 13 px, medium, secondary text, above the field.
+:host {
+  display: block;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.star {
+  margin-inline-start: 2px;
+  color: var(--danger);
+}
+
+.optional,
+.message {
+  margin-inline-start: 0.3em;
+}
+
+.optional {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+// A mistake: the whole label turns red, so the name and what is wrong read as one line ("Name is required").
+:host(.invalid) {
+  color: var(--danger);
+}
+
+.detail {
+  font-weight: 400;
+}

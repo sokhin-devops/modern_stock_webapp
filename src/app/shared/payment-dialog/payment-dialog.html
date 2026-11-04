@@ -1,0 +1,44 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [header]="(isCustomer() ? 'sales.receivePayment' : 'purchase.pay') | translate">
+  <div class="ms-form dialog-form">
+    @if (isCustomer()) {
+      <p class="muted small">{{ 'sales.receiveLead' | translate }}</p>
+    }
+    <div class="ms-field">
+      <label msLabel for="pay-party" required>{{ (isCustomer() ? 'sales.customer' : 'purchase.supplier') | translate }}</label>
+      <p-autocomplete inputId="pay-party" [ngModel]="party()" (ngModelChange)="pick($event)" [suggestions]="parties()" (completeMethod)="find($event)"
+                      optionLabel="name" [forceSelection]="true" [fluid]="true" [dropdown]="true" appendTo="body">
+        <ng-template #item let-p>
+          <div class="party-option"><b>{{ p.name }}</b><small class="muted">${{ p.balance }}</small></div>
+        </ng-template>
+      </p-autocomplete>
+    </div>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="pay-amount" required>{{ 'common.amount' | translate }}</label>
+        <p-inputnumber inputId="pay-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" [min]="0"
+                       [maxFractionDigits]="currency() === 'USD' ? 2 : 0" locale="en-US" [prefix]="currency() === 'USD' ? '$' : '៛'" />
+      </div>
+      <p-selectbutton [options]="currencies" optionLabel="label" optionValue="value" [ngModel]="currency()" (ngModelChange)="currency.set($event)" [allowEmpty]="false" />
+    </div>
+    <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
+      <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+    </p-selectbutton>
+    @if (method() !== 'CASH') {
+      <div class="ms-field">
+        <label msLabel for="pay-ref">{{ 'common.reference' | translate }}</label>
+        <input pInputText id="pay-ref" [ngModel]="reference()" (ngModelChange)="reference.set($event)" />
+      </div>
+    }
+    <div class="ms-field">
+      <label msLabel for="pay-note">{{ 'common.note' | translate }}</label>
+      <input pInputText id="pay-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !party() || !amount()">
+      <span pButtonLabel>{{ 'common.save' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

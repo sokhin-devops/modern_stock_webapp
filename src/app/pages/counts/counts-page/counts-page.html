@@ -1,0 +1,104 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.inventory' | translate }}</span>
+      <span class="current">{{ 'nav.stockCounts' | translate }}</span>
+    </nav>
+    <div class="page-actions">
+      <button pButton type="button" (click)="openStart()"><i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'counts.new' | translate }}</span></button>
+    </div>
+  </div>
+  <div class="page-body list-page">
+    <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'common.number' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.warehouse' | translate }}</th>
+          <th class="num">{{ 'counts.counted' | translate }}</th><th class="num">{{ 'counts.difference' | translate }}</th><th>{{ 'common.status' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-c>
+        <tr class="clickable" tabindex="0" (click)="open(c)" (keydown.enter)="open(c)">
+          <td class="strong">{{ c.number }}</td>
+          <td>{{ (c.postedAt ?? c.createdAt) | date: 'dd/MM/yyyy' }}</td>
+          <td class="muted">{{ c.warehouseName }}</td>
+          <td class="num">{{ c.counted }}</td>
+          <td class="num" [class.danger-text]="c.differenceValue < 0">{{ c.differenceValue | currency: 'USD' }}</td>
+          <td><span class="tag" [class]="'status-' + c.status">{{ 'docs.status.' + c.status | translate }}</span></td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog [visible]="startOpen()" (visibleChange)="startOpen.set($event)" [modal]="true" [draggable]="false" styleClass="ms-dialog" [header]="'counts.new' | translate">
+  <div class="ms-form dialog-form">
+    <p class="muted small">{{ 'counts.startLead' | translate }}</p>
+    <div class="ms-field">
+      <label msLabel for="ct-wh">{{ 'common.warehouse' | translate }}</label>
+      <p-select inputId="ct-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()" (ngModelChange)="warehouseId.set($event)" appendTo="body" />
+    </div>
+    <div class="ms-field">
+      <label msLabel for="ct-cat">{{ 'counts.category' | translate }}</label>
+      <p-select inputId="ct-cat" [options]="categories()" optionLabel="label" optionValue="value" [ngModel]="categoryId()" (ngModelChange)="categoryId.set($event)"
+                [showClear]="true" [placeholder]="'counts.allProducts' | translate" appendTo="body" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="startOpen.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="start()" [loading]="busy()" [disabled]="busy() || !warehouseId()"><span pButtonLabel>{{ 'counts.new' | translate }}</span></button>
+  </ng-template>
+</p-dialog>
+
+<p-drawer [visible]="!!count()" (visibleChange)="!$event && count.set(null)" position="right" styleClass="ms-doc-drawer"
+          [header]="count()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+  @if (count(); as c) {
+    <div class="doc-facts">
+      <div><small>{{ 'common.warehouse' | translate }}</small><b>{{ c.warehouseName }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + c.status">{{ 'docs.status.' + c.status | translate }}</span></b></div>
+      <div><small>{{ 'counts.difference' | translate }}</small><b [class.danger-text]="c.differenceValue < 0">{{ c.differenceValue | currency: 'USD' }}</b></div>
+    </div>
+    <div class="progress-line">
+      <small class="muted">{{ 'counts.progress' | translate: { counted: c.counted, total: c.lines.length } }}</small>
+      <p-progressbar [value]="progress()" [showValue]="false" />
+    </div>
+    <p-iconfield class="filter">
+      <p-inputicon class="pi pi-search" />
+      <input pInputText type="search" [placeholder]="'counts.searchPh' | translate" [ngModel]="filter()" (ngModelChange)="filter.set($event)" />
+    </p-iconfield>
+    <p-table class="ms-table" [value]="shown()" dataKey="id">
+      <ng-template #header>
+        <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'counts.system' | translate }}</th>
+          <th class="num counted-col">{{ 'counts.counted' | translate }}</th><th class="num">{{ 'counts.difference' | translate }}</th></tr>
+      </ng-template>
+      <ng-template #body let-l>
+        <tr>
+          <td><div class="strong">{{ l.productName }}</div><small class="muted">{{ l.sku }}</small></td>
+          <td class="num">{{ l.systemQty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+          <td class="num counted-col">
+            @if (c.status === 'DRAFT') {
+              <p-inputnumber [ngModel]="l.countedQty" (ngModelChange)="setCounted(l, $event)" [min]="0" [maxFractionDigits]="3" locale="en-US"
+                             [fluid]="true" [ariaLabel]="'counts.counted' | translate" />
+            } @else {
+              {{ l.countedQty | number: '1.0-3' }}
+            }
+          </td>
+          <td class="num" [class.danger-text]="(l.difference ?? 0) < 0">
+            @if (l.difference != null && l.difference !== 0) { {{ l.difference > 0 ? '+' : '' }}{{ l.difference | number: '1.0-3' }} }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+  <ng-template #footer>
+    @if (count()?.status === 'DRAFT') {
+      <div class="drawer-actions">
+        <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.deleteDraft' | translate }}</span></button>
+        <span class="spacer"></span>
+        <button pButton type="button" [outlined]="true" (click)="save()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.save' | translate }}</span></button>
+        <button pButton type="button" (click)="post()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.post' | translate }}</span></button>
+      </div>
+    }
+  </ng-template>
+</p-drawer>

@@ -3,7 +3,7 @@ import { ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDete
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideTranslateLoader, provideTranslateService } from '@ngx-translate/core';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 
 import { routes } from './app.routes';
@@ -36,8 +36,9 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
-    // The toasts (<p-toast> in app.html, see NotifyService).
+    // The toasts and the "Are you sure?" dialog (<p-toast> and <p-confirmdialog> in app.html).
     MessageService,
+    ConfirmationService,
     // Before the first screen: language, then the session from the refresh cookie (behind the splash).
     provideAppInitializer(() => {
       inject(LangService).init();

@@ -31,7 +31,15 @@ Open <http://localhost:4201> and sign in with `owner@demo.com` / `Demo@1234`, or
 | Businesses | My businesses (with pending invitations), New business dialog, Setup page (branch, rate, riel rounding, VAT) |
 | Shell | Top bar (business switcher, branch selector, today's rate, notifications, language, dark mode, account menu); side menu filtered by the member's permissions, collapsible to icons (always icons on tablets, with a flyout per group), sliding in on phones |
 | Dashboard | Stock value, stock in transit, low stock, expiring batches, low-stock list, trial banner, plan usage. It reloads when the business or branch changes |
-| Next | Every other menu page opens "Coming next" until it is built: POS, products, stock, documents, settings |
+| Products | Product list (search, category filter, deactivated products, paging and sorting on the server), product drawer (names, SKU, barcode, category, stock unit, price, reorder level, expiry tracking, VAT, bigger units such as a box of 24), categories and units with their own dialogs |
+| Stock | Stock on hand for the branch in the top bar, "low stock only", and per product: stock per warehouse with batches and expiry dates, and the stock card (every movement with the balance after it) |
+| POS | Full screen of its own: scan a barcode or tap a product, units and quantities in the cart, customer search, totals in dollars and riel (VAT and riel rounding from the business settings), payment in cash (dollars and riel, change in riel), KHQR or bank, "Later" for a customer's account, the receipt with Print, and opening and closing the cash shift. Keys: F2 scan, F9 pay |
+| Import | Products from Excel (.xlsx) or CSV: template download, preview, stock unit, then one product at a time with a result per row |
+| Customers | Customer list and drawer (contacts, credit limit, terms, opening balance, balance owed); transactions: sales receipts (open, void), invoices, payments received, and "Receive payment"; cash shifts with expected, counted and difference |
+| Suppliers | Supplier list and drawer; transactions: purchase orders (order, receive everything, cancel, close), goods received, bills, payments, "Quick purchase" (save, receive and pay), "Pay supplier"; expenses by period and category |
+| Inventory | Adjustments (opening stock, corrections, approve or reject requests), transfers (between warehouses or to a branch: move, send, receive, return), stock counts (start, count, post the differences) |
+| Reports | Sales and profit by day with a chart and best sellers, profit and loss with expenses, customer and supplier debts, stock value, low stock and expiry, for a chosen period |
+| Settings | Business profile, branches and warehouses, users and roles (invite with a link, change role or branch, disable, reset link), exchange rate, tax and receipt, sales rules, expense categories, Telegram, appearance (business color, light or dark), plan and billing |
 
 ## How it works
 
@@ -48,7 +56,7 @@ Open <http://localhost:4201> and sign in with `owner@demo.com` / `Demo@1234`, or
 - **Menu:** [nav.ts](src/app/layout/nav.ts) lists every menu page with the permissions it needs. The API checks them again on every request.
 - **Splash screen:** it is plain HTML and CSS in [src/index.html](src/index.html). [SplashService](src/app/core/splash.service.ts) hides it once the first page has rendered and its icon and text fonts have loaded.
 - **UI components:** PrimeNG 19 with a theme preset ([modern-stock-preset.ts](src/app/core/theme/modern-stock-preset.ts)) built on the Material preset. Its colors are the prototype's CSS variables, so dark mode and the business color switch PrimeNG too. PrimeNG's styles sit in the `primeng` CSS layer, before the prototype's `components` layer ([tailwind.css](src/tailwind.css)).
-- **Forms:** a field is `<p-floatlabel variant="on">` with `pInputText` (or `p-select`, `p-inputnumber`...) inside `.ms-field`, then a `.field-hint` or `.field-error` line. On submit, `revealErrors(form)` ([forms.ts](src/app/shared/forms.ts)) shows every error.
+- **Forms:** a field is a `.ms-field` holding its label, the input (`pInputText`, `p-select`, `p-inputnumber`...), then an optional `.field-hint` line. The label is always the [FieldLabel](src/app/shared/field-label/field-label.ts) component, `<label msLabel for="id" control="name">`, one size everywhere. It adds the red `*` for a required control and says what is wrong in red next to the name ("Name is required", "ឈ្មោះ គឺទាមទារ", or the name and its `error` text); nothing is written under the field. No float labels. On submit, `revealErrors(form)` ([forms.ts](src/app/shared/forms.ts)) shows every error.
 - **Icons:** PrimeIcons, written `<i class="icon pi pi-box"></i>`. The `.icon` class gives the prototype's sizes; in buttons use `<i class="pi pi-plus" pButtonIcon></i>`.
 - **Tailwind:** its utilities have the `tw:` prefix (`tw:mt-4`, `tw:flex`), so they never clash with the prototype's helper classes (`.row`, `.grid`, `.mt-16`).
 
@@ -66,12 +74,15 @@ src/
 └── app/
     ├── core/              api/models.ts, auth (service, interceptor, guards), business (open business and branch),
     │                      lang, theme-mode, screen (phone/tablet), notify (toasts + API error messages), splash,
-    │                      theme/modern-stock-preset.ts (PrimeNG theme)
+    │                      theme/modern-stock-preset.ts (PrimeNG theme), catalog (products, categories,
+    │                      units), inventory (stock), sales (POS, cash shifts)
     ├── layout/            nav.ts, app-shell, app-topbar, app-sidebar, account-shell
     ├── auth/              login, sign-up, verify-email, forgot-password, reset-password, invite
     ├── account/           businesses, create-business-dialog, setup
-    ├── pages/             dashboard, coming-soon
-    └── shared/            auth-frame, account-menu, lang-button, flag, forms (error helpers), validators
+    ├── pages/             dashboard, products, stock, pos, partners (customers and suppliers), sales, purchases,
+    │                      expenses, adjustments, transfers, counts, reports, settings, coming-soon
+    └── shared/            auth-frame, account-menu, lang-button, flag, forms (error helpers), validators, lazy-list
+                           (paged tables), lines-editor (product lines), payment-dialog, options, dates
 ```
 
 ## Notes

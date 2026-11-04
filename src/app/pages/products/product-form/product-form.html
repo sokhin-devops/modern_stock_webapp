@@ -1,0 +1,116 @@
+<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-form-drawer"
+          [header]="(product() ? 'products.edit' : 'products.new') | translate" [ariaCloseLabel]="'common.close' | translate">
+  <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="product-form">
+    <div class="ms-field">
+      <label msLabel for="p-nameEn" control="nameEn">{{ 'products.nameEn' | translate }}</label>
+      <input pInputText id="p-nameEn" formControlName="nameEn" />
+    </div>
+    <div class="ms-field">
+      <label msLabel for="p-nameKm" control="nameKm" optional>{{ 'products.nameKm' | translate }}</label>
+      <input pInputText id="p-nameKm" formControlName="nameKm" />
+    </div>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="p-sku" control="sku">{{ 'products.sku' | translate }}</label>
+        <input pInputText id="p-sku" formControlName="sku" autocapitalize="characters" />
+        @if (!product()) {
+          <small class="field-hint">{{ 'products.skuHint' | translate }}</small>
+        }
+      </div>
+      <div class="ms-field">
+        <label msLabel for="p-barcode" control="barcode">{{ 'products.barcode' | translate }}</label>
+        <input pInputText id="p-barcode" formControlName="barcode" inputmode="numeric" />
+      </div>
+    </div>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="p-category" control="categoryId">{{ 'products.category' | translate }}</label>
+        <p-select inputId="p-category" formControlName="categoryId" [options]="categoryOptions()" optionLabel="label"
+                  optionValue="value" [showClear]="true" [filter]="categoryOptions().length > 8" appendTo="body" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="p-unit" control="baseUnitId">{{ 'products.baseUnit' | translate }}</label>
+        <p-select inputId="p-unit" formControlName="baseUnitId" [options]="unitOptions()" optionLabel="label"
+                  optionValue="value" appendTo="body" />
+        <small class="field-hint">{{ 'products.baseUnitHint' | translate }}</small>
+      </div>
+    </div>
+
+    <h3 class="form-section">{{ 'products.sectionPrice' | translate }}</h3>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="p-price" control="sellPrice">{{ 'products.sellPrice' | translate }}</label>
+        <p-inputnumber inputId="p-price" formControlName="sellPrice" mode="currency" currency="USD" locale="en-US"
+                       [minFractionDigits]="2" [maxFractionDigits]="4" [min]="0" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="p-reorder" control="reorderLevel">{{ 'products.reorderLevel' | translate }}</label>
+        <p-inputnumber inputId="p-reorder" formControlName="reorderLevel" [min]="0" [maxFractionDigits]="3" locale="en-US" />
+        <small class="field-hint">{{ 'products.reorderHint' | translate }}</small>
+      </div>
+    </div>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="p-lead" control="leadTimeDays">{{ 'products.leadTime' | translate }}</label>
+        <p-inputnumber inputId="p-lead" formControlName="leadTimeDays" [min]="0" [max]="365" locale="en-US" />
+      </div>
+      @if (product()?.avgCost != null) {
+        <div class="cost">
+          <small>{{ 'products.avgCost' | translate }}</small>
+          <b class="num">${{ product()!.avgCost }}</b>
+        </div>
+      }
+    </div>
+    <div class="ms-check">
+      <p-toggleswitch formControlName="trackExpiry" inputId="p-expiry" />
+      <label for="p-expiry">{{ 'products.trackExpiry' | translate }}</label>
+    </div>
+    <div class="ms-check">
+      <p-toggleswitch formControlName="vatExempt" inputId="p-vat" />
+      <label for="p-vat">{{ 'products.vatExempt' | translate }}</label>
+    </div>
+
+    <h3 class="form-section">{{ 'products.sectionUnits' | translate }}</h3>
+    <p class="muted small">{{ 'products.unitsLead' | translate }}</p>
+    <div formArrayName="units" class="unit-rows">
+      @for (group of units.controls; track group; let i = $index) {
+        <div class="unit-row" [formGroupName]="i">
+          <p-select formControlName="unitId" [options]="unitOptions()" optionLabel="label" optionValue="value" appendTo="body" [fluid]="true"
+                    [placeholder]="'products.unit' | translate" [ariaLabel]="'products.unit' | translate" />
+          <p-inputnumber formControlName="factor" [min]="0" [maxFractionDigits]="3" locale="en-US" [fluid]="true"
+                         [placeholder]="'products.factor' | translate" [ariaLabel]="'products.factor' | translate" />
+          <p-inputnumber formControlName="sellPrice" mode="currency" currency="USD" locale="en-US" [min]="0" [fluid]="true"
+                         [placeholder]="'products.unitPriceHint' | translate" [ariaLabel]="'products.unitPrice' | translate" />
+          @if (canManage()) {
+            <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="removeUnit(i)"
+                    [attr.aria-label]="'common.delete' | translate" [pTooltip]="'common.delete' | translate" tooltipPosition="top">
+              <i class="pi pi-trash" pButtonIcon></i>
+            </button>
+          }
+        </div>
+      }
+    </div>
+    @if (canManage()) {
+      <button pButton type="button" [text]="true" class="add-unit" (click)="addUnit()">
+        <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'products.addUnit' | translate }}</span>
+      </button>
+    }
+  </form>
+
+  <ng-template #footer>
+    <div class="drawer-actions">
+      @if (canManage() && product()?.active) {
+        <button pButton type="button" [text]="true" severity="danger" (click)="deactivate()">
+          <span pButtonLabel>{{ 'products.deactivate' | translate }}</span>
+        </button>
+      }
+      <span class="spacer"></span>
+      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+      @if (canManage()) {
+        <button pButton type="submit" form="product-form" [loading]="busy()" [disabled]="busy()">
+          <span pButtonLabel>{{ 'common.save' | translate }}</span>
+        </button>
+      }
+    </div>
+  </ng-template>
+</p-drawer>

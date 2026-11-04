@@ -8,7 +8,7 @@ import { LangService } from '../lang.service';
 import { AuthService } from './auth.service';
 
 /** Endpoints that don't belong to a business (PLAIN.md 11.11): no X-Business-Id on them. */
-const ACCOUNT_PATHS = ['/auth/', '/me', '/public/', '/admin/'];
+const ACCOUNT_PATHS = ['/auth/', '/me/', '/public/', '/admin/'];
 
 /**
  * Every API call gets the access token, the open business and branch, and the language (PLAIN.md 8).
@@ -30,7 +30,8 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
     const businessId = business.businessId();
-    if (businessId != null && !ACCOUNT_PATHS.some((p) => path.startsWith(p))) {
+    // "/me" itself or below it (not "/members", which needs the business).
+    if (businessId != null && path !== '/me' && !ACCOUNT_PATHS.some((p) => path.startsWith(p))) {
       headers = headers.set('X-Business-Id', String(businessId)).set('X-Branch-Id', String(business.branchId() ?? 'all'));
     }
     return req.clone({ headers });

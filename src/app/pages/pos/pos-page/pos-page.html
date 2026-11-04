@@ -1,0 +1,151 @@
+<div class="pos">
+  <header class="pos-head">
+    <a pButton routerLink="/dashboard" [rounded]="true" [text]="true" severity="secondary" [attr.aria-label]="'pos.back' | translate">
+      <i class="pi pi-arrow-left" pButtonIcon></i>
+    </a>
+    <span class="logo"><i class="icon pi pi-box"></i></span>
+    <div class="pos-title">
+      <b>{{ 'pos.title' | translate }}</b>
+      <span class="muted small">{{ business.current() ? lang.name(business.current()!.nameEn, business.current()!.nameKm) : '' }}</span>
+    </div>
+    @if (business.canPickBranch() && branchOptions().length > 1) {
+      <p-select [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="business.branchId()"
+                (ngModelChange)="selectBranch($event)" [ariaLabel]="'pos.branch' | translate" class="branch-select" />
+    } @else if (branch()) {
+      <span class="chip"><i class="icon pi pi-shop"></i>{{ lang.name(branch()!.nameEn, branch()!.nameKm) }}</span>
+    }
+    @if (canShift()) {
+      @if (shift(); as s) {
+        <span class="tag hide-sm"><span class="dot"></span>{{ 'pos.shiftSince' | translate: { time: (s.openedAt | date: 'HH:mm') } }}</span>
+      } @else if (business.branchId() != null) {
+        <button pButton type="button" size="small" [outlined]="true" (click)="shiftOpen.set(true)">
+          <i class="pi pi-clock" pButtonIcon></i><span pButtonLabel>{{ 'pos.openShift' | translate }}</span>
+        </button>
+      }
+    }
+    @if (rate()) {
+      <span class="rate-chip"><i class="icon pi pi-money-bill"></i>៛{{ rate() | number: '1.0-0' }}</span>
+    }
+    <span class="spacer"></span>
+    <ms-lang-button class="hide-sm" />
+    @if (shift()) {
+      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="shiftOpen.set(true)"
+              [attr.aria-label]="'pos.closeShift' | translate">
+        <i class="pi pi-lock" pButtonIcon></i>
+      </button>
+    }
+    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle()" class="hide-sm"
+            [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate">
+      <i class="pi" [class.pi-sun]="theme.dark()" [class.pi-moon]="!theme.dark()" pButtonIcon></i>
+    </button>
+    <ms-account-menu />
+  </header>
+
+  <div class="pos-main">
+    <section class="pos-products" [attr.aria-label]="'nav.products' | translate">
+      <label class="scan">
+        <i class="icon pi pi-barcode"></i>
+        <input #scan [placeholder]="'pos.scanPh' | translate" [value]="query()" (input)="setQuery($any($event.target).value)"
+               (keydown.enter)="onScan()" autofocus />
+        <span class="kbd">F2</span>
+      </label>
+      <div class="chip-row">
+        <button type="button" class="chip" [class.selected]="categoryId() === null" (click)="setCategory(null)">{{ 'pos.all' | translate }}</button>
+        @for (c of categories(); track c.id) {
+          <button type="button" class="chip" [class.selected]="categoryId() === c.id" (click)="setCategory(c.id)">
+            {{ lang.name(c.nameEn, c.nameKm) }}
+          </button>
+        }
+      </div>
+      <div class="product-grid">
+        @for (p of products(); track p.id) {
+          <button type="button" class="tile" [class.out]="p.qtyOnHand <= 0" (click)="add(p)">
+            <span class="thumb"><i class="icon pi pi-box"></i></span>
+            <span class="name">{{ lang.name(p.nameEn, p.nameKm) }}</span>
+            <span class="price">${{ p.sellPrice | number: '1.2-2' }}</span>
+            @if (p.qtyOnHand <= 0) {
+              <span class="stock"><i class="icon pi pi-ban"></i>{{ 'pos.out' | translate }}</span>
+            } @else if (p.reorderLevel > 0 && p.qtyOnHand <= p.reorderLevel) {
+              <span class="stock"><i class="icon pi pi-exclamation-triangle"></i>{{ 'pos.left' | translate: { n: (p.qtyOnHand | number: '1.0-3') } }}</span>
+            }
+          </button>
+        } @empty {
+          <p class="muted empty-grid">{{ 'common.noResults' | translate }}</p>
+        }
+      </div>
+    </section>
+
+    <aside class="cart" [attr.aria-label]="'pos.cart' | translate">
+      <div class="cart-head">
+        <div class="row">
+          <b>{{ 'pos.cart' | translate }}</b><span class="pill">{{ count() | number: '1.0-3' }}</span>
+          <span class="spacer"></span>
+          <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="clear()" [disabled]="!lines().length"
+                  [attr.aria-label]="'pos.clear' | translate">
+            <i class="pi pi-trash" pButtonIcon></i>
+          </button>
+        </div>
+        <p-autocomplete [ngModel]="customer()" (ngModelChange)="customer.set($event && $event.id ? $event : null)"
+                        [suggestions]="customerResults()" (completeMethod)="findCustomers($event)" optionLabel="name"
+                        [placeholder]="'pos.walkIn' | translate" [showClear]="true" [forceSelection]="true" [fluid]="true"
+                        [ariaLabel]="'pos.customerPh' | translate" appendTo="body" class="customer-pick-field">
+          <ng-template #item let-c>
+            <div class="customer-option">
+              <b>{{ c.name }}</b>
+              <small class="muted">{{ c.phone }}@if (c.balance > 0) { · ${{ c.balance | number: '1.2-2' }} }</small>
+            </div>
+          </ng-template>
+        </p-autocomplete>
+      </div>
+
+      <div class="cart-lines">
+        @for (line of lines(); track $index) {
+          <div class="cart-line">
+            <div class="line-info">
+              <b>{{ lang.name(line.product.nameEn, line.product.nameKm) }}</b>
+              <small>${{ line.price | number: '1.2-4' }}</small>
+            </div>
+            <div class="qty">
+              <button type="button" (click)="changeQty(line, -1)" [attr.aria-label]="'pos.less' | translate">−</button>
+              <span>{{ line.qty | number: '1.0-3' }}</span>
+              <button type="button" (click)="changeQty(line, 1)" [attr.aria-label]="'pos.more' | translate">+</button>
+            </div>
+            @if (line.product.units.length) {
+              <p-select [options]="unitOptions(line.product)" optionLabel="label" optionValue="value" [ngModel]="line.unitId"
+                        (ngModelChange)="changeUnit(line, $event)" [ariaLabel]="'pos.unit' | translate" class="unit-select" appendTo="body" />
+            } @else {
+              <span class="unit-chip">{{ line.unitSymbol }}</span>
+            }
+            <span class="num strong">${{ line.qty * line.price | number: '1.2-2' }}</span>
+          </div>
+        } @empty {
+          <p class="muted cart-empty"><i class="icon pi pi-shopping-cart"></i>{{ 'pos.empty' | translate }}</p>
+        }
+      </div>
+
+      <div class="totals">
+        @if (vat() > 0) {
+          <div class="total-row"><span>{{ 'pos.subtotal' | translate }}</span><span class="num">${{ subtotal() | number: '1.2-2' }}</span></div>
+          <div class="total-row"><span>{{ 'pos.vat' | translate: { rate: settings()?.vatRate } }}</span><span class="num">${{ vat() | number: '1.2-2' }}</span></div>
+        }
+        <div class="total-row grand"><span>{{ 'pos.total' | translate }}</span><span class="num">${{ total() | number: '1.2-2' }}</span></div>
+        <div class="total-row grand-khr"><span></span><span class="num">៛{{ totalKhr() | number: '1.0-0' }}</span></div>
+      </div>
+      <div class="cart-actions">
+        <button pButton type="button" size="large" [outlined]="true" (click)="payLater()" [disabled]="!lines().length || busy()">
+          <i class="pi pi-clock" pButtonIcon></i><span pButtonLabel>{{ 'pos.later' | translate }}</span>
+        </button>
+        <button pButton type="button" size="large" class="pay-btn" (click)="openPay()" [disabled]="!lines().length">
+          <span pButtonLabel>{{ 'pos.pay' | translate }}</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<ms-pay-dialog [(visible)]="payOpen" [total]="total()" [totalKhr]="totalKhr()" [rate]="rate()" [rielStep]="settings()?.rielRounding ?? 100"
+               [partialAllowed]="!!customer()" [lines]="preview()" [busy]="busy()" (pay)="checkout($event)" />
+<ms-receipt-dialog [sale]="sale()" [(visible)]="receiptOpen" [receiptFooter]="settings()?.receiptFooter ?? null" (newSale)="nextSale()" />
+@if (business.branchId() != null) {
+  <ms-shift-dialog [(visible)]="shiftOpen" [shift]="shift()" [branchId]="business.branchId()!" (changed)="shift.set($event)" />
+}
