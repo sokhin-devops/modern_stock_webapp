@@ -1,20 +1,24 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { MyBusiness, MyInvitation } from '../../core/api/models';
+import { AuthService } from '../../core/auth/auth.service';
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
 import { CreateBusinessDialog } from '../create-business-dialog/create-business-dialog';
 
-/** My businesses (prototype businesses.html): open one, accept an invitation, or create a new business. */
+/**
+ * My businesses (prototype businesses.html): open one, accept an invitation, or create a new business. A super admin
+ * also gets the way to the platform admin area.
+ */
 @Component({
   selector: 'ms-businesses',
-  imports: [TranslatePipe, ButtonDirective, ButtonIcon, ButtonLabel, ProgressSpinner],
+  imports: [RouterLink, TranslatePipe, ButtonDirective, ButtonIcon, ButtonLabel, ProgressSpinner],
   providers: [DialogService],
   templateUrl: './businesses.html',
   styleUrl: './businesses.scss',
@@ -22,6 +26,7 @@ import { CreateBusinessDialog } from '../create-business-dialog/create-business-
 export class Businesses implements OnInit {
   protected readonly business = inject(BusinessService);
   protected readonly lang = inject(LangService);
+  protected readonly auth = inject(AuthService);
   private readonly dialog = inject(DialogService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);

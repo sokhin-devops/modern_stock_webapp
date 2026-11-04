@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.tag {
+  margin-inline-start: 6px;
+}
+
+.actions-col {
+  width: 180px;
+  text-align: end;
+
+  .p-button {
+    white-space: nowrap;
+  }
+}
+
+.form-note {
+  margin-bottom: 12px;
+}

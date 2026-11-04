@@ -32,9 +32,13 @@
         <i class="icon pi pi-money-bill"></i>$1 = ៛{{ rate.usdToKhr | number: '1.0-0' }}
       </a>
     }
-    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="notifications.toggle($event)"
-            [attr.aria-label]="'shell.notifications' | translate" aria-haspopup="dialog">
+    <button pButton type="button" class="bell" [rounded]="true" [text]="true" severity="secondary" (click)="openAlerts($event, notifications)"
+            [attr.aria-label]="('shell.notifications' | translate) + (alerts.total() ? ' (' + alerts.total() + ')' : '')"
+            aria-haspopup="dialog" [pTooltip]="'shell.notifications' | translate" tooltipPosition="bottom">
       <i class="pi pi-bell" pButtonIcon></i>
+      @if (alerts.total()) {
+        <span class="badge" aria-hidden="true">{{ alerts.total() > 99 ? '99+' : alerts.total() }}</span>
+      }
     </button>
     <ms-lang-button class="lang" />
     <button pButton type="button" class="dark-toggle" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle()"
@@ -67,9 +71,19 @@
 
 <p-menu #branchMenu [model]="branchItems()" [popup]="true" appendTo="body" />
 
+<!-- Alerts for the member's role in the selected branch; each opens the page that deals with it -->
 <p-popover #notifications appendTo="body">
   <div class="notifications">
     <b>{{ 'shell.notifications' | translate }}</b>
-    <p class="muted">{{ 'shell.noNotifications' | translate }}</p>
+    @for (a of alerts.alerts(); track a.kind) {
+      <a class="alert-row" [class]="'level-' + a.level" [routerLink]="targets[a.kind].link" [queryParams]="targets[a.kind].query"
+         (click)="notifications.hide()">
+        <i class="icon" [class]="targets[a.kind].icon"></i>
+        <span class="grow">{{ 'alerts.' + a.kind | translate: { n: a.count } }}</span>
+        <i class="icon pi pi-chevron-right chev"></i>
+      </a>
+    } @empty {
+      <p class="muted none"><i class="icon pi pi-check-circle"></i>{{ 'shell.noNotifications' | translate }}</p>
+    }
   </div>
 </p-popover>

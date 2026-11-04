@@ -13,6 +13,24 @@
   font-size: 13px;
 }
 
+.scopes {
+  width: 100%;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+
+  b {
+    font-weight: 500;
+  }
+}
+
+.form-note {
+  margin: 0 0 12px;
+}
+
 .progress-line {
   display: flex;
   flex-direction: column;
@@ -20,9 +38,60 @@
   margin-bottom: 12px;
 }
 
+// Products sold or received while counting
+.moved-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 8px 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--warning-bg);
+  color: var(--warning);
+
+  .grow {
+    flex: 1;
+  }
+}
+
+.moved-tag {
+  margin-inline-start: 8px;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.blind-tag {
+  margin-inline-start: 6px;
+}
+
+.warehouse-switch {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.scan-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+
+  .grow {
+    flex: 1;
+  }
+
+  input {
+    width: 100%;
+  }
+}
+
+.scan-result {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .filter {
   display: block;
-  margin-bottom: 12px;
+  margin: 12px 0;
 
   input {
     width: 100%;
@@ -31,4 +100,9 @@
 
 .counted-col {
   width: 160px;
+}
+
+// The line the last scan counted
+tr.scanned > td {
+  background: var(--primary-soft);
 }

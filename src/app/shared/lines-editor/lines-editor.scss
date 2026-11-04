@@ -20,6 +20,10 @@
   grid-template-columns: minmax(0, 3fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) 40px;
 }
 
+.with-price .line {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1.1fr) minmax(0, 1fr) 40px;
+}
+
 .with-cost.with-batch .line {
   grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1.4fr) 40px;
 }
@@ -56,6 +60,7 @@
 @media (max-width: 768px) {
   .line,
   .with-cost .line,
+  .with-price .line,
   .with-cost.with-batch .line {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
   }

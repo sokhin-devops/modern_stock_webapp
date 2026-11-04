@@ -38,6 +38,89 @@
   align-items: start;
 }
 
+// Each column is a stack of cards.
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.card-head {
+  align-items: center;
+  gap: 12px;
+}
+
+// "Waiting for me": one row per kind of work, with its count; each opens its list.
+.waiting {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.waiting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.2s var(--ease);
+
+  &:hover {
+    background: var(--surface-3);
+    text-decoration: none;
+  }
+
+  .icon {
+    color: var(--primary);
+  }
+
+  .count {
+    min-width: 28px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+  }
+}
+
+// Best sellers: name and sales, a thin bar as a share of the first, then the quantity.
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.top-line {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.top-bar {
+  height: 4px;
+  margin: 4px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-3);
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+  }
+}
+
 .empty {
   display: flex;
   align-items: center;

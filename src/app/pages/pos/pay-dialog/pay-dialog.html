@@ -6,7 +6,7 @@
         <div class="due-khr">៛{{ totalKhr() | number: '1.0-0' }}</div>
       </div>
 
-      <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
+      <p-selectbutton [options]="methods()" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
                       class="methods">
         <ng-template #item let-option>{{ option.label | translate }}</ng-template>
       </p-selectbutton>
@@ -44,6 +44,9 @@
         }
         @case ('KHQR') {
           <p class="form-note"><i class="icon pi pi-qrcode"></i>{{ 'pos.khqrLead' | translate }}</p>
+          @if (khqrImage(); as img) {
+            <img class="khqr-image" [src]="img | apiFile" [alt]="'pos.khqr' | translate" />
+          }
         }
         @case ('BANK') {
           <div class="ms-field">

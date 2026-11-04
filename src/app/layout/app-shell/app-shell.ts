@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { ScreenService } from '../../core/screen.service';
 import { AppSidebar } from '../app-sidebar/app-sidebar';
 import { AppTopbar } from '../app-topbar/app-topbar';
+import { PlanBanner } from '../plan-banner/plan-banner';
 
 const COLLAPSED_KEY = 'ms-collapsed';
 
@@ -14,7 +15,7 @@ const COLLAPSED_KEY = 'ms-collapsed';
  */
 @Component({
   selector: 'ms-app-shell',
-  imports: [RouterOutlet, AppTopbar, AppSidebar],
+  imports: [RouterOutlet, AppTopbar, AppSidebar, PlanBanner],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })

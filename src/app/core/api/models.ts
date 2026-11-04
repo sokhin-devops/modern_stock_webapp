@@ -101,6 +101,8 @@ export interface Branch {
   province: string | null;
   main: boolean;
   active: boolean;
+  /** Above the plan's branch limit after a plan ended: viewable, no new work. */
+  readOnly: boolean;
   warehouses: Warehouse[];
 }
 
@@ -132,9 +134,31 @@ export interface StockRow {
   low: boolean;
 }
 
+/** One branch's stock of a product in the stock by branch view (FR-4.7, FR-4.8). */
+export interface BranchQty {
+  branchId: number;
+  qtyOnHand: number;
+  /** The branch's own reorder level, or the product's; 0 = not watched there. */
+  reorderLevel: number;
+  low: boolean;
+}
+
+/** GET /stock/by-branch: a product's stock in every branch the member may use, main branch first. */
+export interface BranchStockRow {
+  productId: number;
+  sku: string;
+  nameEn: string;
+  nameKm: string | null;
+  unitSymbol: string;
+  qtyOnHand: number;
+  branches: BranchQty[];
+}
+
+/** Plan and billing for Owners (GET /billing, PLAIN.md 11.13). */
 export interface Billing {
   planCode: string;
   planName: string;
+  /** Where the limits come from: PRO during the trial, FREE after a plan ends. */
   effectivePlanCode: string;
   status: SubscriptionStatus;
   billingCycle: 'MONTHLY' | 'YEARLY';
@@ -142,6 +166,333 @@ export interface Billing {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   usage: { key: string; limit: number | null; used: number }[];
+  /** A paid plan is chosen (in the trial: billed when it ends). */
+  subscribed: boolean;
+  /** The plan that starts at the end of the period (a downgrade). */
+  pendingPlanCode: string | null;
+  /** Past due: pay before this, or the plan expires to Free. */
+  pastDueUntil: string | null;
+  /** The demo payment buttons are on. */
+  demo: boolean;
+  openInvoice: BillingInvoice | null;
+  plans: PlanView[];
+}
+
+export interface PlanView {
+  code: string;
+  name: string;
+  priceMonthly: number;
+  /** null = unlimited; features are 0 or 1. */
+  limits: Record<string, number | null>;
+}
+
+/** The platform's invoice to the business (SUB-…). */
+export interface BillingInvoice {
+  id: number;
+  number: string;
+  kind: 'NEW' | 'RENEWAL' | 'UPGRADE';
+  planCode: string;
+  planName: string;
+  periodStart: string;
+  periodEnd: string;
+  amount: number;
+  status: 'OPEN' | 'PAID' | 'VOID';
+  createdAt: string;
+  paidAt: string | null;
+}
+
+export interface BillingPayment {
+  id: number;
+  invoiceId: number;
+  gateway: string;
+  reference: string;
+  amount: number;
+  status: 'PENDING' | 'SUCCEEDED' | 'FAILED';
+  failureReason: string | null;
+}
+
+/** Dashboard numbers by role (GET /dashboard, PLAIN.md 12.3); a part the member's role does not see is null. */
+export interface DashboardData {
+  /** A cashier: the sales numbers are their own. */
+  ownSalesOnly: boolean;
+  today: { usd: number; khr: number; receipts: number } | null;
+  profitToday: number | null;
+  profitMonth: number | null;
+  /** The last 30 days, oldest first; profit only for Owners and Managers. */
+  days: { day: string; sales: number; profit: number | null }[] | null;
+  topProducts: { productId: number; name: string; nameKm: string | null; qty: number; unitSymbol: string; sales: number }[] | null;
+  debts: {
+    customersOwe: number;
+    customersOverdue: number;
+    overdueInvoices: number;
+    weOwe: number;
+    billsDueSoon: number;
+    overdueBills: number;
+  } | null;
+  waiting: {
+    approvals: number | null;
+    transfersToReceive: number | null;
+    countsInProgress: number | null;
+    countsToApprove: number | null;
+  } | null;
+}
+
+/** The biggest packaging unit of a product, to show stock as boxes and pieces. */
+export interface Pack {
+  symbol: string;
+  factor: number;
+}
+
+export type SalesBy = 'DAY' | 'PRODUCT' | 'CATEGORY' | 'BRANCH' | 'CASHIER';
+
+/** Reports (PLAIN.md 14). Cost, profit and values are null for roles that do not see them. */
+export interface SalesReport {
+  from: string;
+  to: string;
+  by: SalesBy;
+  ownSalesOnly: boolean;
+  documents: number;
+  sales: number;
+  cost: number | null;
+  grossProfit: number | null;
+  margin: number | null;
+  vat: number;
+  rows: {
+    key: string;
+    label: string | null;
+    labelKm: string | null;
+    qty: number | null;
+    unitSymbol: string | null;
+    documents: number;
+    sales: number;
+    cost: number | null;
+    profit: number | null;
+    margin: number | null;
+  }[];
+}
+
+export interface ProfitReport {
+  revenue: number;
+  costOfGoods: number;
+  grossProfit: number;
+  expenses: number;
+  netProfit: number;
+  expensesByCategory: { category: string; amount: number }[];
+}
+
+export interface CustomerDebtReport {
+  total: number;
+  overdue: number;
+  overdueInvoices: number;
+  rows: { id: number; name: string; phone: string | null; balance: number; overdue: number; openInvoices: number; oldestDue: string | null }[];
+}
+
+export interface SupplierDebtReport {
+  total: number;
+  dueSoon: number;
+  overdue: number;
+  overdueBills: number;
+  rows: {
+    id: number;
+    name: string;
+    phone: string | null;
+    balance: number;
+    dueSoon: number;
+    overdue: number;
+    openBills: number;
+    nextDue: string | null;
+  }[];
+}
+
+/** Should reports (PLAIN.md 14). Values are null for roles that do not see cost. */
+export interface LossReport {
+  from: string;
+  to: string;
+  value: number | null;
+  reasons: { reason: string; products: number; value: number | null }[];
+  rows: { reason: string; productId: number; name: string; nameKm: string | null; unitSymbol: string; qty: number; value: number | null }[];
+}
+
+export interface SlowReport {
+  days: number;
+  products: number;
+  value: number | null;
+  rows: {
+    productId: number;
+    sku: string;
+    name: string;
+    nameKm: string | null;
+    category: string | null;
+    unitSymbol: string;
+    pack: Pack | null;
+    qty: number;
+    value: number | null;
+    lastSold: string | null;
+  }[];
+}
+
+export interface ShiftReport {
+  shifts: number;
+  shortShifts: number;
+  shortUsd: number;
+  overUsd: number;
+  shortKhr: number;
+  overKhr: number;
+  voids: number;
+  rows: {
+    id: number;
+    branch: string;
+    cashier: string;
+    openedAt: string;
+    closedAt: string;
+    expectedUsd: number;
+    countedUsd: number | null;
+    differenceUsd: number | null;
+    expectedKhr: number;
+    countedKhr: number | null;
+    differenceKhr: number | null;
+    voids: number;
+    voidedValue: number;
+  }[];
+}
+
+export interface VatReport {
+  salesVat: number;
+  purchaseVat: number;
+  payable: number;
+  rows: { month: string; taxableSales: number; salesVat: number; purchases: number; purchaseVat: number; payable: number }[];
+}
+
+export type PurchasesBy = 'SUPPLIER' | 'PRODUCT';
+
+export interface PurchaseReport {
+  by: PurchasesBy;
+  receipts: number;
+  spend: number;
+  returned: number;
+  rows: {
+    key: string;
+    label: string;
+    labelKm: string | null;
+    qty: number | null;
+    unitSymbol: string | null;
+    spend: number;
+    returned: number;
+    avgCost: number | null;
+    receipts: number;
+  }[];
+}
+
+export interface Statement {
+  party: 'CUSTOMER' | 'SUPPLIER';
+  partyId: number;
+  name: string;
+  phone: string | null;
+  from: string;
+  to: string;
+  opening: number;
+  debits: number;
+  credits: number;
+  closing: number;
+  lines: { date: string; type: string; number: string; debit: number; credit: number; balance: number }[];
+}
+
+export interface AbcReport {
+  total: number;
+  groups: { group: 'A' | 'B' | 'C'; products: number; value: number; share: number }[];
+  rows: {
+    productId: number;
+    sku: string;
+    name: string;
+    nameKm: string | null;
+    qty: number;
+    unitSymbol: string;
+    value: number;
+    share: number;
+    cumulative: number;
+    group: 'A' | 'B' | 'C';
+  }[];
+}
+
+export interface OnHandReport {
+  value: number | null;
+  products: number;
+  inTransitValue: number | null;
+  transfersInTransit: number;
+  rows: {
+    productId: number;
+    sku: string;
+    name: string;
+    nameKm: string | null;
+    category: string | null;
+    unitSymbol: string;
+    pack: Pack | null;
+    qty: number;
+    avgCost: number | null;
+    value: number | null;
+  }[];
+}
+
+export interface ReorderReport {
+  coverDays: number;
+  salesDays: number;
+  suggestedValue: number | null;
+  rows: {
+    productId: number;
+    sku: string;
+    name: string;
+    nameKm: string | null;
+    unitSymbol: string;
+    pack: Pack | null;
+    onHand: number;
+    reorderLevel: number;
+    soldPerDay: number;
+    leadTimeDays: number;
+    suggestedQty: number;
+    lastCost: number | null;
+    suggestedValue: number | null;
+  }[];
+}
+
+export interface ExpiryReport {
+  days: 30 | 60 | 90;
+  expired: number;
+  expiring: number;
+  expiredValue: number | null;
+  expiringValue: number | null;
+  rows: {
+    batchId: number;
+    productId: number;
+    name: string;
+    nameKm: string | null;
+    unitSymbol: string;
+    warehouse: string;
+    batchNo: string | null;
+    expiryDate: string;
+    daysLeft: number;
+    qty: number;
+    value: number | null;
+  }[];
+}
+
+export interface CountReport {
+  counts: number;
+  gainValue: number | null;
+  lossValue: number | null;
+  rows: {
+    countId: number;
+    number: string;
+    postedOn: string;
+    warehouse: string;
+    productId: number;
+    name: string;
+    nameKm: string | null;
+    unitSymbol: string;
+    systemQty: number;
+    countedQty: number;
+    difference: number;
+    value: number | null;
+  }[];
 }
 
 /** Lists from the API (PLAIN.md 13): one page of rows and the paging numbers. */
@@ -198,6 +549,10 @@ export interface Product {
   units: ProductUnit[];
   /** Base units on hand in the branches you are looking at. */
   qtyOnHand: number;
+  /** The photo's path under the API (see the apiFile pipe), or null. */
+  photoUrl: string | null;
+  /** Reorder level of the branches you are looking at: each branch's own level, or reorderLevel, added up (FR-4.7). */
+  reorderAt: number;
 }
 
 export interface ProductRequest {
@@ -266,6 +621,16 @@ export interface BusinessSettings {
   maxDiscountPercent: number;
   allowNegativeStock: boolean;
   receiptFooter: string | null;
+  /** Under the shop's name on receipts. */
+  receiptHeader: string | null;
+  /** Receipt paper width in mm. */
+  receiptPaper: 58 | 80;
+  receiptShowVatTin: boolean;
+  /** Customers may pay by KHQR or bank (cash is always on). */
+  khqrEnabled: boolean;
+  bankEnabled: boolean;
+  /** The shop's KHQR image under the API, shown at the POS. Read only. */
+  khqrImageUrl: string | null;
 }
 
 /** A scanned barcode: the product, the unit the barcode belongs to, and its price in this branch. */
@@ -394,4 +759,6 @@ export interface BusinessProfile {
   /** Palette name: blue, indigo, purple, teal or green. */
   themeColor: string | null;
   language: string;
+  /** The logo's path under the API (see the apiFile pipe), or null. */
+  logoUrl: string | null;
 }

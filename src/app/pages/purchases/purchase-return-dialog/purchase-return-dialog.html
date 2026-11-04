@@ -1,0 +1,82 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(860px, 96vw)' }"
+          [header]="('purchaseReturns.title' | translate) + (source() ? ' · ' + source()!.number : '')">
+  @if (source(); as s) {
+    <div class="ms-form">
+      <p class="muted">{{ 'purchaseReturns.lead' | translate: { supplier: s.supplierName } }}</p>
+      <table class="lines">
+        <thead>
+          <tr>
+            <th>{{ 'common.product' | translate }}</th>
+            <th class="num">{{ 'purchaseReturns.received' | translate }}</th>
+            <th class="num">{{ 'returns.canReturn' | translate }}</th>
+            <th class="qty-col">{{ 'returns.qty' | translate }}</th>
+            <th class="num">{{ 'common.amount' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.goodsReceiptItemId; let i = $index) {
+            <tr [class.off]="r.returnable <= 0">
+              <td>
+                <div class="strong">{{ r.productName }}</div>
+                <div class="muted small">
+                  {{ r.unitCost | currency: 'USD' : 'symbol' : '1.2-4' }} / {{ r.unitSymbol }}
+                  @if (r.batchNo) { · {{ 'purchaseReturns.batch' | translate }} {{ r.batchNo }} }
+                  @if (r.expiryDate) { · {{ 'purchaseReturns.expires' | translate }} {{ r.expiryDate | date: 'dd/MM/yyyy' }} }
+                </div>
+              </td>
+              <td class="num muted">{{ r.received | number: '1.0-3' }} {{ r.unitSymbol }}</td>
+              <td class="num">{{ r.returnable | number: '1.0-3' }}</td>
+              <td class="qty-col">
+                <p-inputnumber [ngModel]="r.qty" (ngModelChange)="setQty(i, $event)" [min]="0" [max]="r.returnable"
+                               [maxFractionDigits]="3" [disabled]="r.returnable <= 0" locale="en-US"
+                               [ariaLabel]="('returns.qty' | translate) + ' ' + r.productName" [fluid]="true" />
+              </td>
+              <td class="num">{{ (r.qty ?? 0) * r.unitCost | currency: 'USD' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="ms-field">
+        <label msLabel for="prt-reason" optional>{{ 'returns.reason' | translate }}</label>
+        <input pInputText id="prt-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255" />
+      </div>
+
+      <div class="money">
+        <div class="line strong total"><span>{{ 'purchaseReturns.total' | translate }}</span><span>{{ total() | currency: 'USD' }}</span></div>
+        @if (onBill() > 0) {
+          <div class="line muted"><span>{{ 'purchaseReturns.onBill' | translate }}</span><span>− {{ onBill() | currency: 'USD' }}</span></div>
+          <div class="line strong after"><span>{{ 'purchaseReturns.left' | translate }}</span><span>{{ left() | currency: 'USD' }}</span></div>
+        }
+      </div>
+
+      @if (left() > 0) {
+        <div class="ms-check">
+          <p-toggleswitch inputId="prt-refund" [ngModel]="refundNow()" (ngModelChange)="refundNow.set($event)" />
+          <label for="prt-refund">{{ 'purchaseReturns.refundNow' | translate }}</label>
+        </div>
+        @if (refundNow()) {
+          <div class="refund">
+            <span msLabel>{{ 'credits.supplier.refundBy' | translate }}</span>
+            <div class="refund-choices">
+              <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)"
+                              [allowEmpty]="false" [ariaLabel]="'credits.supplier.refundBy' | translate">
+                <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+              </p-selectbutton>
+              <p-selectbutton [options]="currencies" optionValue="value" optionLabel="label" [ngModel]="currency()"
+                              (ngModelChange)="currency.set($event)" [allowEmpty]="false" ariaLabel="USD / KHR" />
+            </div>
+          </div>
+        } @else {
+          <p class="muted small">{{ 'purchaseReturns.keptAsCredit' | translate }}</p>
+        }
+      }
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || total() <= 0">
+      <span pButtonLabel>{{ 'returns.save' | translate: { amount: (total() | currency: 'USD') } }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

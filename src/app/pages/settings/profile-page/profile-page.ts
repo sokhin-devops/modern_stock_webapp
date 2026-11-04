@@ -5,22 +5,27 @@ import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
+import { Observable } from 'rxjs';
 
 import { ApiService } from '../../../core/api/api.service';
 import { BusinessProfile } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
+import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { revealErrors } from '../../../shared/forms';
+import { ImageField } from '../../../shared/image-field/image-field';
 import { CAMBODIAN_PHONE } from '../../../shared/validators';
 
 const TYPES = ['MINI_MART', 'GROCERY', 'PHARMACY', 'COSMETICS', 'HARDWARE', 'PHONE_SHOP', 'WHOLESALE', 'OTHER'];
 
-/** Business profile (prototype settings.html): names, type, contacts, VAT TIN and the language of documents. */
+/**
+ * Business profile (prototype settings.html): logo, names, type, contacts, VAT TIN and the language of documents.
+ */
 @Component({
   selector: 'ms-profile-page',
-  imports: [ReactiveFormsModule, TranslatePipe, InputText, Select, SelectButton, ButtonDirective, ButtonLabel, FieldLabel],
+  imports: [ReactiveFormsModule, TranslatePipe, InputText, Select, SelectButton, ButtonDirective, ButtonLabel, FieldLabel, ImageField, ApiFilePipe],
   templateUrl: './profile-page.html',
   styleUrl: './profile-page.scss',
 })
@@ -32,6 +37,9 @@ export class ProfilePage {
   private readonly notify = inject(NotifyService);
 
   protected readonly busy = signal(false);
+  /** The logo is saved as soon as it is chosen or removed (not with the form). */
+  protected readonly logoUrl = signal<string | null>(null);
+  protected readonly logoBusy = signal(false);
   protected readonly types = computed(() => {
     this.lang.lang();
     return TYPES.map((value) => ({ value, label: this.translate.instant(`account.types.${value}`) }));
@@ -57,6 +65,7 @@ export class ProfilePage {
     this.api.get<BusinessProfile>('/business').subscribe({
       next: (b) => {
         this.themeColor = b.themeColor;
+        this.logoUrl.set(b.logoUrl);
         this.form.reset({
           nameEn: b.nameEn,
           nameKm: b.nameKm ?? '',
@@ -105,6 +114,30 @@ export class ProfilePage {
       },
       error: (e) => {
         this.busy.set(false);
+        this.notify.error(e);
+      },
+    });
+  }
+
+  protected uploadLogo(file: File): void {
+    this.saveLogo(this.api.upload<BusinessProfile>('/business/logo', file));
+  }
+
+  protected removeLogo(): void {
+    this.saveLogo(this.api.delete<BusinessProfile>('/business/logo'));
+  }
+
+  private saveLogo(call: Observable<BusinessProfile>): void {
+    this.logoBusy.set(true);
+    call.subscribe({
+      next: (saved) => {
+        this.logoBusy.set(false);
+        this.logoUrl.set(saved.logoUrl);
+        this.business.setProfile(saved);
+        this.notify.showKey('settings.saved');
+      },
+      error: (e) => {
+        this.logoBusy.set(false);
         this.notify.error(e);
       },
     });

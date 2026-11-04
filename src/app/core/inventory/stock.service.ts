@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { MovementRow, PageResponse, ProductStock, StockRow } from '../api/models';
+import { BranchStockRow, MovementRow, PageResponse, ProductStock, StockRow } from '../api/models';
 import { PageQuery, pageParams } from '../catalog/catalog.service';
 
 const API = environment.apiUrl;
@@ -25,6 +25,21 @@ export class StockService {
       params = params.set('categoryId', query.categoryId);
     }
     return this.http.get<PageResponse<StockRow>>(`${API}/stock/levels`, { params });
+  }
+
+  /** Every branch the member may use side by side, whatever branch is picked in the top bar (FR-4.8). */
+  byBranch(query: PageQuery & { q?: string; categoryId?: number | null; lowOnly?: boolean }): Observable<PageResponse<BranchStockRow>> {
+    let params = pageParams(query);
+    if (query.q) {
+      params = params.set('q', query.q);
+    }
+    if (query.categoryId) {
+      params = params.set('categoryId', query.categoryId);
+    }
+    if (query.lowOnly) {
+      params = params.set('lowOnly', true);
+    }
+    return this.http.get<PageResponse<BranchStockRow>>(`${API}/stock/by-branch`, { params });
   }
 
   /** Products at or below their reorder level (one list, not paged). */

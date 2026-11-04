@@ -3,3 +3,52 @@
   flex: 1;
   min-height: 0;
 }
+
+// The chat box: what is connected, the links while connecting, or the Connect button.
+.chat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  p {
+    margin: 0;
+  }
+
+  > .icon {
+    font-size: 22px;
+  }
+
+  &.connected {
+    border-color: transparent;
+    background: var(--primary-soft);
+
+    > .icon {
+      color: var(--primary);
+    }
+  }
+
+  &.waiting {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wait-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+// The summary's parts sit under the summary switch.
+.indent {
+  padding-inline-start: 28px;
+}

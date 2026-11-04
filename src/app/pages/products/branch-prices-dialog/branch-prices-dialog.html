@@ -1,0 +1,33 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(720px, 96vw)' }"
+          [header]="('products.branchPrices' | translate) + (product() ? ' · ' + lang.name(product()!.nameEn, product()!.nameKm) : '')">
+  <p class="muted">{{ 'products.branchPricesLead' | translate }}</p>
+  <table class="price-grid">
+    <thead>
+      <tr>
+        <th>{{ 'common.branch' | translate }}</th>
+        @for (u of units(); track u.unitId) {
+          <th class="num">{{ u.symbol }} <small class="muted">· {{ u.defaultPrice | currency: 'USD' : 'symbol' : '1.2-4' }}</small></th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (b of branches(); track b.id) {
+        <tr>
+          <td class="strong">{{ lang.name(b.nameEn, b.nameKm) }}@if (b.main) { <small class="muted"> · {{ 'products.mainBranch' | translate }}</small> }</td>
+          @for (u of units(); track u.unitId) {
+            <td>
+              <p-inputnumber [ngModel]="prices()[key(b.id, u.unitId)] ?? null" (ngModelChange)="set(b.id, u.unitId, $event)" mode="currency"
+                             currency="USD" locale="en-US" [maxFractionDigits]="4" [min]="0" [fluid]="true"
+                             [placeholder]="'$' + u.defaultPrice.toFixed(2)"
+                             [ariaLabel]="lang.name(b.nameEn, b.nameKm) + ' · ' + u.symbol" />
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

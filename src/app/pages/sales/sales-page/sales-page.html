@@ -5,6 +5,21 @@
       <span class="current">{{ 'nav.customerTransactions' | translate }}</span>
     </nav>
     <div class="page-actions">
+      @if (tab() === 'quotations' && canManageOrders()) {
+        <button pButton type="button" [outlined]="true" (click)="newDoc('quotation')">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'orders.newQuotation' | translate }}</span>
+        </button>
+      }
+      @if (tab() === 'orders' && canManageOrders()) {
+        <button pButton type="button" [outlined]="true" (click)="newDoc('order')">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'orders.newOrder' | translate }}</span>
+        </button>
+      }
+      @if (tab() === 'credits' && canReturn()) {
+        <button pButton type="button" [outlined]="true" (click)="newCreditOpen.set(true)">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'credits.customer.new' | translate }}</span>
+        </button>
+      }
       @if (canSell()) {
         <button pButton type="button" (click)="payOpen.set(true)">
           <i class="pi pi-wallet" pButtonIcon></i><span pButtonLabel>{{ 'sales.receivePayment' | translate }}</span>
@@ -15,15 +30,66 @@
   <div class="page-body list-page">
     <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))" class="ms-tabs">
       <p-tablist>
+        @if (canOrders()) {
+          <p-tab value="quotations">{{ 'orders.tabQuotations' | translate }}</p-tab>
+          <p-tab value="orders">{{ 'orders.tabOrders' | translate }}</p-tab>
+        }
         @if (canSell()) {
           <p-tab value="receipts">{{ 'sales.tabReceipts' | translate }}</p-tab>
         }
-        <p-tab value="invoices">{{ 'sales.tabInvoices' | translate }}</p-tab>
+        @if (canInvoices()) {
+          <p-tab value="invoices">{{ 'sales.tabInvoices' | translate }}</p-tab>
+        }
         @if (canSell()) {
           <p-tab value="payments">{{ 'sales.tabPayments' | translate }}</p-tab>
         }
+        @if (canCredits()) {
+          <p-tab value="credits">{{ 'credits.customer.tab' | translate }}</p-tab>
+        }
       </p-tablist>
       <p-tabpanels>
+        <p-tabpanel value="quotations">
+          <p-table class="ms-table" [value]="quotations.rows()" [lazy]="true" (onLazyLoad)="quotations.load($event)" [loading]="quotations.loading()"
+                   [paginator]="true" [rows]="20" [first]="quotations.first()" [totalRecords]="quotations.total()" [scrollable]="true" scrollHeight="flex"
+                   dataKey="id" [rowHover]="true">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'sales.customer' | translate }}</th><th>{{ 'common.date' | translate }}</th>
+                <th>{{ 'orders.validUntil' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
+            </ng-template>
+            <ng-template #body let-q>
+              <tr class="clickable" tabindex="0" (click)="orderView.set({ kind: 'quotation', doc: q })" (keydown.enter)="orderView.set({ kind: 'quotation', doc: q })">
+                <td><div class="strong">{{ q.number }}</div>@if (q.salesOrderNumber) { <small class="muted">→ {{ q.salesOrderNumber }}</small> }</td>
+                <td>{{ q.customerName }}</td>
+                <td>{{ q.quoteDate | date: 'dd/MM/yyyy' }}</td>
+                <td [class.danger-text]="q.status === 'EXPIRED'">{{ q.validUntil | date: 'dd/MM/yyyy' }}</td>
+                <td class="num strong">{{ q.total | currency: 'USD' }}</td>
+                <td><span class="tag" [class]="'status-' + q.status">{{ 'orders.status.' + q.status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'orders.emptyQuotations' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="orders">
+          <p-table class="ms-table" [value]="orders.rows()" [lazy]="true" (onLazyLoad)="orders.load($event)" [loading]="orders.loading()"
+                   [paginator]="true" [rows]="20" [first]="orders.first()" [totalRecords]="orders.total()" [scrollable]="true" scrollHeight="flex"
+                   dataKey="id" [rowHover]="true">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'sales.customer' | translate }}</th><th>{{ 'common.date' | translate }}</th>
+                <th>{{ 'orders.deliveryDate' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
+            </ng-template>
+            <ng-template #body let-o>
+              <tr class="clickable" tabindex="0" (click)="orderView.set({ kind: 'order', doc: o })" (keydown.enter)="orderView.set({ kind: 'order', doc: o })">
+                <td><div class="strong">{{ o.number }}</div>@if (o.quotationNumber) { <small class="muted">{{ o.quotationNumber }}</small> }</td>
+                <td>{{ o.customerName }}</td>
+                <td>{{ o.orderDate | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ o.deliveryDate ? (o.deliveryDate | date: 'dd/MM/yyyy') : '—' }}</td>
+                <td class="num strong">{{ o.total | currency: 'USD' }}</td>
+                <td><span class="tag" [class]="'status-' + o.status">{{ 'orders.status.' + o.status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'orders.emptyOrders' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
         <p-tabpanel value="receipts">
           <p-table class="ms-table" [value]="receipts.rows()" [lazy]="true" (onLazyLoad)="receipts.load($event)" [loading]="receipts.loading()"
                    [paginator]="true" [rows]="20" [first]="receipts.first()" [totalRecords]="receipts.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
@@ -50,8 +116,9 @@
                 <th>{{ 'common.status' | translate }}</th></tr>
             </ng-template>
             <ng-template #body let-i>
-              <tr>
-                <td class="strong">{{ i.number }}</td><td>{{ $any(i).customerName }}</td><td>{{ $any(i).invoiceDate | date: 'dd/MM/yyyy' }}</td>
+              <tr class="clickable" tabindex="0" (click)="openInvoice(i)" (keydown.enter)="openInvoice(i)">
+                <td><span class="strong">{{ i.number }}</span>@if ($any(i).type === 'TAX') { <span class="tag tag-primary type-tag">{{ 'sales.taxInvoice' | translate }}</span> }</td>
+                <td>{{ $any(i).customerName }}</td><td>{{ $any(i).invoiceDate | date: 'dd/MM/yyyy' }}</td>
                 <td [class.danger-text]="$any(i).overdue">{{ $any(i).dueDate | date: 'dd/MM/yyyy' }}</td>
                 <td class="num">{{ $any(i).total | currency: 'USD' }}</td><td class="num strong">{{ $any(i).balance | currency: 'USD' }}</td>
                 <td><span class="tag" [class]="'status-' + $any(i).status">{{ 'docs.status.' + $any(i).status | translate }}</span></td>
@@ -64,18 +131,46 @@
           <p-table class="ms-table" [value]="payments.rows()" [lazy]="true" (onLazyLoad)="payments.load($event)" [loading]="payments.loading()"
                    [paginator]="true" [rows]="20" [first]="payments.first()" [totalRecords]="payments.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
             <ng-template #header>
-              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.method' | translate }}</th>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'sales.customer' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.method' | translate }}</th>
                 <th class="num">{{ 'common.amount' | translate }}</th><th class="num">USD</th></tr>
             </ng-template>
             <ng-template #body let-p>
               <tr>
-                <td class="strong">{{ p.number }}</td><td>{{ $any(p).paidAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td class="strong">{{ p.number }}</td><td>{{ $any(p).partyName ?? ('sales.walkIn' | translate) }}</td><td>{{ $any(p).paidAt | date: 'dd/MM/yyyy HH:mm' }}</td>
                 <td>{{ 'docs.methods.' + $any(p).method | translate }}</td>
                 <td class="num">{{ $any(p).currency === 'USD' ? '$' : '៛' }}{{ $any(p).amount | number: ($any(p).currency === 'USD' ? '1.2-2' : '1.0-0') }}</td>
-                <td class="num strong">{{ $any(p).amountUsd | currency: 'USD' }}</td>
+                <td class="num strong">
+                  {{ $any(p).amountUsd | currency: 'USD' }}
+                  @if ($any(p).unallocatedUsd > 0) {
+                    <div><span class="tag tag-primary" [pTooltip]="'sales.depositHint' | translate" tooltipPosition="left">
+                      {{ 'sales.deposit' | translate: { amount: ($any(p).unallocatedUsd | currency: 'USD') } }}</span></div>
+                  }
+                </td>
               </tr>
             </ng-template>
-            <ng-template #emptymessage><tr><td colspan="5" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+            <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="credits">
+          <p-table class="ms-table" [value]="credits.rows()" [lazy]="true" (onLazyLoad)="credits.load($event)" [loading]="credits.loading()"
+                   [paginator]="true" [rows]="20" [first]="credits.first()" [totalRecords]="credits.total()" [scrollable]="true" scrollHeight="flex"
+                   dataKey="id" [rowHover]="true">
+            <ng-template #header>
+              <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'sales.customer' | translate }}</th><th>{{ 'common.date' | translate }}</th>
+                <th class="num">{{ 'credits.amount' | translate }}</th><th class="num">{{ 'credits.left' | translate }}</th>
+                <th>{{ 'common.status' | translate }}</th></tr>
+            </ng-template>
+            <ng-template #body let-c>
+              <tr class="clickable" tabindex="0" (click)="creditNote.set(c)" (keydown.enter)="creditNote.set(c)">
+                <td><div class="strong">{{ c.number }}</div>@if (c.reason) { <small class="muted">{{ c.reason }}</small> }</td>
+                <td>{{ c.customerName ?? ('sales.walkIn' | translate) }}</td>
+                <td>{{ c.issuedAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="num">{{ c.amount | currency: 'USD' }}</td>
+                <td class="num strong">{{ c.left | currency: 'USD' }}</td>
+                <td><span class="tag" [class.tag-primary]="c.status === 'OPEN'">{{ 'credits.status.' + c.status | translate }}</span></td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'credits.customer.empty' | translate }}</td></tr></ng-template>
           </p-table>
         </p-tabpanel>
       </p-tabpanels>
@@ -108,9 +203,68 @@
   <ng-template #footer>
     @if (viewing()?.status === 'POSTED' && canVoid()) {
       <div class="drawer-actions">
+        <button pButton type="button" [outlined]="true" (click)="startReturn(viewing()!.id, null)">
+          <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ 'returns.button' | translate }}</span>
+        </button>
         <span class="spacer"></span>
         <button pButton type="button" [outlined]="true" severity="danger" (click)="voidSale(viewing()!)"><span pButtonLabel>{{ 'sales.voidSale' | translate }}</span></button>
       </div>
     }
   </ng-template>
 </p-drawer>
+
+<!-- An invoice: its lines and money, and its prints -->
+<p-drawer [visible]="!!viewingInvoice()" (visibleChange)="!$event && viewingInvoice.set(null)" position="right" styleClass="ms-form-drawer"
+          [header]="viewingInvoice()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+  @if (viewingInvoice(); as i) {
+    <div class="doc-facts">
+      <div><small>{{ 'sales.customer' | translate }}</small><b>{{ i.customerName }}</b></div>
+      <div><small>{{ 'common.date' | translate }}</small><b>{{ i.invoiceDate | date: 'dd/MM/yyyy' }}</b></div>
+      <div><small>{{ 'sales.due' | translate }}</small><b [class.danger-text]="i.overdue">{{ i.dueDate | date: 'dd/MM/yyyy' }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + i.status">{{ 'docs.status.' + i.status | translate }}</span></b></div>
+      <div><small>{{ 'sales.invoiceType' | translate }}</small><b>{{ (i.type === 'TAX' ? 'sales.taxInvoice' : 'sales.standardInvoice') | translate }}</b></div>
+    </div>
+    <p-table class="ms-table" [value]="i.lines">
+      <ng-template #header>
+        <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th></tr>
+      </ng-template>
+      <ng-template #body let-l>
+        <tr><td class="strong">{{ l.productName }}</td><td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td><td class="num">{{ l.lineTotal | currency: 'USD' }}</td></tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr><td colspan="2" class="num">{{ 'common.total' | translate }}</td><td class="num strong">{{ i.total | currency: 'USD' }}</td></tr>
+        <tr><td colspan="2" class="num">{{ 'sales.balance' | translate }}</td><td class="num strong" [class.danger-text]="i.balance > 0">{{ i.balance | currency: 'USD' }}</td></tr>
+      </ng-template>
+    </p-table>
+  }
+  <ng-template #footer>
+    @if (viewingInvoice(); as i) {
+      <div class="drawer-actions">
+        @if (canReturn() && i.status !== 'VOID') {
+          <button pButton type="button" [outlined]="true" (click)="startReturn(null, i.id)">
+            <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ 'returns.button' | translate }}</span>
+          </button>
+        }
+        @if (i.deliveryId) {
+          <button pButton type="button" [outlined]="true" (click)="printDelivery(i)">
+            <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'print.printDelivery' | translate }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+        <button pButton type="button" (click)="printInvoice(i)">
+          <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.printInvoice' | translate }}</span>
+        </button>
+      </div>
+    }
+  </ng-template>
+</p-drawer>
+
+<ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />
+
+<ms-return-dialog [receiptId]="returnFrom()?.receiptId ?? null" [invoiceId]="returnFrom()?.invoiceId ?? null" [(visible)]="returnOpen"
+                  (saved)="returned($event)" />
+<ms-credit-drawer kind="customer" [(credit)]="creditNote" (changed)="creditChanged()" />
+<ms-credit-dialog kind="customer" [(visible)]="newCreditOpen" (saved)="credits.refresh(); creditNote.set($event)" />
+
+<ms-order-form [target]="formTarget()" [(visible)]="formOpen" (saved)="docSaved($event)" />
+<ms-order-drawer [(view)]="orderView" (edit)="editDoc($event)" (changed)="ordersChanged()" />

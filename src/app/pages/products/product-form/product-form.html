@@ -1,6 +1,8 @@
 <p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-form-drawer"
           [header]="(product() ? 'products.edit' : 'products.new') | translate" [ariaCloseLabel]="'common.close' | translate">
   <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="product-form">
+    <ms-image-field [url]="dropPhoto() ? null : (product()?.photoUrl | apiFile)" [label]="'products.photo' | translate" icon="pi pi-box"
+                    [disabled]="!canManage()" (pick)="photo.set($event); dropPhoto.set(false)" (remove)="photo.set(null); dropPhoto.set(true)" />
     <div class="ms-field">
       <label msLabel for="p-nameEn" control="nameEn">{{ 'products.nameEn' | translate }}</label>
       <input pInputText id="p-nameEn" formControlName="nameEn" />

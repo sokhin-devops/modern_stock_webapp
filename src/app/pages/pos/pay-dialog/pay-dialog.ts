@@ -9,6 +9,7 @@ import { InputText } from 'primeng/inputtext';
 import { SelectButton } from 'primeng/selectbutton';
 
 import { PaymentLine, PaymentMethod } from '../../../core/api/models';
+import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 
 /** What the cart shows on the receipt preview. */
@@ -26,7 +27,7 @@ export interface PreviewLine {
  */
 @Component({
   selector: 'ms-pay-dialog',
-  imports: [FormsModule, TranslatePipe, DecimalPipe, Dialog, SelectButton, InputNumber, InputText, ButtonDirective, ButtonLabel, FieldLabel],
+  imports: [ApiFilePipe, FormsModule, TranslatePipe, DecimalPipe, Dialog, SelectButton, InputNumber, InputText, ButtonDirective, ButtonLabel, FieldLabel],
   templateUrl: './pay-dialog.html',
   styleUrl: './pay-dialog.scss',
 })
@@ -40,17 +41,22 @@ export class PayDialog {
   readonly partialAllowed = input(false);
   readonly lines = input<PreviewLine[]>([]);
   readonly busy = input(false);
+  /** The methods the business takes (Settings › Sales rules); cash always. */
+  readonly khqrEnabled = input(true);
+  readonly bankEnabled = input(true);
+  /** The shop's KHQR image for the customer to scan. */
+  readonly khqrImage = input<string | null>(null);
   readonly pay = output<PaymentLine[]>();
 
   protected readonly method = signal<PaymentMethod>('CASH');
   protected readonly usd = signal<number | null>(null);
   protected readonly khr = signal<number | null>(null);
   protected readonly reference = signal('');
-  protected readonly methods = [
+  protected readonly methods = computed(() => [
     { value: 'CASH', label: 'pos.cash' },
-    { value: 'KHQR', label: 'pos.khqr' },
-    { value: 'BANK', label: 'pos.bank' },
-  ];
+    ...(this.khqrEnabled() ? [{ value: 'KHQR', label: 'pos.khqr' }] : []),
+    ...(this.bankEnabled() ? [{ value: 'BANK', label: 'pos.bank' }] : []),
+  ]);
   protected readonly usdQuick = [1, 5, 10, 20];
   protected readonly khrQuick = [1000, 5000, 10000, 50000];
 

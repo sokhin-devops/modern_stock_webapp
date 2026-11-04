@@ -1,0 +1,123 @@
+// An A4 page in black on white (also in dark mode), as it will print.
+.print-doc {
+  width: 100%;
+  padding: 32px;
+  background: #fff;
+  color: #111;
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: var(--shadow-1);
+
+  .small {
+    font-size: 12px;
+  }
+
+  .muted {
+    color: #5f6368;
+  }
+
+  .strong {
+    font-weight: 600;
+  }
+}
+
+.letterhead {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #111;
+}
+
+.shop {
+  display: flex;
+  gap: 12px;
+}
+
+.logo {
+  max-width: 96px;
+  max-height: 64px;
+  object-fit: contain;
+}
+
+.shop-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.doc-id {
+  text-align: end;
+}
+
+.doc-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.doc-party {
+  display: block;
+  margin: 16px 0;
+}
+
+.doc-lines {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #dadce0;
+    text-align: start;
+  }
+
+  th {
+    border-bottom: 1px solid #111;
+    font-size: 12px;
+  }
+
+  .num {
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  .n {
+    width: 32px;
+    color: #5f6368;
+  }
+}
+
+.totals {
+  width: 280px;
+  margin: 12px 0 0 auto;
+}
+
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+
+  &.strong {
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid #111;
+    font-size: 15px;
+  }
+}
+
+.note {
+  margin-top: 16px;
+}
+
+.signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 64px;
+  text-align: center;
+}
+
+.sign-line {
+  margin-bottom: 6px;
+  border-top: 1px solid #111;
+}

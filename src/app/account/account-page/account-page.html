@@ -1,0 +1,101 @@
+<div class="account-wrap narrow">
+  <div class="page">
+    <div class="page-head">
+      <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'account.myAccount' | translate }}</span></nav>
+    </div>
+    <div class="page-body">
+      <div class="cards">
+        <!-- Profile -->
+        <form class="settings-card ms-form" [formGroup]="profile" (ngSubmit)="saveProfile()" novalidate>
+          <h2 class="card-title">{{ 'accountPage.profile' | translate }}</h2>
+          <div class="ms-field">
+            <label msLabel for="ac-name" control="fullName">{{ 'auth.fullName' | translate }}</label>
+            <input pInputText id="ac-name" formControlName="fullName" autocomplete="name" />
+          </div>
+          <div class="ms-form-row">
+            <div class="ms-field">
+              <label msLabel for="ac-username" control="username" error="auth.usernameHint">{{ 'auth.username' | translate }}</label>
+              <input pInputText id="ac-username" formControlName="username" autocomplete="username" autocapitalize="off" />
+              <small class="field-hint">{{ 'auth.usernameHint' | translate }}</small>
+            </div>
+            <div class="ms-field">
+              <label msLabel for="ac-phone" control="phone" optional error="errors.phone">{{ 'auth.phone' | translate }}</label>
+              <input pInputText id="ac-phone" type="tel" formControlName="phone" placeholder="012 345 678" autocomplete="tel" />
+            </div>
+          </div>
+          @if (auth.user(); as u) {
+            <div class="ms-field">
+              <span msLabel>{{ 'auth.email' | translate }}</span>
+              <div class="email">
+                <span>{{ u.email ?? '—' }}</span>
+                @if (u.email) {
+                  <span class="tag" [class.tag-primary]="u.emailVerified">
+                    {{ (u.emailVerified ? 'accountPage.verified' : 'accountPage.notVerified') | translate }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+          <div class="settings-actions">
+            <button pButton type="submit" [loading]="busy() === 'profile'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+          </div>
+        </form>
+
+        <!-- Preferences: saved as soon as they change -->
+        <section class="settings-card ms-form">
+          <h2 class="card-title">{{ 'accountPage.preferences' | translate }}</h2>
+          <div class="ms-field">
+            <span msLabel id="ac-lang">{{ 'common.language' | translate }}</span>
+            <p-selectbutton [options]="languages" optionValue="value" [ngModel]="lang.lang()" (ngModelChange)="setLanguage($event)"
+                            [allowEmpty]="false" ariaLabelledBy="ac-lang" />
+          </div>
+          <div class="ms-field">
+            <span msLabel id="ac-mode">{{ 'settings.appearance.mode' | translate }}</span>
+            <p-selectbutton [options]="modes" optionValue="value" [ngModel]="theme.mode()" (ngModelChange)="setMode($event)"
+                            [allowEmpty]="false" ariaLabelledBy="ac-mode">
+              <ng-template #item let-o><i class="pi" [class]="o.icon"></i>&nbsp;{{ o.label | translate }}</ng-template>
+            </p-selectbutton>
+          </div>
+        </section>
+
+        <!-- Password -->
+        <form class="settings-card ms-form" [formGroup]="password" (ngSubmit)="changePassword()" novalidate>
+          <h2 class="card-title">{{ 'auth.password' | translate }}</h2>
+          <div class="ms-field">
+            <label msLabel for="ac-current" control="currentPassword">{{ 'accountPage.currentPassword' | translate }}</label>
+            <input pInputText id="ac-current" type="password" formControlName="currentPassword" autocomplete="current-password" />
+          </div>
+          <div class="ms-form-row">
+            <div class="ms-field">
+              <label msLabel for="ac-new" control="newPassword" error="errors.passwordShort">{{ 'accountPage.newPassword' | translate }}</label>
+              <input pInputText id="ac-new" type="password" formControlName="newPassword" autocomplete="new-password" />
+              <small class="field-hint">{{ 'errors.passwordShort' | translate }}</small>
+            </div>
+            <div class="ms-field">
+              <label msLabel for="ac-confirm" control="confirmPassword" error="errors.passwordsDiffer"
+                     [invalid]="password.controls.confirmPassword.dirty && password.hasError('notSame')">{{ 'auth.confirmPassword' | translate }}</label>
+              <input pInputText id="ac-confirm" type="password" formControlName="confirmPassword" autocomplete="new-password" />
+            </div>
+          </div>
+          <div class="settings-actions">
+            <button pButton type="submit" [loading]="busy() === 'password'" [disabled]="busy() !== null">
+              <span pButtonLabel>{{ 'accountPage.changePassword' | translate }}</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Every device -->
+        <section class="settings-card ms-form">
+          <h2 class="card-title">{{ 'accountPage.everywhere' | translate }}</h2>
+          <p class="muted">{{ 'accountPage.everywhereLead' | translate }}</p>
+          <div class="settings-actions">
+            <button pButton type="button" [outlined]="true" severity="danger" (click)="signOutEverywhere()" [loading]="busy() === 'everywhere'"
+                    [disabled]="busy() !== null">
+              <i class="pi pi-sign-out" pButtonIcon></i><span pButtonLabel>{{ 'accountPage.everywhereButton' | translate }}</span>
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

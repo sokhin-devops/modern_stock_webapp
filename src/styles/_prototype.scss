@@ -31,6 +31,8 @@
 
   --danger: #b3261e;
   --danger-bg: #fce8e6;
+  --warning: #b06000;
+  --warning-bg: #fef7e0;
 
   --radius-sm: 10px;
   --radius-md: 12px;
@@ -70,6 +72,8 @@
 
   --danger: #f6aea9;
   --danger-bg: #401614;
+  --warning: #fdd663;
+  --warning-bg: #3a2e12;
   color-scheme: dark;
 }
 
@@ -198,6 +202,7 @@ td.num, th.num, .right { text-align: right; }
 .rate-chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px; background: var(--page); color: var(--text-2); font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .rate-chip .icon { font-size: 18px; color: var(--primary); }
 .rate-chip:hover { background: var(--surface-3); text-decoration: none; }
+.rate-chip.stale, .rate-chip.stale .icon { color: var(--danger); }
 .icon-btn {
   position: relative;
   width: 40px;
@@ -595,6 +600,7 @@ td.num, th.num, .right { text-align: right; }
 .banner .text { flex: 1; min-width: 180px; color: var(--text); }
 .banner-primary { background: var(--primary-soft); color: var(--primary); }
 .banner-danger { background: var(--danger-bg); color: var(--danger); }
+.banner-warn { background: var(--warning-bg); color: var(--warning); }
 .list { display: flex; flex-direction: column; gap: 2px; }
 .list-item { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 12px; color: var(--text); text-decoration: none; transition: background-color .15s var(--ease); }
 a.list-item:hover { background: var(--surface-2); text-decoration: none; }
@@ -904,6 +910,7 @@ html[lang="km"] .auth-title { line-height: 1.5; }
 .receipt { width: 302px; max-width: 100%; padding: 16px 14px; background: #fff; color: #111; box-shadow: var(--shadow-1); font-family: var(--font); font-size: 12px; line-height: 1.5; }
 .receipt hr { margin: 8px 0; border: 0; border-top: 1px dashed #9aa0a6; }
 .r-center { text-align: center; }
+.r-logo { display: block; max-width: 120px; max-height: 56px; margin: 0 auto 6px; object-fit: contain; filter: grayscale(1); }
 .r-row { display: flex; justify-content: space-between; gap: 8px; }
 .r-small { color: #555; font-size: 11px; }
 .r-big { font-size: 15px; font-weight: 700; }

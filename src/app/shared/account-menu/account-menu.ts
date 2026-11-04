@@ -32,7 +32,11 @@ export class AccountMenu {
     const t = (key: string) => this.translate.instant(key);
     return [
       { separator: true },
+      { label: t('account.myAccount'), icon: 'pi pi-user', command: () => this.router.navigate(['/account']) },
       { label: t('account.myBusinesses'), icon: 'pi pi-briefcase', command: () => this.router.navigate(['/businesses']) },
+      ...(this.auth.user()?.superAdmin
+        ? [{ label: t('admin.title'), icon: 'pi pi-shield', command: () => this.router.navigate(['/admin']) }]
+        : []),
       { label: t('account.website'), icon: 'pi pi-globe', url: `${environment.websiteUrl}/${lang}`, target: '_blank' },
       { separator: true },
       {

@@ -435,15 +435,77 @@
   }
 
   .print-receipt,
-  .print-receipt * {
+  .print-receipt *,
+  .print-doc,
+  .print-doc * {
     visibility: visible;
   }
 
-  .print-receipt {
+  .print-receipt,
+  .print-doc {
     position: absolute;
     top: 0;
     left: 0;
     box-shadow: none;
+  }
+
+  // A4 documents (invoice, delivery note) use the whole page width.
+  .print-doc {
+    width: 100%;
+    padding: 0;
+  }
+
+  // A report: its copy on a sheet of its own, every row, nothing scrolling.
+  .print-report,
+  .print-report * {
+    visibility: visible;
+  }
+
+  .print-report {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: #000;
+    background: #fff;
+
+    .card,
+    .kpi {
+      box-shadow: none;
+      break-inside: avoid;
+    }
+
+    .p-datatable-table-container,
+    .p-datatable-wrapper {
+      overflow: visible !important;
+      max-height: none !important;
+      height: auto !important;
+    }
+
+    .p-paginator {
+      display: none;
+    }
+  }
+}
+
+.print-report {
+  display: none;
+}
+
+.print-report-head {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #000;
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 20px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
   }
 }
 
@@ -503,12 +565,14 @@
 }
 
 // Status tags for documents: done (primary), waiting (plain), stopped (danger).
-.tag.status-POSTED, .tag.status-RECEIVED, .tag.status-MOVED, .tag.status-PAID, .tag.status-CLOSED {
+.tag.status-POSTED, .tag.status-RECEIVED, .tag.status-MOVED, .tag.status-PAID, .tag.status-CLOSED,
+.tag.status-ACCEPTED, .tag.status-DELIVERED {
   background: var(--primary-container);
   color: var(--on-primary-container);
 }
 
-.tag.status-VOID, .tag.status-REJECTED, .tag.status-CANCELLED, .tag.status-RETURNED {
+.tag.status-VOID, .tag.status-REJECTED, .tag.status-CANCELLED, .tag.status-RETURNED,
+.tag.status-DECLINED, .tag.status-EXPIRED {
   background: var(--danger-bg);
   color: var(--danger);
 }
@@ -531,5 +595,17 @@
 
   .p-tabpanel > :first-child {
     margin-top: 0;
+  }
+}
+
+// Product photos in the list and on POS tiles fill their thumbnail; without one, the box icon shows.
+.thumb-sm,
+.tile .thumb {
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 }

@@ -1,9 +1,7 @@
 <p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog"
           [header]="(isCustomer() ? 'sales.receivePayment' : 'purchase.pay') | translate">
   <div class="ms-form dialog-form">
-    @if (isCustomer()) {
-      <p class="muted small">{{ 'sales.receiveLead' | translate }}</p>
-    }
+    <p class="muted small">{{ (isCustomer() ? 'sales.receiveLead' : 'purchase.payLead') | translate }}</p>
     <div class="ms-field">
       <label msLabel for="pay-party" required>{{ (isCustomer() ? 'sales.customer' : 'purchase.supplier') | translate }}</label>
       <p-autocomplete inputId="pay-party" [ngModel]="party()" (ngModelChange)="pick($event)" [suggestions]="parties()" (completeMethod)="find($event)"
@@ -21,7 +19,7 @@
       </div>
       <p-selectbutton [options]="currencies" optionLabel="label" optionValue="value" [ngModel]="currency()" (ngModelChange)="currency.set($event)" [allowEmpty]="false" />
     </div>
-    <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
+    <p-selectbutton [options]="methods()" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
       <ng-template #item let-o>{{ o.label | translate }}</ng-template>
     </p-selectbutton>
     @if (method() !== 'CASH') {

@@ -1,0 +1,97 @@
+<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-doc-drawer" [ariaCloseLabel]="'common.close' | translate"
+          [header]="('orders.' + (editing() ? 'edit' : 'new') + (kind() === 'quotation' ? 'Quotation' : 'Order')) | translate">
+  <div class="ms-form">
+    <p class="muted small">{{ (kind() === 'quotation' ? 'orders.quotationLead' : 'orders.orderLead') | translate }}</p>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="of-customer" required>{{ 'sales.customer' | translate }}</label>
+        <p-autocomplete inputId="of-customer" [ngModel]="customer()" (ngModelChange)="customer.set($event?.id ? $event : null)"
+                        [suggestions]="customers()" (completeMethod)="findCustomers($event)" optionLabel="name" [forceSelection]="true"
+                        [fluid]="true" [dropdown]="true" appendTo="body">
+          <ng-template #item let-c><div><b>{{ c.name }}</b> <small class="muted">{{ c.phone }}</small></div></ng-template>
+        </p-autocomplete>
+      </div>
+      @if (kind() === 'quotation') {
+        <div class="ms-field">
+          <label msLabel for="of-valid" required>{{ 'orders.validUntil' | translate }}</label>
+          <p-datepicker inputId="of-valid" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true"
+                        [minDate]="today" appendTo="body" />
+        </div>
+      } @else {
+        <div class="ms-field">
+          <label msLabel for="of-wh">{{ 'common.warehouse' | translate }}</label>
+          <p-select inputId="of-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+                    (ngModelChange)="warehouseId.set($event)" appendTo="body" />
+        </div>
+      }
+    </div>
+    <div [class.ms-form-row]="kind() === 'order'">
+      @if (kind() === 'order') {
+        <div class="ms-field">
+          <label msLabel for="of-date" optional>{{ 'orders.deliveryDate' | translate }}</label>
+          <p-datepicker inputId="of-date" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true"
+                        [minDate]="today" appendTo="body" />
+        </div>
+      }
+      <div class="ms-field">
+        <label msLabel for="of-note" optional>{{ 'common.note' | translate }}</label>
+        <input pInputText id="of-note" [ngModel]="note()" (ngModelChange)="note.set($event)" maxlength="500" />
+      </div>
+    </div>
+
+    <ms-lines-editor [(lines)]="lines" [showPrice]="true" [prices]="prices()" />
+
+    <div class="summary">
+      <div class="ms-field discount">
+        <label msLabel for="of-discount" optional>{{ 'orders.orderDiscount' | translate }}</label>
+        <p-inputnumber inputId="of-discount" [ngModel]="discount()" (ngModelChange)="discount.set($event)" mode="currency" currency="USD"
+                       locale="en-US" [min]="0" />
+      </div>
+      <div class="totals">
+        @if (preview(); as p) {
+          <div class="line"><span>{{ 'print.subtotal' | translate }}</span><span>{{ p.subtotal | currency: 'USD' }}</span></div>
+          @if (p.discount) {
+            <div class="line muted"><span>{{ 'print.discount' | translate }}</span><span>− {{ p.discount | currency: 'USD' }}</span></div>
+          }
+          @if (p.vat) {
+            <div class="line muted"><span>{{ 'print.vat' | translate }}</span><span>{{ p.vat | currency: 'USD' }}</span></div>
+          }
+          <div class="line total"><span>{{ 'common.total' | translate }}</span><b>{{ p.total | currency: 'USD' }}</b></div>
+          @if (p.overLimit && !canOverride()) {
+            <p class="warn small"><i class="pi pi-exclamation-triangle"></i> {{ 'orders.overLimit' | translate }}</p>
+          }
+        } @else {
+          <p class="muted small">{{ 'orders.pricesHint' | translate }}</p>
+        }
+      </div>
+    </div>
+
+    @if (kind() === 'order' && !editing() && canDeliver()) {
+      <div class="pay-row">
+        <span class="muted small">{{ 'orders.deliverNowHint' | translate }}</span>
+        <p-selectbutton [options]="payOptions" optionValue="value" [ngModel]="payNow()" (ngModelChange)="payNow.set($event)" [allowEmpty]="false">
+          <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+        </p-selectbutton>
+        @if (payNow()) {
+          <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
+            <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+          </p-selectbutton>
+        }
+      </div>
+    }
+  </div>
+  <ng-template #footer>
+    <div class="drawer-actions">
+      <span class="spacer"></span>
+      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+      @if (kind() === 'order' && !editing() && canDeliver()) {
+        <button pButton type="button" [outlined]="true" (click)="submit(true)" [disabled]="busy() || !customer() || !filled().length">
+          <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'orders.saveDeliver' | translate }}</span>
+        </button>
+      }
+      <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !customer() || !filled().length">
+        <span pButtonLabel>{{ 'common.save' | translate }}</span>
+      </button>
+    </div>
+  </ng-template>
+</p-drawer>

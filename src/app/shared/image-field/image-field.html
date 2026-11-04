@@ -1,0 +1,24 @@
+<div class="image-field">
+  <div class="frame">
+    @if (shown(); as src) {
+      <img [src]="src" [alt]="label()" />
+    } @else {
+      <i class="icon" [class]="icon()" aria-hidden="true"></i>
+    }
+  </div>
+  <div class="actions">
+    <label class="file-btn" [class.disabled]="disabled() || busy()">
+      <input type="file" accept="image/jpeg,image/png,image/webp" (change)="choose($event)" [disabled]="disabled() || busy()"
+             [attr.aria-label]="label()" />
+      <span class="p-button p-component p-button-outlined p-button-sm">
+        <i class="pi pi-upload"></i>&nbsp;{{ (shown() ? 'image.change' : 'image.choose') | translate }}
+      </span>
+    </label>
+    @if (shown()) {
+      <button pButton type="button" [text]="true" severity="danger" size="small" (click)="clear()" [disabled]="disabled() || busy()">
+        <i class="pi pi-trash" pButtonIcon></i><span pButtonLabel>{{ 'image.remove' | translate }}</span>
+      </button>
+    }
+    <small class="field-hint">{{ 'image.hint' | translate }}</small>
+  </div>
+</div>

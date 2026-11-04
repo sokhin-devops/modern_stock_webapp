@@ -1,8 +1,13 @@
-<div class="lines" [class.with-cost]="showCost()" [class.with-batch]="showBatch()">
+<div class="lines" [class.with-cost]="showCost()" [class.with-batch]="showBatch()" [class.with-price]="showPrice()">
   <div class="line head">
     <span>{{ 'common.product' | translate }}</span>
     <span>{{ 'pos.unit' | translate }}</span>
     <span class="num">{{ 'common.qty' | translate }}</span>
+    @if (showPrice()) {
+      <span class="num">{{ 'common.price' | translate }}</span>
+      <span class="num">{{ 'common.discount' | translate }}</span>
+      <span class="num">{{ 'common.amount' | translate }}</span>
+    }
     @if (showCost()) {
       <span class="num">{{ 'common.unitCost' | translate }}</span>
     }
@@ -27,6 +32,12 @@
                 [ariaLabel]="'pos.unit' | translate" />
       <p-inputnumber [ngModel]="line.qty" (ngModelChange)="update(i, { qty: $event })" [maxFractionDigits]="3" locale="en-US"
                      [min]="allowNegative() ? undefined : 0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.qty' | translate" />
+      @if (showPrice()) {
+        <span class="num muted">{{ prices()[i] == null ? '' : '$' + (prices()[i]! | number: '1.2-2') }}</span>
+        <p-inputnumber [ngModel]="line.discount ?? null" (ngModelChange)="update(i, { discount: $event })" mode="currency" currency="USD"
+                       locale="en-US" [min]="0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.discount' | translate" />
+        <span class="num strong">{{ amount(i, line) == null ? '' : '$' + (amount(i, line)! | number: '1.2-2') }}</span>
+      }
       @if (showCost()) {
         <p-inputnumber [ngModel]="line.unitCost" (ngModelChange)="update(i, { unitCost: $event })" mode="currency" currency="USD" locale="en-US"
                        [maxFractionDigits]="4" [min]="0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.unitCost' | translate" />

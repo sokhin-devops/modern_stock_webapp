@@ -1,0 +1,90 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog print-preview" [header]="doc()?.title ?? ''"
+          [dismissableMask]="true" [style]="{ width: 'min(820px, 96vw)' }">
+  @if (doc(); as d) {
+    <div class="print-doc">
+      <header class="letterhead">
+        <div class="shop">
+          @if (profile()?.logoUrl; as logo) {
+            <img class="logo" [src]="logo | apiFile" alt="" />
+          }
+          <div>
+            <div class="shop-name">{{ profile()?.nameKm || profile()?.nameEn }}</div>
+            @if (profile()?.nameKm) {
+              <div>{{ profile()?.nameEn }}</div>
+            }
+            @if (branch(); as b) {
+              <div class="small">{{ lang.name(b.nameEn, b.nameKm) }}@if (b.address) { · {{ b.address }} }@if (b.phone || profile()?.phone) { · {{ b.phone || profile()?.phone }} }</div>
+            }
+            @if (profile()?.vatTin) {
+              <div class="small">{{ 'print.vatTin' | translate }}: {{ profile()?.vatTin }}</div>
+            }
+          </div>
+        </div>
+        <div class="doc-id">
+          <div class="doc-title">{{ d.title }}</div>
+          <div class="strong">{{ d.number }}</div>
+          <div class="small">{{ 'common.date' | translate }}: {{ d.date | date: 'dd/MM/yyyy' }}</div>
+          @for (f of d.facts; track f.label) {
+            <div class="small">{{ f.label }}: {{ f.value }}</div>
+          }
+        </div>
+      </header>
+
+      <section class="doc-party">
+        <div class="small muted">{{ d.partyLabel }}</div>
+        <div class="strong">{{ d.partyName }}</div>
+        @for (line of d.partyLines; track line) {
+          <div class="small">{{ line }}</div>
+        }
+      </section>
+
+      <table class="doc-lines">
+        <thead>
+          <tr>
+            <th class="n">#</th>
+            <th>{{ 'common.product' | translate }}</th>
+            <th class="num">{{ 'common.qty' | translate }}</th>
+            @if (d.withPrices) {
+              <th class="num">{{ 'print.price' | translate }}</th>
+              <th class="num">{{ 'common.total' | translate }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of d.lines; track $index) {
+            <tr>
+              <td class="n">{{ $index + 1 }}</td>
+              <td>{{ l.name }}</td>
+              <td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unit }}</td>
+              @if (d.withPrices) {
+                <td class="num">${{ l.price | number: '1.2-2' }}</td>
+                <td class="num">${{ l.total | number: '1.2-2' }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (d.totals.length) {
+        <div class="totals">
+          @for (t of d.totals; track t.label) {
+            <div class="total-line" [class.strong]="t.strong"><span>{{ t.label }}</span><span>{{ t.value }}</span></div>
+          }
+        </div>
+      }
+      @if (d.note) {
+        <p class="note small">{{ d.note }}</p>
+      }
+      @if (d.signatures) {
+        <div class="signatures">
+          <div><div class="sign-line"></div>{{ 'print.deliveredBy' | translate }}</div>
+          <div><div class="sign-line"></div>{{ 'print.receivedBy' | translate }}</div>
+        </div>
+      }
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+    <button pButton type="button" (click)="print()"><i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

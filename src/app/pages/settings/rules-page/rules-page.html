@@ -19,10 +19,25 @@
             <p-inputnumber inputId="st-rate" formControlName="vatRate" suffix="%" [min]="0" [max]="100" [maxFractionDigits]="2" />
           </div>
         }
+        <h3 class="form-section">{{ 'settings.receipt.title' | translate }}</h3>
+        <div class="ms-field">
+          <label msLabel for="st-header" control="receiptHeader" optional>{{ 'settings.receipt.header' | translate }}</label>
+          <input pInputText id="st-header" formControlName="receiptHeader" />
+          <small class="field-hint">{{ 'settings.receipt.headerHint' | translate }}</small>
+        </div>
         <div class="ms-field">
           <label msLabel for="st-footer" control="receiptFooter">{{ 'settings.tax.footer' | translate }}</label>
           <input pInputText id="st-footer" formControlName="receiptFooter" />
           <small class="field-hint">{{ 'settings.tax.footerHint' | translate }}</small>
+        </div>
+        <div class="ms-field">
+          <span msLabel id="st-paper">{{ 'settings.receipt.paper' | translate }}</span>
+          <p-selectbutton formControlName="receiptPaper" [options]="papers" optionLabel="label" optionValue="value" [allowEmpty]="false"
+                          ariaLabelledBy="st-paper" />
+        </div>
+        <div class="ms-check">
+          <p-toggleswitch formControlName="receiptShowVatTin" inputId="st-tin" />
+          <label for="st-tin">{{ 'settings.receipt.showTin' | translate }}</label>
         </div>
       } @else {
         <p class="muted">{{ 'settings.rules.lead' | translate }}</p>
@@ -41,6 +56,28 @@
           <label for="st-negative">{{ 'settings.rules.negative' | translate }}</label>
         </div>
         <small class="field-hint">{{ 'settings.rules.negativeHint' | translate }}</small>
+
+        <h3 class="form-section">{{ 'settings.methods.title' | translate }}</h3>
+        <p class="muted small">{{ 'settings.methods.lead' | translate }}</p>
+        <div class="ms-check">
+          <p-toggleswitch inputId="st-cash" [ngModel]="true" [ngModelOptions]="{ standalone: true }" [disabled]="true" />
+          <label for="st-cash">{{ 'pos.cash' | translate }} <small class="muted">· {{ 'settings.methods.always' | translate }}</small></label>
+        </div>
+        <div class="ms-check">
+          <p-toggleswitch formControlName="khqrEnabled" inputId="st-khqr" />
+          <label for="st-khqr">{{ 'pos.khqr' | translate }}</label>
+        </div>
+        @if (form.controls.khqrEnabled.value) {
+          <div class="ms-field indent">
+            <ms-image-field [url]="khqrUrl() | apiFile" [label]="'settings.methods.khqrImage' | translate" icon="pi pi-qrcode"
+                            [busy]="khqrBusy()" [disabled]="form.disabled" (pick)="uploadKhqr($event)" (remove)="removeKhqr()" />
+            <small class="field-hint">{{ 'settings.methods.khqrHint' | translate }}</small>
+          </div>
+        }
+        <div class="ms-check">
+          <p-toggleswitch formControlName="bankEnabled" inputId="st-bank" />
+          <label for="st-bank">{{ 'pos.bank' | translate }}</label>
+        </div>
       }
       @if (form.enabled) {
         <div class="settings-actions">

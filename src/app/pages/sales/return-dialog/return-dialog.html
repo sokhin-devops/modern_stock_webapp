@@ -1,0 +1,92 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(860px, 96vw)' }"
+          [header]="('returns.title' | translate) + (source() ? ' · ' + source()!.number : '')">
+  @if (source(); as s) {
+    <div class="ms-form">
+      <p class="muted">
+        {{ (s.customerName ? 'returns.leadCustomer' : 'returns.leadWalkIn') | translate: { customer: s.customerName } }}
+      </p>
+      <table class="lines">
+        <thead>
+          <tr>
+            <th>{{ 'common.product' | translate }}</th>
+            <th class="num">{{ 'returns.sold' | translate }}</th>
+            <th class="num">{{ 'returns.canReturn' | translate }}</th>
+            <th class="qty-col">{{ 'returns.qty' | translate }}</th>
+            <th>{{ 'returns.condition' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.saleItemId; let i = $index) {
+            <tr [class.off]="r.returnable <= 0">
+              <td>
+                <div class="strong">{{ r.productName }}</div>
+                <div class="muted small">{{ r.unitRefund | currency: 'USD' }} / {{ r.unitSymbol }}</div>
+              </td>
+              <td class="num muted">{{ r.sold | number: '1.0-3' }} {{ r.unitSymbol }}</td>
+              <td class="num">{{ r.returnable | number: '1.0-3' }}</td>
+              <td class="qty-col">
+                <p-inputnumber [ngModel]="r.qty" (ngModelChange)="setRow(i, { qty: $event })" [min]="0" [max]="r.returnable"
+                               [maxFractionDigits]="3" [disabled]="r.returnable <= 0" [showButtons]="false" locale="en-US"
+                               [ariaLabel]="('returns.qty' | translate) + ' ' + r.productName" [fluid]="true" />
+              </td>
+              <td>
+                <p-selectbutton [options]="conditions" optionValue="value" [ngModel]="r.condition" (ngModelChange)="setRow(i, { condition: $event })"
+                                [allowEmpty]="false" size="small" [disabled]="!r.qty" [ariaLabel]="'returns.condition' | translate">
+                  <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+                </p-selectbutton>
+                @if (r.qty && r.condition === 'GOOD' && r.trackExpiry) {
+                  <p-datepicker [ngModel]="r.expiry" (ngModelChange)="setRow(i, { expiry: $event })" dateFormat="dd/mm/yy" appendTo="body"
+                                [placeholder]="'returns.expiry' | translate" [ariaLabel]="'returns.expiry' | translate" class="expiry" />
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="ms-field">
+        <label msLabel for="rt-reason" optional>{{ 'returns.reason' | translate }}</label>
+        <input pInputText id="rt-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255" />
+      </div>
+
+      <div class="money">
+        <div class="line strong total"><span>{{ 'returns.total' | translate }}</span><span>{{ total() | currency: 'USD' }}</span></div>
+        @if (onInvoice() > 0) {
+          <div class="line muted"><span>{{ 'returns.onInvoice' | translate }}</span><span>− {{ onInvoice() | currency: 'USD' }}</span></div>
+          <div class="line strong after"><span>{{ 'returns.left' | translate }}</span><span>{{ left() | currency: 'USD' }}</span></div>
+        }
+      </div>
+
+      @if (left() > 0) {
+        @if (!walkIn()) {
+          <div class="ms-check">
+            <p-toggleswitch inputId="rt-refund" [ngModel]="refundNow()" (ngModelChange)="refundNow.set($event)" />
+            <label for="rt-refund">{{ 'returns.refundNow' | translate }}</label>
+          </div>
+          @if (!refundNow()) {
+            <p class="muted small">{{ 'returns.keptAsCredit' | translate }}</p>
+          }
+        }
+        @if (walkIn() || refundNow()) {
+          <div class="refund">
+            <span msLabel>{{ 'returns.refundBy' | translate }}</span>
+            <div class="refund-choices">
+              <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)"
+                              [allowEmpty]="false" [ariaLabel]="'returns.refundBy' | translate">
+                <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+              </p-selectbutton>
+              <p-selectbutton [options]="currencies" optionValue="value" optionLabel="label" [ngModel]="currency()"
+                              (ngModelChange)="currency.set($event)" [allowEmpty]="false" ariaLabel="USD / KHR" />
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || total() <= 0 || missingExpiry()">
+      <span pButtonLabel>{{ 'returns.save' | translate: { amount: (total() | currency: 'USD') } }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

@@ -13,7 +13,12 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Kantumruy+Pro:wght@400;500;700&display=swap">
   <script>
     // Apply the saved light or dark choice before the page paints (see ThemeModeService).
-    try { if (localStorage.getItem('ms-theme') === 'dark') document.documentElement.classList.add('app-dark'); } catch (e) {}
+    try {
+      var mode = localStorage.getItem('ms-theme');
+      if (mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('app-dark');
+      }
+    } catch (e) {}
   </script>
   <style>
     /* Splash screen (see SplashService). Plain HTML and CSS, so it shows the moment the page arrives. Behind it the

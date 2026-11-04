@@ -1,0 +1,34 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(520px, 96vw)' }"
+          [header]="('products.branchReorder' | translate) + (product() ? ' · ' + lang.name(product()!.nameEn, product()!.nameKm) : '')">
+  <p class="muted">{{ 'products.branchReorderLead' | translate }}</p>
+  <table class="price-grid">
+    <thead>
+      <tr>
+        <th>{{ 'common.branch' | translate }}</th>
+        <th class="num">
+          {{ 'products.reorderLevel' | translate }}
+          @if (loaded(); as p) {
+            <small class="muted">· {{ p.reorderLevel | number: '1.0-3' }} {{ p.baseUnitSymbol }}</small>
+          }
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (b of branches(); track b.id) {
+        <tr>
+          <td class="strong">{{ lang.name(b.nameEn, b.nameKm) }}@if (b.main) { <small class="muted"> · {{ 'products.mainBranch' | translate }}</small> }</td>
+          <td>
+            <p-inputnumber [ngModel]="levels()[b.id] ?? null" (ngModelChange)="set(b.id, $event)" [maxFractionDigits]="3" [min]="0"
+                           [fluid]="true" [suffix]="loaded() ? ' ' + loaded()!.baseUnitSymbol : ''"
+                           [placeholder]="loaded() ? (loaded()!.reorderLevel | number: '1.0-3') + ' ' + loaded()!.baseUnitSymbol : ''"
+                           [disabled]="!loaded()" [ariaLabel]="lang.name(b.nameEn, b.nameKm)" />
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !loaded()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

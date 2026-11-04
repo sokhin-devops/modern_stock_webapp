@@ -1,0 +1,71 @@
+<p-drawer [visible]="!!credit()" (visibleChange)="!$event && credit.set(null)" position="right" styleClass="ms-form-drawer"
+          [header]="credit()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+  @if (credit(); as c) {
+    <div class="doc-facts">
+      <div><small>{{ 'credits.' + kind() + '.party' | translate }}</small><b>{{ party()?.name ?? ('sales.walkIn' | translate) }}</b></div>
+      <div><small>{{ 'common.date' | translate }}</small><b>{{ c.issuedAt | date: 'dd/MM/yyyy' }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class.tag-primary]="c.status === 'OPEN'">{{ 'credits.status.' + c.status | translate }}</span></b></div>
+    </div>
+    @if (c.reason) {
+      <p class="muted">{{ c.reason }}</p>
+    }
+    <div class="amounts">
+      <div class="line"><span>{{ 'credits.amount' | translate }}</span><b>{{ c.amount | currency: 'USD' }}</b></div>
+      <div class="line muted"><span>{{ 'credits.' + kind() + '.used' | translate }}</span><span>{{ c.usedAmount | currency: 'USD' }}</span></div>
+      <div class="line muted"><span>{{ 'credits.' + kind() + '.refunded' | translate }}</span><span>{{ c.refundedAmount | currency: 'USD' }}</span></div>
+      <div class="line total"><span>{{ 'credits.left' | translate }}</span><b>{{ c.left | currency: 'USD' }}</b></div>
+    </div>
+
+    @if (c.status === 'OPEN' && c.left > 0 && canManage()) {
+      <div class="ms-form act">
+        <p-selectbutton [options]="actions()" optionValue="value" [ngModel]="action()" (ngModelChange)="setAction($event)" [allowEmpty]="false"
+                        [ariaLabel]="'credits.what' | translate">
+          <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+        </p-selectbutton>
+        @if (action() === 'apply') {
+          @if (docOptions().length) {
+            <div class="ms-field">
+              <label msLabel for="credit-doc" required>{{ 'credits.' + kind() + '.doc' | translate }}</label>
+              <p-select inputId="credit-doc" [options]="docOptions()" optionLabel="label" optionValue="value" [ngModel]="docId()"
+                        (ngModelChange)="setDoc($event)" appendTo="body" />
+            </div>
+          } @else {
+            <p class="muted">{{ 'credits.' + kind() + '.noOpen' | translate }}</p>
+          }
+        } @else {
+          <div class="ms-field">
+            <span msLabel>{{ 'credits.' + kind() + '.refundBy' | translate }}</span>
+            <div class="choices">
+              <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
+                              [ariaLabel]="'credits.' + kind() + '.refundBy' | translate">
+                <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+              </p-selectbutton>
+              <p-selectbutton [options]="currencies" optionValue="value" optionLabel="label" [ngModel]="currency()" (ngModelChange)="currency.set($event)"
+                              [allowEmpty]="false" ariaLabel="USD / KHR" />
+            </div>
+          </div>
+        }
+        <div class="ms-field">
+          <label msLabel for="credit-amount" required>{{ 'credits.amountUsd' | translate }}</label>
+          <p-inputnumber inputId="credit-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" mode="currency" currency="USD" locale="en-US"
+                         [min]="0" [max]="most()" />
+          <small class="field-hint">{{ 'credits.most' | translate: { amount: (most() | currency: 'USD') } }}</small>
+        </div>
+      </div>
+    }
+  }
+  <ng-template #footer>
+    @if (credit(); as c) {
+      @if (c.status === 'OPEN' && c.left > 0 && canManage()) {
+        <div class="drawer-actions">
+          <span class="spacer"></span>
+          <button pButton type="button" (click)="submit()" [loading]="busy()"
+                  [disabled]="busy() || !amount() || amount()! > most() || (action() === 'apply' && !docId())">
+            <i class="pi" [class.pi-file]="action() === 'apply'" [class.pi-wallet]="action() === 'refund'" pButtonIcon></i>
+            <span pButtonLabel>{{ 'credits.' + kind() + '.' + (action() === 'apply' ? 'useOn' : 'refund') | translate }}</span>
+          </button>
+        </div>
+      }
+    }
+  </ng-template>
+</p-drawer>

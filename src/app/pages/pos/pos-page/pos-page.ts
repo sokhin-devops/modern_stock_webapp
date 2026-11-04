@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Select } from 'primeng/select';
+import { Tooltip } from 'primeng/tooltip';
 import { Subject, debounceTime, switchMap } from 'rxjs';
 
 import { BusinessSettings, CashShift, CheckoutResponse, Customer, PaymentLine, Product } from '../../../core/api/models';
@@ -18,6 +19,7 @@ import { NotifyService } from '../../../core/notify.service';
 import { PosService } from '../../../core/sales/pos.service';
 import { ThemeModeService } from '../../../core/theme-mode.service';
 import { AccountMenu } from '../../../shared/account-menu/account-menu';
+import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { LangButton } from '../../../shared/lang-button/lang-button';
 import { PayDialog, PreviewLine } from '../pay-dialog/pay-dialog';
 import { ReceiptDialog } from '../receipt-dialog/receipt-dialog';
@@ -45,7 +47,7 @@ interface CartLine {
   selector: 'ms-pos-page',
   imports: [
     FormsModule, RouterLink, TranslatePipe, DecimalPipe, DatePipe, AutoComplete, Select, ButtonDirective, ButtonIcon,
-    ButtonLabel, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog,
+    ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, ApiFilePipe,
   ],
   host: { '(document:keydown)': 'onKey($event)' },
   templateUrl: './pos-page.html',

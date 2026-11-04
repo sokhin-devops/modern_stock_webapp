@@ -1,129 +1,869 @@
 <div class="page">
   <div class="page-head">
-    <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'nav.reports' | translate }}</span></nav>
-    <div class="page-actions period">
-      <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" [ariaLabel]="'reports.from' | translate" />
-      <span class="muted">–</span>
-      <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" [ariaLabel]="'reports.to' | translate" />
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.reports' | translate }}</span>
+      @if (report(); as r) {
+        <span class="current">{{ 'reports.name.' + r.id | translate }}</span>
+      }
+    </nav>
+    <div class="page-actions report-actions">
+      @if (ready()) {
+        <button pButton type="button" [outlined]="true" (click)="print()">
+          <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
+        </button>
+        <span [pTooltip]="canExport() ? '' : ('reports.excelPlan' | translate)" tooltipPosition="bottom">
+          <button pButton type="button" [outlined]="true" (click)="exportExcel()" [disabled]="!canExport()">
+            <i class="pi pi-file-excel" pButtonIcon></i><span pButtonLabel>{{ 'reports.excel' | translate }}</span>
+          </button>
+        </span>
+      }
     </div>
+    @if (report()?.period) {
+      <div class="page-actions period">
+        <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+                      [maxDate]="to()" [ariaLabel]="'reports.from' | translate" />
+        <span class="muted">–</span>
+        <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+                      [minDate]="from()" [ariaLabel]="'reports.to' | translate" />
+      </div>
+    }
   </div>
-  <div class="page-body">
-    <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))">
-      <p-tablist>
-        <p-tab value="sales">{{ 'reports.tabSales' | translate }}</p-tab>
-        <p-tab value="profit">{{ 'reports.tabProfit' | translate }}</p-tab>
-        <p-tab value="debts">{{ 'reports.tabDebts' | translate }}</p-tab>
-        <p-tab value="stock">{{ 'reports.tabStock' | translate }}</p-tab>
-      </p-tablist>
-      <p-tabpanels>
-        <p-tabpanel value="sales">
-          @if (sales(); as s) {
-            <div class="kpis">
-              <div class="kpi"><div class="kpi-label">{{ 'reports.sales' | translate }}</div><div class="kpi-value">{{ s.sales | currency: 'USD' }}</div><div class="kpi-sub">{{ s.documents }} · {{ 'reports.documents' | translate }}</div></div>
-              <div class="kpi"><div class="kpi-label">{{ 'reports.grossProfit' | translate }}</div><div class="kpi-value">{{ s.grossProfit | currency: 'USD' }}</div><div class="kpi-sub">{{ 'reports.margin' | translate: { pct: margin() } }}</div></div>
-              <div class="kpi"><div class="kpi-label">{{ 'reports.cost' | translate }}</div><div class="kpi-value">{{ s.cost | currency: 'USD' }}</div></div>
-              <div class="kpi"><div class="kpi-label">{{ 'reports.vat' | translate }}</div><div class="kpi-value">{{ s.vat | currency: 'USD' }}</div></div>
+
+  <div class="page-body reports">
+    <!-- The report picker: a list by area on computers, a select on smaller screens -->
+    <nav class="report-nav" [attr.aria-label]="'reports.pick' | translate">
+      @for (g of areas(); track g.area) {
+        <div class="report-area">{{ 'reports.area.' + g.area | translate }}</div>
+        @for (r of g.reports; track r.id) {
+          <button type="button" class="report-link" [class.active]="report()?.id === r.id" (click)="pick(r.id)"
+                  [attr.aria-current]="report()?.id === r.id ? 'page' : null">
+            <i class="icon" [class]="r.icon"></i><span>{{ 'reports.name.' + r.id | translate }}</span>
+          </button>
+        }
+      }
+    </nav>
+
+    <section class="report-body" #reportBody>
+      <div class="report-picker no-print">
+        <p-select [options]="pickerOptions()" optionLabel="label" optionValue="value" [ngModel]="report()?.id"
+                  (ngModelChange)="pick($event)" appendTo="body" [ariaLabel]="'reports.pick' | translate" />
+      </div>
+
+      @if (report(); as r) {
+        <p class="muted report-lead">{{ 'reports.lead.' + r.id | translate }}</p>
+
+        @if (r.id === 'sales' || r.id === 'gross-profit' || r.id === 'expiry' || r.id === 'stock-on-hand' || r.id === 'slow-moving'
+             || r.id === 'purchases' || r.id === 'customer-statement' || r.id === 'supplier-statement') {
+          <div class="filters no-print">
+            @if (r.id === 'slow-moving') {
+              <p-selectbutton [options]="slowOptions" optionValue="value" [ngModel]="slowDays()" (ngModelChange)="slowDays.set($event)"
+                              [allowEmpty]="false" size="small" [ariaLabel]="'reports.notSoldFor' | translate">
+                <ng-template #item let-o>{{ o.label | translate: { n: o.value } }}</ng-template>
+              </p-selectbutton>
+            }
+            @if (r.id === 'purchases') {
+              <p-selectbutton [options]="purchasesByOptions" optionValue="value" [ngModel]="purchasesBy()" (ngModelChange)="setBy($event)"
+                              [allowEmpty]="false" size="small" [ariaLabel]="'reports.groupBy' | translate">
+                <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+              </p-selectbutton>
+            }
+            @if (r.id === 'customer-statement' || r.id === 'supplier-statement') {
+              <p-autocomplete [ngModel]="party()" (ngModelChange)="party.set($event?.id ? $event : null)" [suggestions]="parties()"
+                              (completeMethod)="findParty($event)" optionLabel="name" [forceSelection]="true" [dropdown]="true" appendTo="body"
+                              [placeholder]="(r.id === 'customer-statement' ? 'reports.pickCustomer' : 'reports.pickSupplier') | translate"
+                              [ariaLabel]="(r.id === 'customer-statement' ? 'sales.customer' : 'purchase.supplier') | translate" class="party-pick">
+                <ng-template #item let-p><div><b>{{ p.name }}</b> <small class="muted">{{ p.phone }}</small></div></ng-template>
+              </p-autocomplete>
+            }
+            @if (r.id === 'sales' || r.id === 'gross-profit') {
+              <p-selectbutton [options]="byOptions()" optionValue="value" [ngModel]="by()" (ngModelChange)="setBy($event)"
+                              [allowEmpty]="false" size="small" [ariaLabel]="'reports.groupBy' | translate">
+                <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+              </p-selectbutton>
+            }
+            @if (r.id === 'expiry') {
+              <p-selectbutton [options]="dayOptions" optionValue="value" [ngModel]="days()" (ngModelChange)="days.set($event)"
+                              [allowEmpty]="false" size="small" [ariaLabel]="'reports.withinDays' | translate: { n: '' }">
+                <ng-template #item let-o>{{ o.label | translate: { n: o.value } }}</ng-template>
+              </p-selectbutton>
+            }
+            @if (r.id === 'stock-on-hand') {
+              <p-select [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
+                        (ngModelChange)="categoryId.set($event)" [showClear]="true" [placeholder]="'reports.allCategories' | translate"
+                        [filter]="categoryOptions().length > 8" appendTo="body" [ariaLabel]="'products.category' | translate" />
+            }
+          </div>
+        }
+
+        @if (data.isLoading()) {
+          <p-progressbar mode="indeterminate" class="loading no-print" />
+        }
+        @if ((r.id === 'customer-statement' || r.id === 'supplier-statement') && !party()) {
+          <p class="muted empty">{{ (r.id === 'customer-statement' ? 'reports.pickCustomerHint' : 'reports.pickSupplierHint') | translate }}</p>
+        }
+
+        <!-- Sales summary and gross profit -->
+        @if (sales(); as s) {
+          @if (s.ownSalesOnly) {
+            <p class="form-note"><i class="icon pi pi-user"></i>{{ 'reports.ownSales' | translate }}</p>
+          }
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.sales' | translate }}</div>
+              <div class="kpi-value">{{ s.sales | currency: 'USD' }}</div>
+              <div class="kpi-sub">
+                @if (rate(); as rate) {
+                  ៛{{ s.sales * rate | number: '1.0-0' }} ·
+                }
+                {{ 'reports.documentsN' | translate: { n: s.documents } }}
+              </div>
             </div>
+            @if (r.id === 'gross-profit') {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.cost' | translate }}</div>
+                <div class="kpi-value">{{ s.cost | currency: 'USD' }}</div>
+              </div>
+            }
+            @if (s.grossProfit != null) {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.grossProfit' | translate }}</div>
+                <div class="kpi-value" [class.danger-text]="s.grossProfit < 0">{{ s.grossProfit | currency: 'USD' }}</div>
+                <div class="kpi-sub">{{ 'reports.margin' | translate: { pct: s.margin } }}</div>
+              </div>
+            }
+            @if (r.id === 'sales') {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.vat' | translate }}</div>
+                <div class="kpi-value">{{ s.vat | currency: 'USD' }}</div>
+              </div>
+            }
+          </div>
+
+          @if (s.by === 'DAY' && s.rows.length) {
             <section class="card">
               <h2 class="card-title">{{ 'reports.byDay' | translate }}</h2>
-              @if (s.days.length) {
-                <div class="bars" role="img" [attr.aria-label]="'reports.byDay' | translate">
-                  @for (d of s.days; track d.day) {
-                    <div class="bar-col" [title]="(d.day | date: 'dd/MM') + ' · $' + (d.sales | number: '1.2-2')">
-                      <span class="bar" [style.height.%]="(d.sales / maxDay()) * 100"></span>
-                      <small>{{ d.day | date: 'dd' }}</small>
-                    </div>
+              <ms-bar-chart [points]="dayPoints()" [format]="money" [label]="'reports.byDay' | translate" />
+            </section>
+          }
+
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="s.rows" [paginator]="!full() && s.rows.length > 50" [rows]="50" dataKey="key"
+                     [sortField]="s.by === 'DAY' ? 'key' : 'sales'" [sortOrder]="s.by === 'DAY' ? 1 : -1">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="label">{{ 'reports.by.' + s.by | translate }}</th>
+                  @if (s.by === 'PRODUCT') {
+                    <th class="num" pSortableColumn="qty">{{ 'common.qty' | translate }}</th>
                   }
-                </div>
-                <!-- The same numbers as a table, for screen readers -->
-                <table class="tw:sr-only">
-                  <caption>{{ 'reports.byDay' | translate }}</caption>
-                  @for (d of s.days; track d.day) {
-                    <tr><th>{{ d.day | date: 'dd/MM/yyyy' }}</th><td>{{ d.sales | currency: 'USD' }}</td><td>{{ d.profit | currency: 'USD' }}</td></tr>
+                  @if (r.id === 'sales') {
+                    <th class="num" pSortableColumn="documents">{{ 'reports.documents' | translate }}</th>
                   }
-                </table>
-              } @else {
-                <p class="muted empty">{{ 'reports.noData' | translate }}</p>
-              }
-            </section>
-            <section class="card">
-              <h2 class="card-title">{{ 'reports.topProducts' | translate }}</h2>
-              <p-table class="ms-table" [value]="s.topProducts">
-                <ng-template #header>
-                  <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th><th class="num">{{ 'reports.sales' | translate }}</th><th class="num">{{ 'reports.grossProfit' | translate }}</th></tr>
-                </ng-template>
-                <ng-template #body let-p>
-                  <tr><td class="strong">{{ p.name }}</td><td class="num">{{ p.qty | number: '1.0-3' }}</td><td class="num">{{ p.sales | currency: 'USD' }}</td><td class="num" [class.danger-text]="p.profit < 0">{{ p.profit | currency: 'USD' }}</td></tr>
-                </ng-template>
-                <ng-template #emptymessage><tr><td colspan="4" class="empty-cell">{{ 'reports.noData' | translate }}</td></tr></ng-template>
-              </p-table>
-            </section>
-          }
-        </p-tabpanel>
+                  <th class="num" pSortableColumn="sales">{{ 'reports.sales' | translate }}</th>
+                  @if (r.id === 'gross-profit') {
+                    <th class="num" pSortableColumn="cost">{{ 'reports.cost' | translate }}</th>
+                    <th class="num" pSortableColumn="profit">{{ 'reports.grossProfit' | translate }}</th>
+                    <th class="num" pSortableColumn="margin">{{ 'reports.marginCol' | translate }}</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td>
+                    <div class="strong">{{ s.by === 'DAY' ? (row.key | date: 'EEE dd/MM/yyyy') : rowLabel(row, s.by) }}</div>
+                    @if (s.by !== 'DAY') {
+                      <div class="share" aria-hidden="true"><span [style.width.%]="(row.sales / salesMax()) * 100"></span></div>
+                    }
+                  </td>
+                  @if (s.by === 'PRODUCT') {
+                    <td class="num">{{ row.qty | number: '1.0-3' }} {{ row.unitSymbol }}</td>
+                  }
+                  @if (r.id === 'sales') {
+                    <td class="num">{{ row.documents }}</td>
+                  }
+                  <td class="num strong">{{ row.sales | currency: 'USD' }}</td>
+                  @if (r.id === 'gross-profit') {
+                    <td class="num muted">{{ row.cost | currency: 'USD' }}</td>
+                    <td class="num" [class.danger-text]="row.profit < 0">{{ row.profit | currency: 'USD' }}</td>
+                    <td class="num">{{ row.margin | number: '1.1-1' }}%</td>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'reports.noData' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
 
-        <p-tabpanel value="profit">
-          @if (profit(); as p) {
-            <section class="card statement">
-              <div class="line"><span>{{ 'reports.revenue' | translate }}</span><b>{{ p.revenue | currency: 'USD' }}</b></div>
-              <div class="line"><span>− {{ 'reports.cost' | translate }}</span><b>{{ p.costOfGoods | currency: 'USD' }}</b></div>
-              <div class="line total"><span>{{ 'reports.grossProfit' | translate }}</span><b>{{ p.grossProfit | currency: 'USD' }}</b></div>
-              <div class="line"><span>− {{ 'reports.expenses' | translate }}</span><b>{{ p.expenses | currency: 'USD' }}</b></div>
-              @for (e of p.expensesByCategory; track e.category) {
-                <div class="line sub"><span>{{ e.category }}</span><span>{{ e.amount | currency: 'USD' }}</span></div>
-              }
-              <div class="line total grand"><span>{{ 'reports.netProfit' | translate }}</span><b [class.danger-text]="p.netProfit < 0">{{ p.netProfit | currency: 'USD' }}</b></div>
-            </section>
-          }
-        </p-tabpanel>
-
-        <p-tabpanel value="debts">
-          @if (debts(); as d) {
-            <div class="two">
-              <section class="card">
-                <h2 class="card-title">{{ 'reports.customersOwe' | translate }} · {{ d.customersOwe | currency: 'USD' }}</h2>
-                <p-table class="ms-table" [value]="d.customers">
-                  <ng-template #body let-c><tr><td class="strong">{{ c.name }}<br /><small class="muted">{{ c.phone }}</small></td><td class="num danger-text">{{ c.balance | currency: 'USD' }}</td></tr></ng-template>
-                  <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'partners.settled' | translate }}</td></tr></ng-template>
-                </p-table>
-              </section>
-              <section class="card">
-                <h2 class="card-title">{{ 'reports.weOwe' | translate }} · {{ d.weOwe | currency: 'USD' }}</h2>
-                <p-table class="ms-table" [value]="d.suppliers">
-                  <ng-template #body let-s><tr><td class="strong">{{ s.name }}<br /><small class="muted">{{ s.phone }}</small></td><td class="num">{{ s.balance | currency: 'USD' }}</td></tr></ng-template>
-                  <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'partners.settled' | translate }}</td></tr></ng-template>
-                </p-table>
-              </section>
+        <!-- Profit and loss -->
+        @if (profit(); as p) {
+          <section class="card statement">
+            <div class="line"><span>{{ 'reports.revenue' | translate }}</span><b>{{ p.revenue | currency: 'USD' }}</b></div>
+            <div class="line"><span>− {{ 'reports.cost' | translate }}</span><b>{{ p.costOfGoods | currency: 'USD' }}</b></div>
+            <div class="line total"><span>{{ 'reports.grossProfit' | translate }}</span><b>{{ p.grossProfit | currency: 'USD' }}</b></div>
+            <div class="line"><span>− {{ 'reports.expenses' | translate }}</span><b>{{ p.expenses | currency: 'USD' }}</b></div>
+            @for (e of p.expensesByCategory; track e.category) {
+              <div class="line sub"><span>{{ e.category }}</span><span>{{ e.amount | currency: 'USD' }}</span></div>
+            }
+            <div class="line total grand">
+              <span>{{ 'reports.netProfit' | translate }}</span>
+              <b [class.danger-text]="p.netProfit < 0">{{ p.netProfit | currency: 'USD' }}</b>
             </div>
-          }
-        </p-tabpanel>
+          </section>
+        }
 
-        <p-tabpanel value="stock">
-          @if (summary(); as s) {
-            <div class="kpis">
-              <div class="kpi"><div class="kpi-label">{{ 'reports.stockValue' | translate }}</div><div class="kpi-value">{{ s.onHandValue | currency: 'USD' }}</div></div>
-              <div class="kpi"><div class="kpi-label">{{ 'reports.lowStock' | translate }}</div><div class="kpi-value">{{ s.lowStockItems }}</div></div>
-              <div class="kpi"><div class="kpi-label">{{ 'reports.expiring' | translate }}</div><div class="kpi-value">{{ s.expiringIn30Days }}</div></div>
+        <!-- Customer debt -->
+        @if (customerDebt(); as c) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.customersOwe' | translate }}</div>
+              <div class="kpi-value">{{ c.total | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ 'reports.customersN' | translate: { n: c.rows.length } }}</div>
             </div>
-          }
-          <div class="two">
-            <section class="card">
-              <h2 class="card-title">{{ 'reports.lowStock' | translate }}</h2>
-              <p-table class="ms-table" [value]="low()">
-                <ng-template #body let-r><tr><td class="strong">{{ r.nameEn }}</td><td class="num danger-text">{{ r.qtyOnHand | number: '1.0-3' }} {{ r.unitSymbol }}</td></tr></ng-template>
-                <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'dashboard.lowStockEmpty' | translate }}</td></tr></ng-template>
-              </p-table>
-            </section>
-            <section class="card">
-              <h2 class="card-title">{{ 'reports.expiring' | translate }}</h2>
-              <p-table class="ms-table" [value]="expiring()">
-                <ng-template #body let-b><tr><td class="strong">{{ b.productName }}<br /><small class="muted">{{ b.warehouseName }}</small></td>
-                  <td class="num" [class.danger-text]="b.expired">{{ b.expiryDate | date: 'dd/MM/yyyy' }}</td><td class="num">{{ b.qtyOnHand | number: '1.0-3' }}</td></tr></ng-template>
-                <ng-template #emptymessage><tr><td colspan="3" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
-              </p-table>
-            </section>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.overdue' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="c.overdue > 0">{{ c.overdue | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ 'reports.overdueInvoicesN' | translate: { n: c.overdueInvoices } }}</div>
+            </div>
           </div>
-        </p-tabpanel>
-      </p-tabpanels>
-    </p-tabs>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="c.rows" [paginator]="!full() && c.rows.length > 50" [rows]="50" dataKey="id">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="name">{{ 'sales.customer' | translate }}</th>
+                  <th class="num" pSortableColumn="openInvoices">{{ 'reports.openInvoices' | translate }}</th>
+                  <th pSortableColumn="oldestDue">{{ 'reports.oldestDue' | translate }}</th>
+                  <th class="num" pSortableColumn="overdue">{{ 'reports.overdue' | translate }}</th>
+                  <th class="num" pSortableColumn="balance">{{ 'reports.balance' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td><div class="strong">{{ row.name }}</div><div class="muted small">{{ row.phone }}</div></td>
+                  <td class="num">{{ row.openInvoices }}</td>
+                  <td [class.danger-text]="row.overdue > 0">{{ row.oldestDue ? (row.oldestDue | date: 'dd/MM/yyyy') : '—' }}</td>
+                  <td class="num" [class.danger-text]="row.overdue > 0">{{ row.overdue | currency: 'USD' }}</td>
+                  <td class="num strong">{{ row.balance | currency: 'USD' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="5" class="empty-cell">{{ 'partners.settled' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Supplier debt -->
+        @if (supplierDebt(); as sd) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.weOwe' | translate }}</div>
+              <div class="kpi-value">{{ sd.total | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ 'reports.suppliersN' | translate: { n: sd.rows.length } }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.dueSoon' | translate }}</div>
+              <div class="kpi-value">{{ sd.dueSoon | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ 'reports.within7' | translate }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.overdue' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="sd.overdue > 0">{{ sd.overdue | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ 'reports.overdueBillsN' | translate: { n: sd.overdueBills } }}</div>
+            </div>
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="sd.rows" [paginator]="!full() && sd.rows.length > 50" [rows]="50" dataKey="id">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="name">{{ 'purchase.supplier' | translate }}</th>
+                  <th class="num" pSortableColumn="openBills">{{ 'reports.openBills' | translate }}</th>
+                  <th pSortableColumn="nextDue">{{ 'reports.nextDue' | translate }}</th>
+                  <th class="num" pSortableColumn="dueSoon">{{ 'reports.dueSoon' | translate }}</th>
+                  <th class="num" pSortableColumn="overdue">{{ 'reports.overdue' | translate }}</th>
+                  <th class="num" pSortableColumn="balance">{{ 'reports.balance' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td><div class="strong">{{ row.name }}</div><div class="muted small">{{ row.phone }}</div></td>
+                  <td class="num">{{ row.openBills }}</td>
+                  <td>{{ row.nextDue ? (row.nextDue | date: 'dd/MM/yyyy') : '—' }}</td>
+                  <td class="num">{{ row.dueSoon | currency: 'USD' }}</td>
+                  <td class="num" [class.danger-text]="row.overdue > 0">{{ row.overdue | currency: 'USD' }}</td>
+                  <td class="num strong">{{ row.balance | currency: 'USD' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'partners.settled' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Stock on hand -->
+        @if (onHand(); as o) {
+          <div class="kpis">
+            @if (o.value != null) {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.stockValue' | translate }}</div>
+                <div class="kpi-value">{{ o.value | currency: 'USD' }}</div>
+                <div class="kpi-sub">{{ 'dashboard.stockValueHint' | translate }}</div>
+              </div>
+            }
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.productsInStock' | translate }}</div>
+              <div class="kpi-value">{{ o.products }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'dashboard.inTransit' | translate }}</div>
+              <div class="kpi-value">{{ o.inTransitValue != null ? (o.inTransitValue | currency: 'USD') : o.transfersInTransit }}</div>
+              <div class="kpi-sub">{{ 'reports.transfersN' | translate: { n: o.transfersInTransit } }}</div>
+            </div>
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="o.rows" [paginator]="!full() && o.rows.length > 50" [rows]="50" dataKey="productId">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th pSortableColumn="category">{{ 'products.category' | translate }}</th>
+                  <th class="num" pSortableColumn="qty">{{ 'dashboard.onHand' | translate }}</th>
+                  @if (o.value != null) {
+                    <th class="num" pSortableColumn="avgCost">{{ 'reports.avgCost' | translate }}</th>
+                    <th class="num" pSortableColumn="value">{{ 'reports.value' | translate }}</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td><div class="strong">{{ lang.name(row.name, row.nameKm) }}</div><div class="muted small">{{ row.sku }}</div></td>
+                  <td class="muted">{{ row.category ?? '—' }}</td>
+                  <td class="num" [class.danger-text]="row.qty < 0">{{ row.qty | packQty: row.pack : row.unitSymbol }}</td>
+                  @if (o.value != null) {
+                    <td class="num muted">{{ row.avgCost | currency: 'USD' : 'symbol' : '1.2-4' }}</td>
+                    <td class="num strong">{{ row.value | currency: 'USD' }}</td>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="5" class="empty-cell">{{ 'reports.noStock' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Low stock and reorder suggestions -->
+        @if (reorder(); as ro) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.toReorder' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="ro.rows.length > 0">{{ ro.rows.length }}</div>
+              <div class="kpi-sub">{{ (ro.rows.length === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
+            </div>
+            @if (ro.suggestedValue != null) {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.orderValue' | translate }}</div>
+                <div class="kpi-value">{{ ro.suggestedValue | currency: 'USD' }}</div>
+                <div class="kpi-sub">{{ 'reports.atAvgCost' | translate }}</div>
+              </div>
+            }
+          </div>
+          <p class="muted small rule">{{ 'reports.reorderRule' | translate: { cover: ro.coverDays, days: ro.salesDays } }}</p>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="ro.rows" [paginator]="!full() && ro.rows.length > 50" [rows]="50" dataKey="productId">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th class="num" pSortableColumn="onHand">{{ 'dashboard.onHand' | translate }}</th>
+                  <th class="num" pSortableColumn="reorderLevel">{{ 'dashboard.reorderAt' | translate }}</th>
+                  <th class="num" pSortableColumn="soldPerDay">{{ 'reports.soldPerDay' | translate }}</th>
+                  <th class="num" pSortableColumn="leadTimeDays">{{ 'products.leadTime' | translate }}</th>
+                  <th class="num" pSortableColumn="suggestedQty">{{ 'reports.suggested' | translate }}</th>
+                  @if (ro.suggestedValue != null) {
+                    <th class="num" pSortableColumn="suggestedValue">{{ 'reports.value' | translate }}</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td><div class="strong">{{ lang.name(row.name, row.nameKm) }}</div><div class="muted small">{{ row.sku }}</div></td>
+                  <td class="num danger-text">{{ row.onHand | packQty: row.pack : row.unitSymbol }}</td>
+                  <td class="num muted">{{ row.reorderLevel | number: '1.0-3' }}</td>
+                  <td class="num muted">{{ row.soldPerDay | number: '1.0-2' }}</td>
+                  <td class="num muted">{{ row.leadTimeDays }}</td>
+                  <td class="num strong">{{ row.suggestedQty | packQty: row.pack : row.unitSymbol }}</td>
+                  @if (ro.suggestedValue != null) {
+                    <td class="num">{{ row.suggestedValue | currency: 'USD' }}</td>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="7" class="empty-cell">{{ 'dashboard.lowStockEmpty' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Near expiry and expired -->
+        @if (expiry(); as ex) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.expiredBatches' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="ex.expired > 0">{{ ex.expired }}</div>
+              @if (ex.expiredValue != null) {
+                <div class="kpi-sub">{{ ex.expiredValue | currency: 'USD' }}</div>
+              }
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.expiringWithin' | translate: { n: ex.days } }}</div>
+              <div class="kpi-value">{{ ex.expiring }}</div>
+              @if (ex.expiringValue != null) {
+                <div class="kpi-sub">{{ ex.expiringValue | currency: 'USD' }}</div>
+              }
+            </div>
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="ex.rows" [paginator]="!full() && ex.rows.length > 50" [rows]="50" dataKey="batchId">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th pSortableColumn="warehouse">{{ 'common.warehouse' | translate }}</th>
+                  <th>{{ 'reports.batch' | translate }}</th>
+                  <th pSortableColumn="expiryDate">{{ 'reports.expiryDate' | translate }}</th>
+                  <th class="num" pSortableColumn="qty">{{ 'common.qty' | translate }}</th>
+                  @if (ex.expiredValue != null) {
+                    <th class="num" pSortableColumn="value">{{ 'reports.value' | translate }}</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td class="strong">{{ lang.name(row.name, row.nameKm) }}</td>
+                  <td class="muted">{{ row.warehouse }}</td>
+                  <td class="muted">{{ row.batchNo ?? '—' }}</td>
+                  <td>
+                    {{ row.expiryDate | date: 'dd/MM/yyyy' }}
+                    @if (row.daysLeft < 0) {
+                      <span class="tag tag-danger">{{ 'reports.expiredTag' | translate }}</span>
+                    } @else {
+                      <span class="tag" [class.tag-warn]="row.daysLeft <= 7">{{ 'reports.daysLeft' | translate: { n: row.daysLeft } }}</span>
+                    }
+                  </td>
+                  <td class="num">{{ row.qty | number: '1.0-3' }} {{ row.unitSymbol }}</td>
+                  @if (ex.expiredValue != null) {
+                    <td class="num">{{ row.value | currency: 'USD' }}</td>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'reports.noExpiry' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Stock count differences -->
+        @if (counts(); as cd) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.countsPosted' | translate }}</div>
+              <div class="kpi-value">{{ cd.counts }}</div>
+              <div class="kpi-sub">{{ 'reports.linesDiffer' | translate: { n: cd.rows.length } }}</div>
+            </div>
+            @if (cd.gainValue != null) {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.found' | translate }}</div>
+                <div class="kpi-value">{{ cd.gainValue | currency: 'USD' }}</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.missing' | translate }}</div>
+                <div class="kpi-value" [class.danger-text]="cd.lossValue! < 0">{{ cd.lossValue | currency: 'USD' }}</div>
+              </div>
+            }
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="cd.rows" [paginator]="!full() && cd.rows.length > 50" [rows]="50">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="postedOn">{{ 'reports.count' | translate }}</th>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th class="num" pSortableColumn="systemQty">{{ 'counts.system' | translate }}</th>
+                  <th class="num" pSortableColumn="countedQty">{{ 'counts.counted' | translate }}</th>
+                  <th class="num" pSortableColumn="difference">{{ 'counts.difference' | translate }}</th>
+                  @if (cd.gainValue != null) {
+                    <th class="num" pSortableColumn="value">{{ 'reports.value' | translate }}</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td><div class="strong">{{ row.number }}</div><div class="muted small">{{ row.postedOn | date: 'dd/MM/yyyy' }} · {{ row.warehouse }}</div></td>
+                  <td>{{ lang.name(row.name, row.nameKm) }}</td>
+                  <td class="num muted">{{ row.systemQty | number: '1.0-3' }}</td>
+                  <td class="num">{{ row.countedQty | number: '1.0-3' }}</td>
+                  <td class="num strong" [class.danger-text]="row.difference < 0">
+                    {{ row.difference > 0 ? '+' : '' }}{{ row.difference | number: '1.0-3' }} {{ row.unitSymbol }}
+                  </td>
+                  @if (cd.gainValue != null) {
+                    <td class="num" [class.danger-text]="row.value < 0">{{ row.value | currency: 'USD' }}</td>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'reports.noDifferences' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- ABC analysis -->
+        @if (abc(); as a) {
+          <div class="kpis">
+            @for (g of a.groups; track g.group) {
+              <div class="kpi">
+                <div class="kpi-label"><span class="abc abc-{{ g.group }}">{{ g.group }}</span>{{ 'reports.abcGroup.' + g.group | translate }}</div>
+                <div class="kpi-value">{{ g.products }}</div>
+                <div class="kpi-sub">{{ 'reports.abcShare' | translate: { pct: (g.share | number: '1.0-1'), amount: (g.value | currency: 'USD') } }}</div>
+              </div>
+            }
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="a.rows" [paginator]="!full() && a.rows.length > 50" [rows]="50" dataKey="productId">
+              <ng-template #header>
+                <tr>
+                  <th>#</th>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th pSortableColumn="group">{{ 'reports.group' | translate }}</th>
+                  <th class="num" pSortableColumn="qty">{{ 'reports.sold' | translate }}</th>
+                  <th class="num" pSortableColumn="value">{{ 'reports.valueAtCost' | translate }}</th>
+                  <th class="num" pSortableColumn="share">{{ 'reports.share' | translate }}</th>
+                  <th class="num" pSortableColumn="cumulative">{{ 'reports.cumulative' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row let-i="rowIndex">
+                <tr>
+                  <td class="muted">{{ i + 1 }}</td>
+                  <td><div class="strong">{{ lang.name(row.name, row.nameKm) }}</div><div class="muted small">{{ row.sku }}</div></td>
+                  <td><span class="abc abc-{{ row.group }}">{{ row.group }}</span></td>
+                  <td class="num">{{ row.qty | number: '1.0-3' }} {{ row.unitSymbol }}</td>
+                  <td class="num strong">{{ row.value | currency: 'USD' }}</td>
+                  <td class="num">{{ row.share | number: '1.1-1' }}%</td>
+                  <td class="num muted">{{ row.cumulative | number: '1.1-1' }}%</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="7" class="empty-cell">{{ 'reports.noData' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+        <!-- Adjustments and losses -->
+        @if (losses(); as l) {
+          <div class="kpis">
+            @if (l.value != null) {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.lostValue' | translate }}</div>
+                <div class="kpi-value" [class.danger-text]="l.value > 0">{{ l.value | currency: 'USD' }}</div>
+                <div class="kpi-sub">{{ 'reports.atAvgCost' | translate }}</div>
+              </div>
+            }
+            @for (g of l.reasons; track g.reason) {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.lossReason.' + g.reason | translate }}</div>
+                <div class="kpi-value">{{ g.value != null ? (g.value | currency: 'USD') : g.products }}</div>
+                <div class="kpi-sub">{{ 'reports.productsN' | translate: { n: g.products } }}</div>
+              </div>
+            }
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="l.rows" [paginator]="!full() && l.rows.length > 50" [rows]="50">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="reason">{{ 'reports.reason' | translate }}</th>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th class="num" pSortableColumn="qty">{{ 'common.qty' | translate }}</th>
+                  @if (l.value != null) {
+                    <th class="num" pSortableColumn="value">{{ 'reports.valueAtCost' | translate }}</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td>{{ 'reports.lossReason.' + row.reason | translate }}</td>
+                  <td class="strong">{{ lang.name(row.name, row.nameKm) }}</td>
+                  <td class="num">{{ row.qty | number: '1.0-3' }} {{ row.unitSymbol }}</td>
+                  @if (l.value != null) {
+                    <td class="num strong">{{ row.value | currency: 'USD' }}</td>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="4" class="empty-cell">{{ 'reports.noLosses' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Slow-moving and dead stock -->
+        @if (slow(); as sl) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.notSoldFor' | translate: { n: sl.days } }}</div>
+              <div class="kpi-value">{{ sl.products }}</div>
+              <div class="kpi-sub">{{ 'reports.productsInStock' | translate }}</div>
+            </div>
+            @if (sl.value != null) {
+              <div class="kpi">
+                <div class="kpi-label">{{ 'reports.stockValue' | translate }}</div>
+                <div class="kpi-value">{{ sl.value | currency: 'USD' }}</div>
+                <div class="kpi-sub">{{ 'reports.atAvgCost' | translate }}</div>
+              </div>
+            }
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="sl.rows" [paginator]="!full() && sl.rows.length > 50" [rows]="50" dataKey="productId">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th pSortableColumn="category">{{ 'products.category' | translate }}</th>
+                  <th class="num" pSortableColumn="qty">{{ 'reports.onHand' | translate }}</th>
+                  @if (sl.value != null) {
+                    <th class="num" pSortableColumn="value">{{ 'reports.valueAtCost' | translate }}</th>
+                  }
+                  <th pSortableColumn="lastSold">{{ 'reports.lastSold' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td><div class="strong">{{ lang.name(row.name, row.nameKm) }}</div><div class="muted small">{{ row.sku }}</div></td>
+                  <td class="muted">{{ row.category ?? ('reports.none.CATEGORY' | translate) }}</td>
+                  <td class="num">{{ row.qty | packQty: row.pack : row.unitSymbol }}</td>
+                  @if (sl.value != null) {
+                    <td class="num strong">{{ row.value | currency: 'USD' }}</td>
+                  }
+                  <td [class.danger-text]="!row.lastSold">{{ row.lastSold ? (row.lastSold | date: 'dd/MM/yyyy') : ('reports.neverSold' | translate) }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="5" class="empty-cell">{{ 'reports.noSlow' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Cash shifts -->
+        @if (shifts(); as sh) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.shiftsClosed' | translate }}</div>
+              <div class="kpi-value">{{ sh.shifts }}</div>
+              <div class="kpi-sub">{{ 'reports.shortShiftsN' | translate: { n: sh.shortShifts } }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.short' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="sh.shortUsd < 0 || sh.shortKhr < 0">{{ sh.shortUsd | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ riel(sh.shortKhr) }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.over' | translate }}</div>
+              <div class="kpi-value">{{ sh.overUsd | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ riel(sh.overKhr) }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.voids' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="sh.voids > 0">{{ sh.voids }}</div>
+            </div>
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="sh.rows" [paginator]="!full() && sh.rows.length > 50" [rows]="50" dataKey="id">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="closedAt">{{ 'reports.closedAt' | translate }}</th>
+                  <th pSortableColumn="cashier">{{ 'reports.cashier' | translate }}</th>
+                  <th class="num">{{ 'reports.expected' | translate }}</th>
+                  <th class="num">{{ 'reports.counted' | translate }}</th>
+                  <th class="num" pSortableColumn="differenceUsd">{{ 'reports.difference' | translate }}</th>
+                  <th class="num">{{ 'reports.expected' | translate }} ៛</th>
+                  <th class="num">{{ 'reports.counted' | translate }} ៛</th>
+                  <th class="num" pSortableColumn="differenceKhr">{{ 'reports.difference' | translate }} ៛</th>
+                  <th class="num" pSortableColumn="voids">{{ 'reports.voids' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td>{{ row.closedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td><div class="strong">{{ row.cashier }}</div><div class="muted small">{{ row.branch }}</div></td>
+                  <td class="num">{{ row.expectedUsd | currency: 'USD' }}</td>
+                  <td class="num">{{ row.countedUsd != null ? (row.countedUsd | currency: 'USD') : '—' }}</td>
+                  <td class="num strong" [class.danger-text]="row.differenceUsd < 0">{{ row.differenceUsd != null ? (row.differenceUsd | currency: 'USD') : '—' }}</td>
+                  <td class="num">{{ riel(row.expectedKhr) }}</td>
+                  <td class="num">{{ row.countedKhr != null ? riel(row.countedKhr) : '—' }}</td>
+                  <td class="num strong" [class.danger-text]="row.differenceKhr < 0">{{ row.differenceKhr != null ? riel(row.differenceKhr) : '—' }}</td>
+                  <td class="num" [class.danger-text]="row.voids > 0">{{ row.voids }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="9" class="empty-cell">{{ 'reports.noShifts' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- VAT summary -->
+        @if (vat(); as v) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.salesVat' | translate }}</div>
+              <div class="kpi-value">{{ v.salesVat | currency: 'USD' }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.purchaseVat' | translate }}</div>
+              <div class="kpi-value">{{ v.purchaseVat | currency: 'USD' }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.vatPayable' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="v.payable > 0">{{ v.payable | currency: 'USD' }}</div>
+              @if (rate(); as rate) {
+                <div class="kpi-sub">៛{{ v.payable * rate | number: '1.0-0' }}</div>
+              }
+            </div>
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="v.rows" dataKey="month">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'reports.month' | translate }}</th>
+                  <th class="num">{{ 'reports.taxableSales' | translate }}</th>
+                  <th class="num">{{ 'reports.salesVat' | translate }}</th>
+                  <th class="num">{{ 'reports.purchasesExVat' | translate }}</th>
+                  <th class="num">{{ 'reports.purchaseVat' | translate }}</th>
+                  <th class="num">{{ 'reports.vatPayable' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td class="strong">{{ row.month + '-01' | date: 'MMMM yyyy' }}</td>
+                  <td class="num">{{ row.taxableSales | currency: 'USD' }}</td>
+                  <td class="num">{{ row.salesVat | currency: 'USD' }}</td>
+                  <td class="num">{{ row.purchases | currency: 'USD' }}</td>
+                  <td class="num">{{ row.purchaseVat | currency: 'USD' }}</td>
+                  <td class="num strong">{{ row.payable | currency: 'USD' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'reports.noData' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Purchases -->
+        @if (purchases(); as pu) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.spend' | translate }}</div>
+              <div class="kpi-value">{{ pu.spend - pu.returned | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ 'reports.receiptsN' | translate: { n: pu.receipts } }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.received' | translate }}</div>
+              <div class="kpi-value">{{ pu.spend | currency: 'USD' }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.returnedToSuppliers' | translate }}</div>
+              <div class="kpi-value">{{ pu.returned | currency: 'USD' }}</div>
+            </div>
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="pu.rows" [paginator]="!full() && pu.rows.length > 50" [rows]="50" dataKey="key">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="label">{{ 'reports.purchasesBy.' + pu.by | translate }}</th>
+                  @if (pu.by === 'PRODUCT') {
+                    <th class="num" pSortableColumn="qty">{{ 'common.qty' | translate }}</th>
+                  }
+                  <th class="num" pSortableColumn="spend">{{ 'reports.received' | translate }}</th>
+                  <th class="num" pSortableColumn="returned">{{ 'reports.returnedShort' | translate }}</th>
+                  @if (pu.by === 'PRODUCT') {
+                    <th class="num" pSortableColumn="avgCost">{{ 'reports.avgCost' | translate }}</th>
+                  }
+                  <th class="num" pSortableColumn="receipts">{{ 'reports.receipts' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td class="strong">{{ row.labelKm ? lang.name(row.label, row.labelKm) : row.label }}</td>
+                  @if (pu.by === 'PRODUCT') {
+                    <td class="num">{{ row.qty | number: '1.0-3' }} {{ row.unitSymbol }}</td>
+                  }
+                  <td class="num strong">{{ row.spend | currency: 'USD' }}</td>
+                  <td class="num muted">{{ row.returned ? (row.returned | currency: 'USD') : '' }}</td>
+                  @if (pu.by === 'PRODUCT') {
+                    <td class="num">{{ row.avgCost | currency: 'USD' : 'symbol' : '1.2-4' }}</td>
+                  }
+                  <td class="num">{{ row.receipts }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'reports.noData' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+
+        <!-- Customer and supplier statements -->
+        @if (statement(); as st) {
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.openingBalance' | translate }}</div>
+              <div class="kpi-value">{{ st.opening | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ st.from | date: 'dd/MM/yyyy' }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.increases.' + st.party | translate }}</div>
+              <div class="kpi-value">{{ st.debits | currency: 'USD' }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.decreases.' + st.party | translate }}</div>
+              <div class="kpi-value">{{ st.credits | currency: 'USD' }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">{{ 'reports.closingBalance' | translate }}</div>
+              <div class="kpi-value" [class.danger-text]="st.closing > 0">{{ st.closing | currency: 'USD' }}</div>
+              <div class="kpi-sub">{{ st.to | date: 'dd/MM/yyyy' }}</div>
+            </div>
+          </div>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="st.lines" [paginator]="!full() && st.lines.length > 50" [rows]="50">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'common.date' | translate }}</th>
+                  <th>{{ 'reports.document' | translate }}</th>
+                  <th>{{ 'common.number' | translate }}</th>
+                  <th class="num">{{ 'reports.debit' | translate }}</th>
+                  <th class="num">{{ 'reports.credit' | translate }}</th>
+                  <th class="num">{{ 'reports.balance' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td>{{ row.date | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ 'reports.docType.' + row.type | translate }}</td>
+                  <td class="strong">{{ row.number }}</td>
+                  <td class="num">{{ row.debit ? (row.debit | currency: 'USD') : '' }}</td>
+                  <td class="num">{{ row.credit ? (row.credit | currency: 'USD') : '' }}</td>
+                  <td class="num strong">{{ row.balance | currency: 'USD' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'reports.noMovements' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+      } @else {
+        <p class="muted empty">{{ 'reports.noneForRole' | translate }}</p>
+      }
+    </section>
   </div>
 </div>

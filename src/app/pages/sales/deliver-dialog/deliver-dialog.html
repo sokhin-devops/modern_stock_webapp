@@ -1,0 +1,41 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(760px, 96vw)' }"
+          [header]="('orders.deliver' | translate) + (order() ? ' · ' + order()!.number : '')">
+  <div class="ms-form">
+    <p class="muted">{{ 'orders.deliverLead' | translate: { customer: order()?.customerName } }}</p>
+    <table class="lines">
+      <thead>
+        <tr>
+          <th>{{ 'common.product' | translate }}</th>
+          <th class="num">{{ 'orders.ordered' | translate }}</th>
+          <th class="num">{{ 'orders.deliveredQty' | translate }}</th>
+          <th class="num">{{ 'orders.toDeliver' | translate }}</th>
+          <th class="qty-col">{{ 'orders.now' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of rows(); track r.id; let i = $index) {
+          <tr [class.off]="r.left <= 0">
+            <td class="strong">{{ r.productName }}</td>
+            <td class="num muted">{{ r.ordered | number: '1.0-3' }} {{ r.unitSymbol }}</td>
+            <td class="num muted">{{ r.delivered | number: '1.0-3' }}</td>
+            <td class="num">{{ r.left | number: '1.0-3' }}</td>
+            <td class="qty-col">
+              <p-inputnumber [ngModel]="r.qty" (ngModelChange)="setQty(i, $event)" [min]="0" [max]="r.left" [maxFractionDigits]="3"
+                             [disabled]="r.left <= 0" locale="en-US" [fluid]="true" [ariaLabel]="('orders.now' | translate) + ' ' + r.productName" />
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="ms-field">
+      <label msLabel for="dl-note" optional>{{ 'common.note' | translate }}</label>
+      <input pInputText id="dl-note" [ngModel]="note()" (ngModelChange)="note.set($event)" maxlength="500" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !any()">
+      <span pButtonLabel>{{ 'orders.deliverInvoice' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

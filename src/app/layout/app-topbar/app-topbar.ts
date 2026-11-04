@@ -9,6 +9,7 @@ import { Popover } from 'primeng/popover';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
 
+import { ALERT_TARGETS, AlertsService } from '../../core/alerts.service';
 import { MyBusiness } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
@@ -36,6 +37,8 @@ export class AppTopbar {
   protected readonly business = inject(BusinessService);
   protected readonly lang = inject(LangService);
   protected readonly theme = inject(ThemeModeService);
+  protected readonly alerts = inject(AlertsService);
+  protected readonly targets = ALERT_TARGETS;
   private readonly screen = inject(ScreenService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
@@ -80,6 +83,12 @@ export class AppTopbar {
   /** Branch selector (the chip): all branches, then each branch. */
   protected readonly branchItems = computed<MenuItem[]>(() => [{ label: this.t('shell.branch'), items: this.branchEntries() }]);
 
+  /** Opens the alerts with fresh numbers. */
+  protected openAlerts(event: Event, popover: Popover): void {
+    this.alerts.refresh();
+    popover.toggle(event);
+  }
+
   protected initials(b: MyBusiness): string {
     return b.nameEn.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
   }
@@ -107,8 +116,9 @@ export class AppTopbar {
         command: () => this.business.selectBranch(null),
       },
       ...this.business.branches().map((b) => ({
-        label: this.lang.name(b.nameEn, b.nameKm) + (b.main ? ` · ${this.t('shell.mainBranch')}` : ''),
-        icon: 'pi pi-shop',
+        label: this.lang.name(b.nameEn, b.nameKm) + (b.main ? ` · ${this.t('shell.mainBranch')}` : '')
+          + (b.readOnly ? ` · ${this.t('shell.readOnly')}` : ''),
+        icon: b.readOnly ? 'pi pi-lock' : 'pi pi-shop',
         styleClass: b.id === selected ? 'active' : undefined,
         command: () => this.business.selectBranch(b.id),
       })),

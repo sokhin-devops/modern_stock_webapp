@@ -8,6 +8,12 @@
   <div class="page-body">
     <form class="settings-card ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <p class="muted">{{ 'settings.profile.lead' | translate }}</p>
+      <div class="ms-field">
+        <span msLabel>{{ 'settings.profile.logo' | translate }}</span>
+        <ms-image-field [url]="logoUrl() | apiFile" [label]="'settings.profile.logo' | translate" icon="pi pi-building"
+                        [busy]="logoBusy()" (pick)="uploadLogo($event)" (remove)="removeLogo()" />
+        <small class="field-hint">{{ 'settings.profile.logoHint' | translate }}</small>
+      </div>
       <div class="ms-form-row">
         <div class="ms-field">
           <label msLabel for="bp-nameEn" control="nameEn">{{ 'settings.profile.nameEn' | translate }}</label>

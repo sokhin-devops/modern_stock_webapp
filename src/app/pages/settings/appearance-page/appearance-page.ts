@@ -7,12 +7,12 @@ import { ApiService } from '../../../core/api/api.service';
 import { BusinessProfile } from '../../../core/api/models';
 import { BusinessService, PALETTES } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
-import { ThemeModeService } from '../../../core/theme-mode.service';
+import { ThemeModeService, UiMode } from '../../../core/theme-mode.service';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 
 /**
  * Appearance (prototype appearance.html): the business color, one of five tested palettes, for everyone in the
- * business; and my own light or dark mode, which this browser remembers.
+ * business; and my own light, dark or device mode, saved to my account.
  */
 @Component({
   selector: 'ms-appearance-page',
@@ -37,6 +37,7 @@ export class AppearancePage {
   protected readonly modes = [
     { value: 'light', label: 'settings.appearance.light', icon: 'pi pi-sun' },
     { value: 'dark', label: 'settings.appearance.dark', icon: 'pi pi-moon' },
+    { value: 'system', label: 'settings.appearance.system', icon: 'pi pi-desktop' },
   ];
 
   protected pick(color: string): void {
@@ -59,9 +60,7 @@ export class AppearancePage {
     });
   }
 
-  protected setMode(mode: 'light' | 'dark'): void {
-    if ((mode === 'dark') !== this.theme.dark()) {
-      this.theme.toggle();
-    }
+  protected setMode(mode: UiMode): void {
+    this.theme.set(mode);
   }
 }

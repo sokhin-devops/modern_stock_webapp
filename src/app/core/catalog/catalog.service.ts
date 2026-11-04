@@ -74,6 +74,17 @@ export class CatalogService {
       : this.http.put<Product>(`${API}/products/${id}`, body);
   }
 
+  /** Adds or replaces the product's photo (JPEG, PNG or WebP up to 2 MB). */
+  uploadPhoto(id: number, file: File): Observable<Product> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<Product>(`${API}/products/${id}/photo`, form);
+  }
+
+  removePhoto(id: number): Observable<Product> {
+    return this.http.delete<Product>(`${API}/products/${id}/photo`);
+  }
+
   /** Products are never deleted, only deactivated (their history stays). */
   deactivateProduct(id: number): Observable<void> {
     return this.http.delete<void>(`${API}/products/${id}`);

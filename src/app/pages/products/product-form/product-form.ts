@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, model, output, signal, untracked, viewChild } from '@angular/core';
 import { FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
@@ -9,14 +9,17 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Tooltip } from 'primeng/tooltip';
+import { of, switchMap } from 'rxjs';
 
 import { Product, ProductRequest } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { CatalogService } from '../../../core/catalog/catalog.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
+import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { revealErrors } from '../../../shared/forms';
+import { ImageField } from '../../../shared/image-field/image-field';
 
 /**
  * Add or edit a product (prototype drw-product) in a drawer beside the list: names, codes, category, stock unit,
@@ -27,7 +30,7 @@ import { revealErrors } from '../../../shared/forms';
   selector: 'ms-product-form',
   imports: [
     ReactiveFormsModule, TranslatePipe, Drawer, InputText, InputNumber, Select, ToggleSwitch, ButtonDirective,
-    ButtonIcon, ButtonLabel, Tooltip, FieldLabel,
+    ButtonIcon, ButtonLabel, Tooltip, FieldLabel, ImageField, ApiFilePipe,
   ],
   templateUrl: './product-form.html',
   styleUrl: './product-form.scss',
@@ -48,6 +51,10 @@ export class ProductForm {
 
   protected readonly busy = signal(false);
   protected readonly canManage = computed(() => this.business.can('product:manage'));
+  /** The photo is saved with the product: a new picture is uploaded, or the old one removed, after Save. */
+  protected readonly photo = signal<File | null>(null);
+  protected readonly dropPhoto = signal(false);
+  private readonly imageField = viewChild(ImageField);
 
   protected readonly categoryOptions = computed(() =>
     this.catalog.categories().map((c) => ({ value: c.id, label: this.lang.name(c.nameEn, c.nameKm) })),
@@ -76,6 +83,9 @@ export class ProductForm {
     effect(() => {
       if (this.visible()) {
         this.reset(this.product());
+        this.photo.set(null);
+        this.dropPhoto.set(false);
+        untracked(() => this.imageField()?.reset());
       }
     });
   }
@@ -115,7 +125,15 @@ export class ProductForm {
       units: v.units.map((u) => ({ unitId: u.unitId!, factor: u.factor!, barcode: u.barcode.trim() || null, sellPrice: u.sellPrice })),
     };
     this.busy.set(true);
-    this.catalog.saveProduct(this.product()?.id ?? null, body).subscribe({
+    this.catalog.saveProduct(this.product()?.id ?? null, body).pipe(
+      switchMap((product) => {
+        const photo = this.photo();
+        if (photo) {
+          return this.catalog.uploadPhoto(product.id, photo);
+        }
+        return this.dropPhoto() && product.photoUrl ? this.catalog.removePhoto(product.id) : of(product);
+      }),
+    ).subscribe({
       next: (product) => {
         this.busy.set(false);
         this.notify.showKey('common.saved');

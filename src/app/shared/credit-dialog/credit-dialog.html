@@ -1,0 +1,25 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [header]="'credits.' + kind() + '.new' | translate">
+  <div class="ms-form dialog-form">
+    <p class="muted">{{ 'credits.' + kind() + '.newLead' | translate }}</p>
+    <div class="ms-field">
+      <label msLabel for="credit-party" required>{{ 'credits.' + kind() + '.party' | translate }}</label>
+      <p-autocomplete inputId="credit-party" [ngModel]="party()" (ngModelChange)="pick($event)" [suggestions]="parties()" (completeMethod)="find($event)"
+                      optionLabel="name" [forceSelection]="true" [fluid]="true" [dropdown]="true" appendTo="body">
+        <ng-template #item let-p><div><b>{{ p.name }}</b> <small class="muted">{{ p.phone }}</small></div></ng-template>
+      </p-autocomplete>
+    </div>
+    <div class="ms-field">
+      <label msLabel for="credit-new-amount" required>{{ 'credits.amountUsd' | translate }}</label>
+      <p-inputnumber inputId="credit-new-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" mode="currency" currency="USD" locale="en-US" [min]="0" />
+    </div>
+    <div class="ms-field">
+      <label msLabel for="credit-reason" required>{{ 'credits.reason' | translate }}</label>
+      <input pInputText id="credit-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="submit()" [loading]="busy()"
+            [disabled]="busy() || !party() || !amount() || !reason().trim()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

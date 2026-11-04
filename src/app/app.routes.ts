@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import { Routes } from '@angular/router';
 
-import { authGuard, businessGuard, guestGuard, permissionGuard, setupGuard } from './core/auth/guards';
+import { adminGuard, authGuard, businessGuard, guestGuard, permissionGuard, setupGuard } from './core/auth/guards';
 import { navPages } from './layout/nav';
 
 /** The screen of each menu page (a page missing here would open "Coming next"). */
@@ -55,6 +55,12 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/account-shell/account-shell').then((m) => m.AccountShell),
     children: [
       { path: 'businesses', loadComponent: () => import('./account/businesses/businesses').then((m) => m.Businesses) },
+      { path: 'account', loadComponent: () => import('./account/account-page/account-page').then((m) => m.AccountPage) },
+      {
+        path: 'admin',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./admin/admin-page/admin-page').then((m) => m.AdminPage),
+      },
       {
         path: 'setup',
         canActivate: [setupGuard],

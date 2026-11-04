@@ -10,58 +10,164 @@
   gap: 8px;
 }
 
+// The picker on the left, the report on the right (one screen for every report, PLAIN.md 6.11).
+.page-body.reports {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.report-nav {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-area {
+  margin: 12px 0 4px;
+  padding: 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.report-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 14px;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease);
+
+  &:hover {
+    background: var(--surface-3);
+  }
+
+  &.active {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    font-weight: 500;
+  }
+}
+
+.report-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.report-picker {
+  display: none;
+}
+
+// The same height with or without the period pickers, so the page does not jump between reports.
+.page-head {
+  min-height: 50px;
+}
+
+.report-lead {
+  margin: 0;
+  font-size: 14px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading {
+  --p-progressbar-height: 3px;
+}
+
 .kpis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  margin: 16px 0;
 }
 
-.card {
-  margin-bottom: 16px;
-}
-
-// Sales by day: one bar per day in the brand color, rounded at the top, 2 px apart; the date under each.
-.bars {
+.kpi-label {
   display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 200px;
-  padding-top: 12px;
-}
-
-.bar-col {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: flex-end;
   align-items: center;
-  gap: 4px;
-  height: 100%;
-  min-width: 0;
+  gap: 8px;
+}
 
-  small {
-    color: var(--muted);
-    font-size: 10px;
+.rule {
+  margin: -4px 0 0;
+}
+
+// Tables sit in a white card; the card adds no padding of its own around the table.
+.table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+// A row's share of the biggest one, under its name (sales by product, category...).
+.share {
+  height: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-3);
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
   }
 }
 
-.bar {
-  width: 100%;
-  max-width: 28px;
-  min-height: 2px;
-  border-radius: 4px 4px 0 0;
-  background: var(--primary);
-  transition: opacity 0.15s var(--ease);
+.tag {
+  margin-inline-start: 6px;
 }
 
-.bar-col:hover .bar {
-  opacity: 0.8;
+.tag-warn {
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
-.empty {
-  padding: 32px 0;
-  text-align: center;
+// ABC groups: A strongest, C lightest, in the brand color (identity is also the letter).
+.abc {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.abc-A {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+
+  &.abc-B {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+  }
+
+  &.abc-C {
+    background: var(--surface-3);
+    color: var(--text-2);
+  }
 }
 
 // Profit and loss as a short statement.
@@ -96,15 +202,34 @@
   }
 }
 
-.two {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 16px;
+.empty {
+  padding: 32px 0;
+  text-align: center;
 }
 
+// Smaller screens: the picker becomes a select above the report.
 @media (max-width: 1000px) {
-  .two {
+  .page-body.reports {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .report-nav {
+    display: none;
+  }
+
+  .report-picker {
+    display: block;
+
+    p-select {
+      width: 100%;
+    }
+  }
+}
+
+.report-actions {
+  gap: 8px;
+}
+
+.party-pick {
+  min-width: 280px;
 }

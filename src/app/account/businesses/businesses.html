@@ -3,6 +3,9 @@
     <div class="page-head">
       <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'account.myBusinesses' | translate }}</span></nav>
       <div class="page-actions">
+        @if (auth.user()?.superAdmin) {
+          <a pButton routerLink="/admin" [outlined]="true"><i class="pi pi-shield" pButtonIcon></i><span pButtonLabel>{{ 'admin.title' | translate }}</span></a>
+        }
         <button pButton type="button" (click)="create()">
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'account.newBusiness' | translate }}</span>
         </button>

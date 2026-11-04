@@ -1,0 +1,30 @@
+<div class="chart" [style.--chart-h.px]="height()" (mouseleave)="active.set(null)">
+  <div class="grid" aria-hidden="true">
+    <span class="grid-line top"><span class="grid-value">{{ format()(max()) }}</span></span>
+    <span class="grid-line half"></span>
+    <span class="grid-line base"></span>
+  </div>
+  <div class="bars" role="img" [attr.aria-label]="label()">
+    @for (p of points(); track p.key; let i = $index) {
+      <div class="col" (mouseenter)="active.set(i)">
+        <span class="bar" [style.height.%]="heightOf(p.value)" [class.on]="active() === i"></span>
+        @if (active() === i) {
+          <span class="tip" [class.left]="i > points().length * 0.66" [class.right]="i < points().length * 0.34">{{ p.tip }}</span>
+        }
+      </div>
+    }
+  </div>
+  <div class="axis" aria-hidden="true">
+    @for (p of points(); track p.key; let i = $index) {
+      <span class="tick">{{ i % every() === 0 ? p.label : '' }}</span>
+    }
+  </div>
+</div>
+
+<!-- The same numbers for screen readers -->
+<table class="tw:sr-only">
+  <caption>{{ label() }}</caption>
+  @for (p of points(); track p.key) {
+    <tr><td>{{ p.tip }}</td></tr>
+  }
+</table>

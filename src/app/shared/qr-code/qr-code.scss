@@ -1,0 +1,19 @@
+// Black on white in both themes (phones read it best), with a white frame from the code's own margin.
+:host {
+  display: block;
+  width: 200px;
+  max-width: 100%;
+}
+
+.qr {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: #fff;
+
+  ::ng-deep svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}

@@ -48,15 +48,18 @@ h3 {
 
 .plans {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 220px));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  max-width: 1000px;
   margin-bottom: 16px;
 }
 
+// A plan card: name, price, what it allows, and what its button does now.
 .plan {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  max-width: none;
   border: 1px solid transparent;
 
   &.current {
@@ -69,8 +72,95 @@ h3 {
   }
 }
 
-.form-note {
+.plan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.limits {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .icon {
+    color: var(--primary);
+    font-size: 12px;
+  }
+
+  .off {
+    color: var(--muted);
+
+    .icon {
+      color: var(--muted);
+    }
+  }
+}
+
+.plan-btn {
+  width: 100%;
+}
+
+.banner {
   max-width: 1000px;
+}
+
+.table-card {
+  max-width: 1000px;
+  padding: 0;
+  overflow: hidden;
+}
+
+// Red when the plan is almost full (PrimeNG reads its color from this token).
+.danger {
+  --p-progressbar-value-background: var(--danger);
+}
+
+// The pay dialog: what is paid, the total, then where the payment is.
+.pay-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(380px, 80vw);
+}
+
+.pay-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pay-total {
+  margin: 8px 0;
+  font-size: 32px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.pay-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.demo-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
 }
 
 @media (max-width: 768px) {

@@ -11,3 +11,12 @@
 .change-box.short b {
   color: var(--danger);
 }
+
+.khqr-image {
+  display: block;
+  width: 220px;
+  max-width: 100%;
+  margin: 12px auto 0;
+  border-radius: var(--radius-md);
+  background: #fff;
+}

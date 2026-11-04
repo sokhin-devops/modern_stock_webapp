@@ -6,28 +6,33 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
+import { ButtonDirective, ButtonIcon } from 'primeng/button';
 import { Select } from 'primeng/select';
+import { SelectButton } from 'primeng/selectbutton';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { ToggleButton } from 'primeng/togglebutton';
+import { Tooltip } from 'primeng/tooltip';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
-import { StockRow } from '../../../core/api/models';
+import { BranchQty, BranchStockRow, StockRow } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { CatalogService } from '../../../core/catalog/catalog.service';
 import { StockService } from '../../../core/inventory/stock.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
+import { ReorderLevelsDialog, ReorderTarget } from '../../products/reorder-levels-dialog/reorder-levels-dialog';
 import { StockDetail } from '../stock-detail/stock-detail';
 
 /**
  * Stock (prototype stock.html, PLAIN.md 11.2): on hand per product for the branch in the top bar, with search, a
  * category filter and "low stock only". A product opens its stock per warehouse and its stock card in a drawer.
+ * "By branch" puts every branch side by side with its own reorder level (FR-4.7, FR-4.8).
  */
 @Component({
   selector: 'ms-stock-page',
   imports: [
     FormsModule, TranslatePipe, CurrencyPipe, DecimalPipe, TableModule, IconField, InputIcon, InputText, Select,
-    ToggleButton, StockDetail,
+    ToggleButton, SelectButton, ButtonDirective, ButtonIcon, Tooltip, StockDetail, ReorderLevelsDialog,
   ],
   templateUrl: './stock-page.html',
   styleUrl: './stock-page.scss',
@@ -59,6 +64,28 @@ export class StockPage {
   protected readonly detailOpen = signal(false);
   protected readonly selected = signal<StockRow | null>(null);
 
+  /** Side by side needs a member who may use more than one branch. */
+  protected readonly canByBranch = computed(
+    () => this.business.canPickBranch() && this.business.branches().filter((b) => b.active).length > 1,
+  );
+  protected readonly view = signal<'list' | 'branches'>('list');
+  protected readonly byBranch = computed(() => this.view() === 'branches' && this.canByBranch());
+  protected readonly views = [
+    { label: 'stock.viewList', value: 'list' },
+    { label: 'stock.viewByBranch', value: 'branches' },
+  ];
+  /** The columns, in the API's order: main branch first. */
+  protected readonly branchColumns = computed(() =>
+    this.business
+      .branches()
+      .filter((b) => b.active)
+      .sort((a, b) => Number(b.main) - Number(a.main) || a.id - b.id),
+  );
+  protected readonly branchRows = signal<BranchStockRow[]>([]);
+  protected readonly canReorder = computed(() => this.business.can('product:manage'));
+  protected readonly reorderFor = signal<ReorderTarget | null>(null);
+  protected readonly reorderOpen = signal(false);
+
   constructor() {
     this.catalog.loadLists();
     this.search
@@ -81,6 +108,10 @@ export class StockPage {
 
   protected load(event: TableLazyLoadEvent): void {
     this.last = event;
+    if (this.byBranch()) {
+      this.loadByBranch(event);
+      return;
+    }
     if (this.onlyLow()) {
       this.loadLow();
       return;
@@ -120,6 +151,26 @@ export class StockPage {
     this.reload();
   }
 
+  /** The new table loads its first page itself. */
+  protected setView(view: 'list' | 'branches'): void {
+    this.first.set(0);
+    this.last = { ...this.last, first: 0 };
+    this.view.set(view);
+  }
+
+  protected cell(row: BranchStockRow, branchId: number): BranchQty | undefined {
+    return row.branches.find((c) => c.branchId === branchId);
+  }
+
+  protected editLevels(row: BranchStockRow): void {
+    this.reorderFor.set({ id: row.productId, nameEn: row.nameEn, nameKm: row.nameKm });
+    this.reorderOpen.set(true);
+  }
+
+  protected reloadPage(): void {
+    this.load(this.last);
+  }
+
   protected open(row: StockRow): void {
     this.selected.set(row);
     this.detailOpen.set(true);
@@ -128,6 +179,29 @@ export class StockPage {
   private reload(): void {
     this.first.set(0);
     this.load({ ...this.last, first: 0 });
+  }
+
+  private loadByBranch(event: TableLazyLoadEvent): void {
+    const size = event.rows ?? 20;
+    const sortField = typeof event.sortField === 'string' ? event.sortField : null;
+    this.loading.set(true);
+    this.stock
+      .byBranch({
+        page: Math.floor((event.first ?? 0) / size),
+        size,
+        sort: sortField ? `${sortField},${event.sortOrder === -1 ? 'desc' : 'asc'}` : undefined,
+        q: this.q(),
+        categoryId: this.categoryId(),
+        lowOnly: this.onlyLow(),
+      })
+      .subscribe({
+        next: (page) => {
+          this.branchRows.set(page.content);
+          this.total.set(page.totalElements);
+          this.loading.set(false);
+        },
+        error: (e) => this.fail(e),
+      });
   }
 
   /** Low stock: the whole list, filtered by the search text here. */

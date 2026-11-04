@@ -1,0 +1,147 @@
+<p-drawer [visible]="!!view()" (visibleChange)="!$event && view.set(null)" position="right" styleClass="ms-doc-drawer"
+          [header]="view()?.doc?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+  @if (view(); as v) {
+    <div class="doc-facts">
+      <div><small>{{ 'sales.customer' | translate }}</small><b>{{ v.doc.customerName }}</b></div>
+      @if (quotation(); as q) {
+        <div><small>{{ 'common.date' | translate }}</small><b>{{ q.quoteDate | date: 'dd/MM/yyyy' }}</b></div>
+        <div><small>{{ 'orders.validUntil' | translate }}</small><b [class.danger-text]="q.status === 'EXPIRED'">{{ q.validUntil | date: 'dd/MM/yyyy' }}</b></div>
+        <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + q.status">{{ 'orders.status.' + q.status | translate }}</span></b></div>
+        @if (q.salesOrderNumber) {
+          <div><small>{{ 'orders.salesOrder' | translate }}</small><b>{{ q.salesOrderNumber }}</b></div>
+        }
+      }
+      @if (order(); as o) {
+        <div><small>{{ 'common.date' | translate }}</small><b>{{ o.orderDate | date: 'dd/MM/yyyy' }}</b></div>
+        <div><small>{{ 'orders.deliveryDate' | translate }}</small><b>{{ o.deliveryDate ? (o.deliveryDate | date: 'dd/MM/yyyy') : '—' }}</b></div>
+        <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + o.status">{{ 'orders.status.' + o.status | translate }}</span></b></div>
+        <div><small>{{ 'common.warehouse' | translate }}</small><b>{{ o.warehouseName }}</b></div>
+        @if (o.quotationNumber) {
+          <div><small>{{ 'orders.quotation' | translate }}</small><b>{{ o.quotationNumber }}</b></div>
+        }
+      }
+    </div>
+    @if (v.doc.note) {
+      <p class="muted">{{ v.doc.note }}</p>
+    }
+
+    @if (quotation(); as q) {
+      <p-table class="ms-table" [value]="q.lines" dataKey="id">
+        <ng-template #header>
+          <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th>
+            <th class="num">{{ 'common.price' | translate }}</th><th class="num">{{ 'common.discount' | translate }}</th>
+            <th class="num">{{ 'common.amount' | translate }}</th></tr>
+        </ng-template>
+        <ng-template #body let-l>
+          <tr>
+            <td class="strong">{{ l.productName }}</td>
+            <td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+            <td class="num">{{ l.unitPrice | currency: 'USD' }}</td>
+            <td class="num muted">{{ l.discount ? (l.discount | currency: 'USD') : '' }}</td>
+            <td class="num">{{ l.lineTotal | currency: 'USD' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+    @if (order(); as o) {
+      <p-table class="ms-table" [value]="o.lines" dataKey="id">
+        <ng-template #header>
+          <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'orders.ordered' | translate }}</th>
+            <th class="num">{{ 'orders.deliveredQty' | translate }}</th><th class="num">{{ 'common.price' | translate }}</th>
+            <th class="num">{{ 'common.amount' | translate }}</th></tr>
+        </ng-template>
+        <ng-template #body let-l>
+          <tr>
+            <td class="strong">{{ l.productName }}@if (l.discount) { <small class="muted"> · −{{ l.discount | currency: 'USD' }}</small> }</td>
+            <td class="num">{{ l.qtyOrdered | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+            <td class="num" [class.done]="l.qtyDelivered >= l.qtyOrdered">{{ l.qtyDelivered | number: '1.0-3' }}</td>
+            <td class="num">{{ l.unitPrice | currency: 'USD' }}</td>
+            <td class="num">{{ l.lineTotal | currency: 'USD' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+
+    <div class="totals">
+      <div class="line"><span>{{ 'print.subtotal' | translate }}</span><span>{{ v.doc.subtotal | currency: 'USD' }}</span></div>
+      @if (v.doc.discount) {
+        <div class="line muted"><span>{{ 'print.discount' | translate }}</span><span>− {{ v.doc.discount | currency: 'USD' }}</span></div>
+      }
+      @if (v.doc.vat) {
+        <div class="line muted"><span>{{ 'print.vat' | translate }}</span><span>{{ v.doc.vat | currency: 'USD' }}</span></div>
+      }
+      <div class="line total"><span>{{ 'common.total' | translate }}</span><b>{{ v.doc.total | currency: 'USD' }}</b></div>
+    </div>
+
+    @if (order()?.deliveries?.length) {
+      <h3 class="section-title">{{ 'orders.deliveries' | translate }}</h3>
+      <ul class="deliveries">
+        @for (d of order()!.deliveries; track d.deliveryId) {
+          <li>
+            <span><b>{{ d.deliveryNumber }}</b> <small class="muted">{{ d.deliveredAt | date: 'dd/MM/yyyy HH:mm' }}</small></span>
+            <span class="muted">{{ d.invoiceNumber }}</span>
+            <b>{{ d.invoiceTotal | currency: 'USD' }}</b>
+          </li>
+        }
+      </ul>
+    }
+  }
+  <ng-template #footer>
+    @if (view(); as v) {
+      <div class="drawer-actions">
+        @if (quotation(); as q) {
+          @if (canManage() && q.status === 'DRAFT') {
+            <button pButton type="button" [text]="true" severity="danger" (click)="remove(q)" [disabled]="busy()"><span pButtonLabel>{{ 'common.delete' | translate }}</span></button>
+          }
+          @if (canManage() && (q.status === 'DRAFT' || q.status === 'SENT')) {
+            <button pButton type="button" [text]="true" severity="danger" (click)="decline(q)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.decline' | translate }}</span></button>
+          }
+        }
+        @if (order(); as o) {
+          @if (canManage() && o.status === 'CONFIRMED' && nothingDelivered()) {
+            <button pButton type="button" [text]="true" severity="danger" (click)="cancel(o)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.cancel' | translate }}</span></button>
+          }
+          @if (canManage() && o.status === 'PARTIALLY_DELIVERED') {
+            <button pButton type="button" [text]="true" (click)="close(o)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.close' | translate }}</span></button>
+          }
+        }
+        <span class="spacer"></span>
+        <button pButton type="button" [outlined]="true" (click)="print()">
+          <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
+        </button>
+        @if (quotation(); as q) {
+          @if (canManage() && (q.status === 'DRAFT' || q.status === 'SENT' || q.status === 'EXPIRED')) {
+            <button pButton type="button" [outlined]="true" (click)="startEdit()" [disabled]="busy()">
+              <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
+            </button>
+          }
+          @if (canManage() && q.status === 'DRAFT') {
+            <button pButton type="button" [outlined]="true" (click)="send(q)" [disabled]="busy()">
+              <i class="pi pi-send" pButtonIcon></i><span pButtonLabel>{{ 'orders.markSent' | translate }}</span>
+            </button>
+          }
+          @if (canManage() && (q.status === 'DRAFT' || q.status === 'SENT')) {
+            <button pButton type="button" (click)="convert(q)" [loading]="busy()" [disabled]="busy()">
+              <i class="pi pi-check" pButtonIcon></i><span pButtonLabel>{{ 'orders.convert' | translate }}</span>
+            </button>
+          }
+        }
+        @if (order(); as o) {
+          @if (canManage() && o.status === 'CONFIRMED' && nothingDelivered()) {
+            <button pButton type="button" [outlined]="true" (click)="startEdit()" [disabled]="busy()">
+              <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
+            </button>
+          }
+          @if (canDeliver() && (o.status === 'CONFIRMED' || o.status === 'PARTIALLY_DELIVERED')) {
+            <button pButton type="button" (click)="deliverOpen.set(true)" [disabled]="busy()">
+              <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'orders.deliver' | translate }}</span>
+            </button>
+          }
+        }
+      </div>
+    }
+  </ng-template>
+</p-drawer>
+
+<ms-deliver-dialog [order]="order()" [(visible)]="deliverOpen" (delivered)="delivered($event)" />
+<ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />

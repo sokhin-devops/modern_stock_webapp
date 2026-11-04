@@ -14,7 +14,10 @@ import { Product } from '../../core/api/models';
 import { CatalogService } from '../../core/catalog/catalog.service';
 import { LangService } from '../../core/lang.service';
 
-/** One line of a stock document: a product in one of its units, a quantity, and (receiving) cost, batch and expiry. */
+/**
+ * One line of a document: a product in one of its units, a quantity, and (receiving) cost, batch and expiry, or (selling)
+ * a line discount.
+ */
 export interface DocLine {
   product: Product | null;
   /** null = the stock unit. */
@@ -23,6 +26,8 @@ export interface DocLine {
   unitCost: number | null;
   batchNo: string;
   expiryDate: Date | null;
+  /** Line discount in USD (sales documents). */
+  discount?: number | null;
 }
 
 export function emptyLine(): DocLine {
@@ -45,6 +50,10 @@ export class LinesEditor {
   readonly showCost = input(false);
   /** Show batch and expiry (receiving products that track expiry). */
   readonly showBatch = input(false);
+  /** Sales documents: the price (set by the API, see prices), a line discount and the amount. */
+  readonly showPrice = input(false);
+  /** The unit price of each line as the API priced it (same order as lines; null while unknown). */
+  readonly prices = input<(number | null)[]>([]);
   /** Quantities may be negative (adjustments take stock out). */
   readonly allowNegative = input(false);
   readonly disabled = input(false);
@@ -61,6 +70,11 @@ export class LinesEditor {
     this.catalog.searchProducts({ page: 0, size: 15, sort: 'nameEn,asc', q: event.query }).subscribe({
       next: (page) => this.results.set(page.content),
     });
+  }
+
+  protected amount(index: number, line: DocLine): number | null {
+    const price = this.prices()[index];
+    return price == null || !line.qty ? null : Math.round((price * line.qty - (line.discount ?? 0)) * 100) / 100;
   }
 
   protected label(p: Product): string {

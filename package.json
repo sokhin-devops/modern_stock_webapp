@@ -20,11 +20,15 @@
     "@angular/router": "~19.2.25",
     "@ngx-translate/core": "^18.1.0",
     "@primeng/themes": "19.1.4",
+    "@zxing/browser": "0.1.5",
+    "@zxing/library": "0.21.3",
     "primeicons": "^7.0.0",
     "primeng": "19.1.4",
+    "qrcode": "1.5.4",
     "read-excel-file": "9.3.14",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "write-excel-file": "4.1.1",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -32,6 +36,7 @@
     "@angular/cli": "~19.2.27",
     "@angular/compiler-cli": "~19.2.25",
     "@tailwindcss/postcss": "^4.3.4",
+    "@types/qrcode": "1.5.5",
     "postcss": "^8.5.32",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.3.4",

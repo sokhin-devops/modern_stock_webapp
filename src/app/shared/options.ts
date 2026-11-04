@@ -28,6 +28,12 @@ export function receivingWarehouse(branches: Branch[], branchId: number | null):
   return branch?.warehouses.find((w) => w.active && w.receiving)?.id ?? branch?.warehouses.find((w) => w.active)?.id ?? null;
 }
 
+/** The warehouse a branch sells from (or its first one). */
+export function salesWarehouse(branches: Branch[], branchId: number | null): number | null {
+  const branch = branches.find((b) => b.id === branchId) ?? branches.find((b) => b.main);
+  return branch?.warehouses.find((w) => w.active && w.sales)?.id ?? branch?.warehouses.find((w) => w.active)?.id ?? null;
+}
+
 /** Document lines in the shape the API takes (productId, unitId, qty...); empty lines are left out. */
 export function filledLines<T extends { product: unknown; qty: number | null }>(lines: T[]): T[] {
   return lines.filter((l) => l.product && l.qty);

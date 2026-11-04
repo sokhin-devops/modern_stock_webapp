@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-title {
+  margin: 0;
+}
+
+.email {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}

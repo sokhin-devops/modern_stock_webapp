@@ -49,24 +49,73 @@ p-popover {
   }
 }
 
-.rate-chip.stale {
-  color: var(--danger);
-
-  .icon {
-    color: var(--danger);
-  }
+// The bell carries the prototype's .badge with the number of things to look at.
+.bell {
+  position: relative;
 }
 
-// The notifications popover (its content keeps this component's styles).
+// The alerts popover (its content keeps this component's styles): one row per kind, opening its page.
 .notifications {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 240px;
+  gap: 2px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
 
   b {
+    margin-bottom: 6px;
     font-weight: 500;
   }
+}
+
+.alert-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -8px;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.2s var(--ease);
+
+  &:hover {
+    background: var(--surface-3);
+    text-decoration: none;
+  }
+
+  > .icon:first-child {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 16px;
+  }
+
+  &.level-WARN > .icon:first-child {
+    background: var(--warning-bg);
+    color: var(--warning);
+  }
+
+  &.level-DANGER > .icon:first-child {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+
+  .chev {
+    color: var(--muted);
+    font-size: 12px;
+  }
+}
+
+.none {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
 }
 
 // Phones (prototype: menu, business, notifications, account). Language and dark mode are in the account menu,

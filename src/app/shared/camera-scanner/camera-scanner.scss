@@ -1,0 +1,28 @@
+.viewport {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  background: #000;
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// Where to hold the barcode
+.aim {
+  position: absolute;
+  inset: 30% 12%;
+  border: 2px solid rgb(255 255 255 / 85%);
+  border-radius: 8px;
+  box-shadow: 0 0 0 999px rgb(0 0 0 / 25%);
+}
+
+.note {
+  min-height: 1.5em;
+  margin: 12px 0 0;
+  text-align: center;
+}

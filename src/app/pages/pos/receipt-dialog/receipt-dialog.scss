@@ -6,3 +6,9 @@
   display: flex;
   justify-content: center;
 }
+
+// 58 mm paper prints about 48 mm wide
+.receipt.paper-58 {
+  width: 220px;
+  font-size: 11px;
+}

@@ -24,7 +24,9 @@
       }
     }
     @if (rate()) {
-      <span class="rate-chip"><i class="icon pi pi-money-bill"></i>៛{{ rate() | number: '1.0-0' }}</span>
+      <span class="rate-chip" [class.stale]="business.rate()?.stale"
+            [pTooltip]="(business.rate()?.stale ? 'shell.rateStale' : 'shell.rateToday') | translate: { date: business.rate()?.rateDate }"
+            tooltipPosition="bottom"><i class="icon pi pi-money-bill"></i>៛{{ rate() | number: '1.0-0' }}</span>
     }
     <span class="spacer"></span>
     <ms-lang-button class="hide-sm" />
@@ -57,10 +59,25 @@
           </button>
         }
       </div>
+      @if (business.rate()?.stale) {
+        <div class="banner banner-warn rate-warning" role="status">
+          <i class="icon pi pi-exclamation-triangle"></i>
+          <div class="text">{{ 'pos.rateStale' | translate: { date: (business.rate()!.rateDate | date: 'dd/MM/yyyy') } }}</div>
+          @if (business.can('exchange_rate:manage')) {
+            <a pButton routerLink="/settings/rates" [text]="true" size="small"><span pButtonLabel>{{ 'pos.setRate' | translate }}</span></a>
+          }
+        </div>
+      }
       <div class="product-grid">
         @for (p of products(); track p.id) {
           <button type="button" class="tile" [class.out]="p.qtyOnHand <= 0" (click)="add(p)">
-            <span class="thumb"><i class="icon pi pi-box"></i></span>
+            <span class="thumb">
+              @if (p.photoUrl) {
+                <img [src]="p.photoUrl | apiFile" alt="" loading="lazy" />
+              } @else {
+                <i class="icon pi pi-box"></i>
+              }
+            </span>
             <span class="name">{{ lang.name(p.nameEn, p.nameKm) }}</span>
             <span class="price">${{ p.sellPrice | number: '1.2-2' }}</span>
             @if (p.qtyOnHand <= 0) {
@@ -143,9 +160,12 @@
   </div>
 </div>
 
-<ms-pay-dialog [(visible)]="payOpen" [total]="total()" [totalKhr]="totalKhr()" [rate]="rate()" [rielStep]="settings()?.rielRounding ?? 100"
+<ms-pay-dialog [(visible)]="payOpen" [khqrEnabled]="settings()?.khqrEnabled ?? true" [bankEnabled]="settings()?.bankEnabled ?? true"
+               [khqrImage]="settings()?.khqrImageUrl ?? null" [total]="total()" [totalKhr]="totalKhr()" [rate]="rate()" [rielStep]="settings()?.rielRounding ?? 100"
                [partialAllowed]="!!customer()" [lines]="preview()" [busy]="busy()" (pay)="checkout($event)" />
-<ms-receipt-dialog [sale]="sale()" [(visible)]="receiptOpen" [receiptFooter]="settings()?.receiptFooter ?? null" (newSale)="nextSale()" />
+<ms-receipt-dialog [sale]="sale()" [(visible)]="receiptOpen" [receiptFooter]="settings()?.receiptFooter ?? null"
+                   [receiptHeader]="settings()?.receiptHeader ?? null" [paper]="settings()?.receiptPaper ?? 80"
+                   [showVatTin]="settings()?.receiptShowVatTin ?? true" (newSale)="nextSale()" />
 @if (business.branchId() != null) {
   <ms-shift-dialog [(visible)]="shiftOpen" [shift]="shift()" [branchId]="business.branchId()!" (changed)="shift.set($event)" />
 }

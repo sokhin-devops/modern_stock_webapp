@@ -1,0 +1,9 @@
+:host {
+  display: contents;
+}
+
+// Above the page card, as wide as it; the page below gets the rest of the height.
+.banner {
+  flex: none;
+  margin: 0 0 12px;
+}

@@ -17,6 +17,7 @@ import { BusinessService } from '../../../core/business/business.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { FieldLabel } from '../../../shared/field-label/field-label';
+import { QrCode } from '../../../shared/qr-code/qr-code';
 
 interface Member {
   id: number;
@@ -60,7 +61,7 @@ interface Role {
   selector: 'ms-members-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Dialog, InputText, Select,
-    ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel,
+    ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel, QrCode,
   ],
   templateUrl: './members-page.html',
   styleUrl: './members-page.scss',
@@ -203,6 +204,12 @@ export class MembersPage {
 
   protected cancelInvite(inv: Invitation): void {
     this.api.delete(`/members/invitations/${inv.id}`).subscribe({ next: () => this.load(), error: (e) => this.notify.error(e) });
+  }
+
+  /** Opens Telegram's share screen with the link and a short line, to send it to the person (FR-6.12). */
+  protected telegramShare(link: string): string {
+    const text = this.translate.instant('settings.members.telegramText');
+    return `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
   }
 
   protected copy(link: string): void {

@@ -8,15 +8,48 @@
   max-width: 1000px;
 }
 
-.small {
+.columns {
   margin: -8px 0 0;
   font-size: 13px;
 }
 
-.row-actions {
+.warehouse {
+  max-width: 420px;
+}
+
+// The three steps: template, file, check and import.
+.steps {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.step {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.file-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 // A real file input, hidden behind a PrimeNG-looking button (the label opens it, keyboard included).
@@ -30,12 +63,41 @@
     cursor: pointer;
   }
 
+  input:disabled + .p-button {
+    opacity: 0.6;
+  }
+
   input:focus-visible + .p-button {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 }
 
-.preview {
-  align-self: center;
+.loading {
+  --p-progressbar-height: 3px;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.only {
+  font-size: 13px;
+}
+
+.row-col {
+  width: 64px;
+}
+
+// A row with problems stands out a little.
+tr.bad td:first-child {
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+
+.tag .icon {
+  margin-inline-end: 4px;
+  font-size: 11px;
 }

@@ -16,109 +16,230 @@
         <i class="icon pi pi-star"></i>
         <div class="text">
           <b>{{ 'dashboard.trialEnds' | translate: { days } }}</b>
-          <div class="small">{{ 'dashboard.trialLead' | translate: { date: (billing.value()?.trialEndsAt | date: 'dd/MM/yyyy') } }}</div>
+          <div class="small">{{ 'dashboard.trialLead' | translate: { date: (billing()?.trialEndsAt | date: 'dd/MM/yyyy') } }}</div>
         </div>
         <a pButton routerLink="/settings/billing" [text]="true"><span pButtonLabel>{{ 'nav.billing' | translate }}</span></a>
       </div>
     }
 
-    @if (business.can('stock:view')) {
-      <div class="kpis">
+    @let d = data.value();
+    @let s = summary.value();
+    <div class="kpis">
+      @if (d?.today; as today) {
         <div class="kpi">
-          <div class="kpi-label"><i class="icon pi pi-box"></i>{{ 'dashboard.stockValue' | translate }}</div>
-          <div class="kpi-value">{{ (summary.value()?.onHandValue ?? 0) | currency: 'USD' }}</div>
-          <div class="kpi-sub">{{ 'dashboard.stockValueHint' | translate }}</div>
+          <div class="kpi-label"><i class="icon pi pi-shopping-cart"></i>{{ (d!.ownSalesOnly ? 'dashboard.mySalesToday' : 'dashboard.todaySales') | translate }}</div>
+          <div class="kpi-value">{{ today.usd | currency: 'USD' }}</div>
+          <div class="kpi-sub">៛{{ today.khr | number: '1.0-0' }} · {{ 'dashboard.receipts' | translate: { n: today.receipts } }}</div>
         </div>
-        @if (summary.value()?.inTransitValue != null) {
-          <div class="kpi">
-            <div class="kpi-label"><i class="icon pi pi-truck"></i>{{ 'dashboard.inTransit' | translate }}</div>
-            <div class="kpi-value">{{ summary.value()!.inTransitValue! | currency: 'USD' }}</div>
-            <div class="kpi-sub">{{ 'dashboard.inTransitHint' | translate }}</div>
-          </div>
-        }
-        <a class="kpi link" routerLink="/inventory/stock">
-          <div class="kpi-label"><i class="icon pi pi-arrow-down"></i>{{ 'dashboard.lowStock' | translate }}</div>
-          <div class="kpi-value" [class.warn]="(summary.value()?.lowStockItems ?? 0) > 0">{{ summary.value()?.lowStockItems ?? 0 }}</div>
-          <div class="kpi-sub">{{ ((summary.value()?.lowStockItems ?? 0) === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
-        </a>
-        <a class="kpi link" routerLink="/inventory/stock">
-          <div class="kpi-label"><i class="icon pi pi-calendar-times"></i>{{ 'dashboard.expiring' | translate }}</div>
-          <div class="kpi-value">{{ summary.value()?.expiringIn30Days ?? 0 }}</div>
+      }
+      @if (d?.profitToday != null) {
+        <div class="kpi">
+          <div class="kpi-label"><i class="icon pi pi-chart-line"></i>{{ 'dashboard.profitToday' | translate }}</div>
+          <div class="kpi-value" [class.warn]="d!.profitToday! < 0">{{ d!.profitToday! | currency: 'USD' }}</div>
+          <div class="kpi-sub">{{ 'dashboard.thisMonth' | translate: { amount: (d!.profitMonth! | currency: 'USD') } }}</div>
+        </div>
+      }
+      @if (s && business.can('product:manage')) {
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'stock-on-hand' }">
+          <div class="kpi-label"><i class="icon pi pi-box"></i>{{ 'dashboard.stockValue' | translate }}</div>
+          <div class="kpi-value">{{ s.onHandValue | currency: 'USD' }}</div>
           <div class="kpi-sub">
-            {{ (summary.value()?.expiringIn30Days === 1 ? 'dashboard.batch' : 'dashboard.batches') | translate }}
-            @if (summary.value()?.expiredBatches) {
-              · <span class="danger-text">{{ 'dashboard.expired' | translate: { n: summary.value()!.expiredBatches } }}</span>
+            @if (s.inTransitValue) {
+              {{ 'dashboard.plusInTransit' | translate: { amount: (s.inTransitValue | currency: 'USD') } }}
+            } @else {
+              {{ 'dashboard.stockValueHint' | translate }}
             }
           </div>
         </a>
-      </div>
-      @if (summary.isLoading()) {
-        <p-progressbar mode="indeterminate" />
       }
+      @if (s) {
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'reorder' }">
+          <div class="kpi-label"><i class="icon pi pi-arrow-down"></i>{{ 'dashboard.lowStock' | translate }}</div>
+          <div class="kpi-value" [class.warn]="s.lowStockItems > 0">{{ s.lowStockItems }}</div>
+          <div class="kpi-sub">{{ (s.lowStockItems === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
+        </a>
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'expiry' }">
+          <div class="kpi-label"><i class="icon pi pi-calendar-times"></i>{{ 'dashboard.expiring' | translate }}</div>
+          <div class="kpi-value">{{ s.expiringIn30Days }}</div>
+          <div class="kpi-sub">
+            {{ (s.expiringIn30Days === 1 ? 'dashboard.batch' : 'dashboard.batches') | translate }}
+            @if (s.expiredBatches) {
+              · <span class="danger-text">{{ 'dashboard.expired' | translate: { n: s.expiredBatches } }}</span>
+            }
+          </div>
+        </a>
+      }
+      @if (d?.debts; as debts) {
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'customer-debt' }">
+          <div class="kpi-label"><i class="icon pi pi-users"></i>{{ 'dashboard.customerDebt' | translate }}</div>
+          <div class="kpi-value">{{ debts.customersOwe | currency: 'USD' }}</div>
+          <div class="kpi-sub" [class.danger-text]="debts.overdueInvoices > 0">
+            {{ (debts.overdueInvoices ? 'dashboard.overdueInvoices' : 'dashboard.noneOverdue') | translate: { n: debts.overdueInvoices } }}
+          </div>
+        </a>
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'supplier-debt' }">
+          <div class="kpi-label"><i class="icon pi pi-truck"></i>{{ 'dashboard.supplierDebt' | translate }}</div>
+          <div class="kpi-value">{{ debts.weOwe | currency: 'USD' }}</div>
+          <div class="kpi-sub" [class.danger-text]="debts.overdueBills > 0">
+            {{ (debts.overdueBills ? 'dashboard.overdueBills' : 'dashboard.noneOverdue') | translate: { n: debts.overdueBills } }}
+          </div>
+        </a>
+      }
+    </div>
+    @if (data.isLoading() && !d) {
+      <p-progressbar mode="indeterminate" />
     }
 
     <div class="cols">
-      @if (business.can('stock:view')) {
-        <section class="card">
-          <div class="card-head"><h2 class="card-title">{{ 'dashboard.lowStockList' | translate }}</h2></div>
-          @if (low.value()?.length) {
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>{{ 'nav.products' | translate }}</th>
-                  <th class="num">{{ 'dashboard.onHand' | translate }}</th>
-                  <th class="num">{{ 'dashboard.reorderAt' | translate }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (row of low.value()!.slice(0, 8); track row.productId) {
-                  <tr>
-                    <td>
-                      <div class="strong">{{ lang.name(row.nameEn, row.nameKm) }}</div>
-                      <div class="muted small">{{ row.sku }}</div>
-                    </td>
-                    <td class="num danger-text">{{ row.qtyOnHand | number: '1.0-3' }} {{ row.unitSymbol }}</td>
-                    <td class="num muted">{{ row.reorderLevel | number: '1.0-3' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          } @else if (!low.isLoading()) {
-            <p class="muted empty"><i class="icon pi pi-check-circle"></i>{{ 'dashboard.lowStockEmpty' | translate }}</p>
-          }
-        </section>
-      }
+      <div class="col">
+        @if (d?.days) {
+          <section class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">{{ (d!.ownSalesOnly ? 'dashboard.mySales' : 'dashboard.sales') | translate }}</h2>
+                <div class="muted small">{{ 'dashboard.periodTotal' | translate: { amount: (chartTotal() | currency: 'USD') } }}</div>
+              </div>
+              <span class="spacer"></span>
+              <p-selectbutton [options]="spans" optionValue="value" [ngModel]="span()" (ngModelChange)="span.set($event)" [allowEmpty]="false"
+                              size="small" [ariaLabel]="'dashboard.sales' | translate">
+                <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+              </p-selectbutton>
+            </div>
+            <ms-bar-chart [points]="chartPoints()" [format]="money" [height]="180"
+                          [label]="(d!.ownSalesOnly ? 'dashboard.mySales' : 'dashboard.sales') | translate" />
+          </section>
+        }
 
-      @if (billing.value(); as plan) {
-        <section class="card">
-          <div class="card-head">
-            <h2 class="card-title">{{ 'dashboard.plan' | translate }}</h2>
-            <span class="spacer"></span>
-            <span class="tag tag-primary">{{ plan.effectivePlanCode }}</span>
-          </div>
-          @for (u of plan.usage; track u.key) {
-            @if (u.key === 'branches' || u.key === 'members' || u.key === 'products') {
-              <div class="usage">
-                <div class="usage-line">
-                  <span>{{ 'dashboard.limit.' + u.key | translate }}</span>
-                  @if (u.limit === null) {
-                    <span class="num muted">{{ u.used }} · {{ 'dashboard.unlimited' | translate }}</span>
-                  } @else {
-                    <span class="num muted">{{ u.used }} / {{ u.limit }}</span>
+        @if (business.can('stock:view')) {
+          <section class="card">
+            <div class="card-head">
+              <h2 class="card-title">{{ 'dashboard.lowStockList' | translate }}</h2>
+              <span class="spacer"></span>
+              @if (low.value()?.length) {
+                <a routerLink="/reports" [queryParams]="{ r: 'reorder' }" class="small">{{ 'dashboard.seeAll' | translate }}</a>
+              }
+            </div>
+            @if (low.value()?.length) {
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'nav.products' | translate }}</th>
+                    <th class="num">{{ 'dashboard.onHand' | translate }}</th>
+                    <th class="num">{{ 'dashboard.reorderAt' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of low.value()!.slice(0, 8); track row.productId) {
+                    <tr>
+                      <td>
+                        <div class="strong">{{ lang.name(row.nameEn, row.nameKm) }}</div>
+                        <div class="muted small">{{ row.sku }}</div>
+                      </td>
+                      <td class="num danger-text">{{ row.qtyOnHand | number: '1.0-3' }} {{ row.unitSymbol }}</td>
+                      <td class="num muted">{{ row.reorderLevel | number: '1.0-3' }}</td>
+                    </tr>
                   }
-                </div>
-                @if (u.limit !== null) {
-                  <p-progressbar [value]="usagePercent(u.used, u.limit)" [showValue]="false"
-                                 [class.danger]="usagePercent(u.used, u.limit) >= 90"
-                                 [attr.aria-label]="'dashboard.limit.' + u.key | translate" />
+                </tbody>
+              </table>
+            } @else if (!low.isLoading()) {
+              <p class="muted empty"><i class="icon pi pi-check-circle"></i>{{ 'dashboard.lowStockEmpty' | translate }}</p>
+            }
+          </section>
+        }
+      </div>
+
+      <div class="col">
+        @if (d?.waiting; as w) {
+          <section class="card">
+            <div class="card-head"><h2 class="card-title">{{ 'dashboard.waiting' | translate }}</h2></div>
+            @if (waitingCount()) {
+              <div class="waiting">
+                @if (w.approvals) {
+                  <a routerLink="/inventory/adjustments" class="waiting-row">
+                    <i class="icon pi pi-check-square"></i><span class="grow">{{ 'dashboard.approvals' | translate }}</span>
+                    <span class="count">{{ w.approvals }}</span>
+                  </a>
+                }
+                @if (w.transfersToReceive) {
+                  <a routerLink="/inventory/transfers" class="waiting-row">
+                    <i class="icon pi pi-truck"></i><span class="grow">{{ 'dashboard.toReceive' | translate }}</span>
+                    <span class="count">{{ w.transfersToReceive }}</span>
+                  </a>
+                }
+                @if (w.countsToApprove) {
+                  <a routerLink="/inventory/stock-counts" class="waiting-row">
+                    <i class="icon pi pi-check-square"></i><span class="grow">{{ 'dashboard.countsToApprove' | translate }}</span>
+                    <span class="count">{{ w.countsToApprove }}</span>
+                  </a>
+                }
+                @if (w.countsInProgress) {
+                  <a routerLink="/inventory/stock-counts" class="waiting-row">
+                    <i class="icon pi pi-list-check"></i><span class="grow">{{ 'dashboard.countsOpen' | translate }}</span>
+                    <span class="count">{{ w.countsInProgress }}</span>
+                  </a>
                 }
               </div>
+            } @else {
+              <p class="muted empty"><i class="icon pi pi-check-circle"></i>{{ 'dashboard.nothingWaiting' | translate }}</p>
             }
-          }
-        </section>
-      }
-    </div>
+          </section>
+        }
 
-    <p class="form-note tw:mt-4"><i class="icon pi pi-chart-line"></i>{{ 'dashboard.salesSoon' | translate }}</p>
+        @if (d?.topProducts) {
+          <section class="card">
+            <div class="card-head">
+              <h2 class="card-title">{{ 'dashboard.topProducts' | translate }}</h2>
+              <span class="spacer"></span>
+              <a routerLink="/reports" [queryParams]="{ r: 'sales', by: 'PRODUCT' }" class="small">{{ 'dashboard.seeAll' | translate }}</a>
+            </div>
+            @if (d!.topProducts!.length) {
+              <ol class="top">
+                @for (p of d!.topProducts!; track p.productId) {
+                  <li>
+                    <div class="top-line">
+                      <span class="grow strong">{{ lang.name(p.name, p.nameKm) }}</span>
+                      <span class="num">{{ p.sales | currency: 'USD' }}</span>
+                    </div>
+                    <div class="top-bar" aria-hidden="true"><span [style.width.%]="(p.sales / topMax()) * 100"></span></div>
+                    <div class="muted small">{{ p.qty | number: '1.0-3' }} {{ p.unitSymbol }}</div>
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p class="muted empty"><i class="icon pi pi-info-circle"></i>{{ 'dashboard.noSales' | translate }}</p>
+            }
+          </section>
+        }
+
+        @if (billing(); as plan) {
+          <section class="card">
+            <div class="card-head">
+              <h2 class="card-title">{{ 'dashboard.plan' | translate }}</h2>
+              <span class="spacer"></span>
+              <span class="tag tag-primary">{{ plan.effectivePlanCode }}</span>
+            </div>
+            @for (u of plan.usage; track u.key) {
+              @if (u.key === 'branches' || u.key === 'members' || u.key === 'products') {
+                <div class="usage">
+                  <div class="usage-line">
+                    <span>{{ 'dashboard.limit.' + u.key | translate }}</span>
+                    @if (u.limit === null) {
+                      <span class="num muted">{{ u.used }} · {{ 'dashboard.unlimited' | translate }}</span>
+                    } @else {
+                      <span class="num muted">{{ u.used }} / {{ u.limit }}</span>
+                    }
+                  </div>
+                  @if (u.limit !== null) {
+                    <p-progressbar [value]="usagePercent(u.used, u.limit)" [showValue]="false"
+                                   [class.danger]="usagePercent(u.used, u.limit) >= 90"
+                                   [attr.aria-label]="'dashboard.limit.' + u.key | translate" />
+                  }
+                </div>
+              }
+            }
+          </section>
+        }
+      </div>
+    </div>
   </div>
 </div>

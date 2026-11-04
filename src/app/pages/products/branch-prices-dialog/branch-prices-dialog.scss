@@ -1,0 +1,27 @@
+.price-grid {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  th {
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .num {
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  td:not(:first-child) {
+    width: 160px;
+  }
+}

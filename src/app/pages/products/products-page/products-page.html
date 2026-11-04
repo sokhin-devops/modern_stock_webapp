@@ -59,13 +59,22 @@
                 <th pSortableColumn="sellPrice" class="num">{{ 'products.colPrice' | translate }} <p-sortIcon field="sellPrice" /></th>
                 <th class="num">{{ 'products.colStock' | translate }}</th>
                 <th>{{ 'products.colStatus' | translate }}</th>
+                @if (showActions()) {
+                  <th class="actions"></th>
+                }
               </tr>
             </ng-template>
             <ng-template #body let-p>
               <tr class="clickable" tabindex="0" (click)="openProduct(p)" (keydown.enter)="openProduct(p)">
                 <td>
                   <div class="prod-cell">
-                    <span class="thumb-sm"><i class="icon pi pi-box"></i></span>
+                    <span class="thumb-sm">
+                      @if (p.photoUrl) {
+                        <img [src]="p.photoUrl | apiFile" alt="" loading="lazy" />
+                      } @else {
+                        <i class="icon pi pi-box"></i>
+                      }
+                    </span>
                     <div>
                       <div class="strong">{{ lang.name(p.nameEn, p.nameKm) }}</div>
                       @if (p.barcode) {
@@ -82,11 +91,30 @@
                   @let s = status(p);
                   <span class="tag" [class]="s.tone">{{ s.key | translate }}</span>
                 </td>
+                @if (showActions()) {
+                  <td class="actions">
+                    @if (canBranchReorder()) {
+                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary"
+                              (click)="$event.stopPropagation(); pricing.set(p); reorderOpen.set(true)"
+                              [attr.aria-label]="'products.branchReorder' | translate" [pTooltip]="'products.branchReorder' | translate"
+                              tooltipPosition="top">
+                        <i class="pi pi-sort-amount-down" pButtonIcon></i>
+                      </button>
+                    }
+                    @if (canBranchPrices()) {
+                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary"
+                              (click)="$event.stopPropagation(); pricing.set(p); pricesOpen.set(true)"
+                              [attr.aria-label]="'products.branchPrices' | translate" [pTooltip]="'products.branchPrices' | translate" tooltipPosition="top">
+                        <i class="pi pi-tags" pButtonIcon></i>
+                      </button>
+                    }
+                  </td>
+                }
               </tr>
             </ng-template>
             <ng-template #emptymessage>
               <tr>
-                <td colspan="6" class="empty-cell">{{ (q() || categoryId() ? 'common.noResults' : 'products.empty') | translate }}</td>
+                <td [attr.colspan]="showActions() ? 7 : 6" class="empty-cell">{{ (q() || categoryId() ? 'common.noResults' : 'products.empty') | translate }}</td>
               </tr>
             </ng-template>
           </p-table>
@@ -157,3 +185,5 @@
 <ms-product-form [product]="editing()" [(visible)]="productOpen" (saved)="onSaved($event)" />
 <ms-category-dialog [category]="editingCategory()" [(visible)]="categoryOpen" />
 <ms-unit-dialog [unit]="editingUnit()" [(visible)]="unitOpen" />
+<ms-branch-prices-dialog [product]="pricing()" [(visible)]="pricesOpen" />
+<ms-reorder-levels-dialog [product]="pricing()" [(visible)]="reorderOpen" (saved)="reload()" />

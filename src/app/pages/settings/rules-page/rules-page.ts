@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { InputNumber } from 'primeng/inputnumber';
@@ -12,7 +13,9 @@ import { ApiService } from '../../../core/api/api.service';
 import { BusinessSettings } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
+import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { FieldLabel } from '../../../shared/field-label/field-label';
+import { ImageField } from '../../../shared/image-field/image-field';
 import { revealErrors } from '../../../shared/forms';
 
 /**
@@ -21,7 +24,10 @@ import { revealErrors } from '../../../shared/forms';
  */
 @Component({
   selector: 'ms-rules-page',
-  imports: [ReactiveFormsModule, TranslatePipe, InputNumber, InputText, SelectButton, ToggleSwitch, ButtonDirective, ButtonLabel, FieldLabel],
+  imports: [
+    ReactiveFormsModule, FormsModule, TranslatePipe, InputNumber, InputText, SelectButton, ToggleSwitch, ButtonDirective, ButtonLabel, FieldLabel, ImageField,
+    ApiFilePipe,
+  ],
   templateUrl: './rules-page.html',
   styleUrl: './rules-page.scss',
 })
@@ -45,17 +51,52 @@ export class RulesPage {
     maxDiscountPercent: [10, [Validators.required, Validators.min(0), Validators.max(100)]],
     allowNegativeStock: [false],
     receiptFooter: ['', Validators.maxLength(255)],
+    receiptHeader: ['', Validators.maxLength(255)],
+    receiptPaper: [80 as 58 | 80],
+    receiptShowVatTin: [true],
+    khqrEnabled: [true],
+    bankEnabled: [true],
   });
+  protected readonly papers = [
+    { value: 80, label: '80 mm' },
+    { value: 58, label: '58 mm' },
+  ];
+  /** The KHQR image is saved as soon as it is chosen or removed (not with the form). */
+  protected readonly khqrUrl = signal<string | null>(null);
+  protected readonly khqrBusy = signal(false);
 
   constructor() {
     this.api.get<BusinessSettings>('/business/settings').subscribe({
       next: (s) => {
-        this.form.reset({ ...s, receiptFooter: s.receiptFooter ?? '' });
+        this.form.reset({ ...s, receiptFooter: s.receiptFooter ?? '', receiptHeader: s.receiptHeader ?? '' });
+        this.khqrUrl.set(s.khqrImageUrl);
         if (!this.business.can('business:manage')) {
           this.form.disable();
         }
       },
       error: (e) => this.notify.error(e),
+    });
+  }
+
+  protected uploadKhqr(file: File): void {
+    this.saveKhqr(this.api.upload<BusinessSettings>('/business/khqr', file));
+  }
+
+  protected removeKhqr(): void {
+    this.saveKhqr(this.api.delete<BusinessSettings>('/business/khqr'));
+  }
+
+  private saveKhqr(call: Observable<BusinessSettings>): void {
+    this.khqrBusy.set(true);
+    call.subscribe({
+      next: (s) => {
+        this.khqrBusy.set(false);
+        this.khqrUrl.set(s.khqrImageUrl);
+      },
+      error: (e) => {
+        this.khqrBusy.set(false);
+        this.notify.error(e);
+      },
     });
   }
 
@@ -66,7 +107,8 @@ export class RulesPage {
     }
     const v = this.form.getRawValue();
     this.busy.set(true);
-    this.api.put<BusinessSettings>('/business/settings', { ...v, receiptFooter: v.receiptFooter.trim() || null }).subscribe({
+    const body = { ...v, receiptFooter: v.receiptFooter.trim() || null, receiptHeader: v.receiptHeader.trim() || null };
+    this.api.put<BusinessSettings>('/business/settings', body).subscribe({
       next: () => {
         this.busy.set(false);
         this.notify.showKey('settings.saved');

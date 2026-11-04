@@ -9,7 +9,7 @@ import { InputText } from 'primeng/inputtext';
 import { SelectButton } from 'primeng/selectbutton';
 
 import { ApiService } from '../../core/api/api.service';
-import { Currency, PaymentMethod } from '../../core/api/models';
+import { BusinessSettings, Currency, PaymentMethod } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
 import { NotifyService } from '../../core/notify.service';
 import { FieldLabel } from '../field-label/field-label';
@@ -52,7 +52,13 @@ export class PaymentDialog {
     { value: 'USD', label: 'USD $' },
     { value: 'KHR', label: 'KHR ៛' },
   ];
-  protected readonly methods = ['CASH', 'KHQR', 'BANK'].map((m) => ({ value: m, label: `docs.methods.${m}` }));
+  /** Customers pay by the methods the business takes (Settings › Sales rules); payments to suppliers by any. */
+  private readonly enabled = signal<{ khqr: boolean; bank: boolean }>({ khqr: true, bank: true });
+  protected readonly methods = computed(() =>
+    ['CASH', 'KHQR', 'BANK']
+      .filter((m) => !this.isCustomer() || m === 'CASH' || (m === 'KHQR' ? this.enabled().khqr : this.enabled().bank))
+      .map((m) => ({ value: m, label: `docs.methods.${m}` })),
+  );
 
   constructor() {
     effect(() => {
@@ -63,6 +69,11 @@ export class PaymentDialog {
         this.method.set('CASH');
         this.reference.set('');
         this.note.set('');
+        if (this.isCustomer()) {
+          this.api.get<BusinessSettings>('/business/settings').subscribe({
+            next: (s) => this.enabled.set({ khqr: s.khqrEnabled, bank: s.bankEnabled }),
+          });
+        }
       }
     });
   }

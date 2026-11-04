@@ -109,8 +109,10 @@
 <p-dialog [visible]="inviteOpen()" (visibleChange)="inviteOpen.set($event)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
           [header]="'settings.members.invite' | translate">
   @if (inviteLink(); as link) {
-    <div class="ms-form">
+    <div class="share">
       <p>{{ 'settings.members.link' | translate }}</p>
+      <ms-qr-code [value]="link" [label]="'settings.members.qrLabel' | translate" />
+      <p class="muted small">{{ 'settings.members.qrLead' | translate }}</p>
       <div class="link-box"><code>{{ link }}</code></div>
     </div>
   } @else {
@@ -134,6 +136,9 @@
   }
   <ng-template #footer>
     @if (inviteLink(); as link) {
+      <a pButton [outlined]="true" [href]="telegramShare(link)" target="_blank" rel="noopener">
+        <i class="pi pi-telegram" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.telegram' | translate }}</span>
+      </a>
       <button pButton type="button" [outlined]="true" (click)="copy(link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
       <button pButton type="button" (click)="inviteOpen.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
     } @else {
@@ -166,10 +171,18 @@
 <p-dialog [visible]="!!shownLink()" (visibleChange)="!$event && shownLink.set(null)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
           [header]="'settings.members.link' | translate">
   @if (shownLink(); as s) {
-    <p>{{ s.title }}</p>
-    <div class="link-box"><code>{{ s.link }}</code></div>
+    <div class="share">
+      <p>{{ s.title }}</p>
+      <ms-qr-code [value]="s.link" [label]="s.title" />
+      <div class="link-box"><code>{{ s.link }}</code></div>
+    </div>
   }
   <ng-template #footer>
+    @if (shownLink(); as s) {
+      <a pButton [outlined]="true" [href]="telegramShare(s.link)" target="_blank" rel="noopener">
+        <i class="pi pi-telegram" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.telegram' | translate }}</span>
+      </a>
+    }
     <button pButton type="button" [outlined]="true" (click)="copy(shownLink()!.link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
     <button pButton type="button" (click)="shownLink.set(null)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
   </ng-template>

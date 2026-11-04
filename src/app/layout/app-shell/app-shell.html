@@ -1,6 +1,6 @@
 <div class="shell" [class.collapsed]="collapsed()" [class.nav-open]="navOpen()">
   <ms-app-topbar (menu)="navOpen.set(!navOpen())" />
   <ms-app-sidebar [rail]="rail()" (collapse)="toggleCollapsed()" (navigate)="navOpen.set(false)" />
-  <main class="main"><router-outlet /></main>
+  <main class="main"><ms-plan-banner /><router-outlet /></main>
   <div class="scrim" (click)="navOpen.set(false)"></div>
 </div>

@@ -39,6 +39,13 @@ export class ApiService {
     return this.http.patch<T>(this.base + path, body);
   }
 
+  /** Sends one file as the form field "file" (pictures). */
+  upload<T>(path: string, file: File): Observable<T> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<T>(this.base + path, form);
+  }
+
   delete<T = void>(path: string): Observable<T> {
     return this.http.delete<T>(this.base + path);
   }

@@ -38,6 +38,10 @@
               "node_modules/primeicons/primeicons.css",
               "src/tailwind.css",
               "src/styles.scss"
+            ],
+            "allowedCommonJsDependencies": [
+              "dijkstrajs",
+              "qrcode"
             ]
           },
           "configurations": {

@@ -23,7 +23,7 @@
       </div>
       <div class="ms-field">
         <span msLabel id="ap-mode">{{ 'settings.appearance.mode' | translate }}</span>
-        <p-selectbutton [options]="modes" optionValue="value" [ngModel]="theme.dark() ? 'dark' : 'light'" (ngModelChange)="setMode($event)"
+        <p-selectbutton [options]="modes" optionValue="value" [ngModel]="theme.mode()" (ngModelChange)="setMode($event)"
                         [allowEmpty]="false" ariaLabelledBy="ap-mode">
           <ng-template #item let-option><i [class]="option.icon"></i>&nbsp;{{ option.label | translate }}</ng-template>
         </p-selectbutton>

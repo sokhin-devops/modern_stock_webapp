@@ -1,0 +1,116 @@
+// Marks follow the app's chart rules: thin bars with 4 px rounded tops on the baseline, 2 px apart, a recessive grid,
+// and labels in text colors (never the bar color).
+:host {
+  display: block;
+}
+
+.chart {
+  position: relative;
+  padding-top: 18px;
+}
+
+.grid {
+  position: absolute;
+  inset: 18px 0 22px;
+  pointer-events: none;
+}
+
+.grid-line {
+  position: absolute;
+  inset-inline: 0;
+  border-top: 1px dashed var(--border);
+
+  &.top {
+    top: 0;
+  }
+
+  &.half {
+    top: 50%;
+  }
+
+  &.base {
+    bottom: 0;
+    border-top: 1px solid var(--border-strong);
+  }
+}
+
+.grid-value {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: var(--chart-h);
+}
+
+// The whole column is the hover target, bigger than the bar.
+.col {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+  height: 100%;
+}
+
+.bar {
+  width: 100%;
+  max-width: 28px;
+  border-radius: 4px 4px 0 0;
+  background: var(--primary);
+  transition: background-color 0.15s var(--ease);
+
+  &.on {
+    background: var(--primary-hover);
+  }
+}
+
+.tip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--text);
+  color: var(--surface);
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+
+  // Near the edges the tip leans inward, so it stays inside the card.
+  &.left {
+    right: 0;
+    left: auto;
+    transform: none;
+  }
+
+  &.right {
+    left: 0;
+    transform: none;
+  }
+}
+
+.axis {
+  display: flex;
+  gap: 2px;
+  height: 22px;
+  padding-top: 4px;
+}
+
+.tick {
+  flex: 1;
+  min-width: 0;
+  overflow: visible;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}

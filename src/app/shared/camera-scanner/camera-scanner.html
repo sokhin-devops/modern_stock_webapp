@@ -1,0 +1,19 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(480px, 96vw)' }" [header]="'scanner.title' | translate"
+          (onShow)="start()" (onHide)="stop()">
+  <div class="viewport">
+    <video #video playsinline muted></video>
+    @if (!error()) {
+      <div class="aim" aria-hidden="true"></div>
+    }
+  </div>
+  @if (error(); as key) {
+    <p class="note danger-text">{{ key | translate }}</p>
+  } @else if (message()) {
+    <p class="note strong" aria-live="polite">{{ message() }}</p>
+  } @else {
+    <p class="note muted">{{ (starting() ? 'scanner.starting' : 'scanner.hint') | translate }}</p>
+  }
+  <ng-template #footer>
+    <button pButton type="button" (click)="visible.set(false)"><span pButtonLabel>{{ 'scanner.done' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

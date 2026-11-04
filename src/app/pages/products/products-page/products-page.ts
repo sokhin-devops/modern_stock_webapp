@@ -20,8 +20,11 @@ import { BusinessService } from '../../../core/business/business.service';
 import { CatalogService } from '../../../core/catalog/catalog.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
+import { ApiFilePipe } from '../../../shared/api-file.pipe';
+import { BranchPricesDialog } from '../branch-prices-dialog/branch-prices-dialog';
 import { CategoryDialog } from '../category-dialog/category-dialog';
 import { ProductForm } from '../product-form/product-form';
+import { ReorderLevelsDialog } from '../reorder-levels-dialog/reorder-levels-dialog';
 import { UnitDialog } from '../unit-dialog/unit-dialog';
 
 type ProductTab = 'products' | 'categories' | 'units';
@@ -35,7 +38,7 @@ type ProductTab = 'products' | 'categories' | 'units';
   imports: [
     FormsModule, TranslatePipe, CurrencyPipe, DecimalPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, IconField,
     InputIcon, InputText, Select, ToggleButton, ButtonDirective, ButtonIcon, ButtonLabel, ProductForm, CategoryDialog,
-    UnitDialog, Tooltip,
+    UnitDialog, Tooltip, ApiFilePipe, BranchPricesDialog, ReorderLevelsDialog,
   ],
   templateUrl: './products-page.html',
   styleUrl: './products-page.scss',
@@ -49,6 +52,18 @@ export class ProductsPage {
   private readonly confirm = inject(ConfirmationService);
 
   protected readonly tab = signal<ProductTab>('products');
+  /** Own prices per branch (FR-1.5): only worth showing with more than one branch. */
+  protected readonly canBranchPrices = computed(
+    () => this.business.can('branch_price:manage') && this.business.branches().filter((b) => b.active).length > 1,
+  );
+  protected readonly pricing = signal<Product | null>(null);
+  protected readonly pricesOpen = signal(false);
+  /** Own reorder level per branch (FR-4.7), for members who manage products. */
+  protected readonly canBranchReorder = computed(
+    () => this.business.can('product:manage') && this.business.branches().filter((b) => b.active).length > 1,
+  );
+  protected readonly showActions = computed(() => this.canBranchPrices() || this.canBranchReorder());
+  protected readonly reorderOpen = signal(false);
   protected readonly canManage = computed(() => this.business.can('product:manage'));
 
   // Product list: one page at a time from the API.
@@ -173,7 +188,7 @@ export class ProductsPage {
     if (p.qtyOnHand <= 0) {
       return { key: 'products.out', tone: 'tag-danger' };
     }
-    if (p.reorderLevel > 0 && p.qtyOnHand <= p.reorderLevel) {
+    if (p.reorderAt > 0 && p.qtyOnHand <= p.reorderAt) {
       return { key: 'products.low', tone: 'tag-primary' };
     }
     return { key: 'products.inStock', tone: '' };

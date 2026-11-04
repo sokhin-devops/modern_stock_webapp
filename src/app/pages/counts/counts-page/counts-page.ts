@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
+import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { Drawer } from 'primeng/drawer';
@@ -12,52 +13,80 @@ import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { ProgressBar } from 'primeng/progressbar';
 import { Select } from 'primeng/select';
+import { SelectButton } from 'primeng/selectbutton';
 import { TableModule } from 'primeng/table';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 
 import { ApiService } from '../../../core/api/api.service';
+import { Product } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { CatalogService } from '../../../core/catalog/catalog.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
+import { CameraScanner } from '../../../shared/camera-scanner/camera-scanner';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { LazyList } from '../../../shared/lazy-list';
-import { warehouseOptions } from '../../../shared/options';
+import { Option, warehouseOptions } from '../../../shared/options';
 
 interface CountLine {
   id: number;
   productId: number;
   productName: string;
+  productNameKm: string | null;
   sku: string;
   unitSymbol: string;
-  systemQty: number;
+  warehouseId: number;
+  warehouseName: string;
+  /** Empty in a blind count until it is submitted. */
+  systemQty: number | null;
   countedQty: number | null;
   difference: number | null;
   value: number | null;
+  /** Sold or received after the snapshot: count it again. */
+  moved: boolean;
+  /** Barcodes that count this product, and the base units one scan adds. */
+  codes: { barcode: string; factor: number }[];
 }
+
+type CountStatus = 'DRAFT' | 'SUBMITTED' | 'POSTED' | 'VOID';
+type CountScope = 'ALL' | 'CATEGORY' | 'PRODUCTS';
 
 interface StockCount {
   id: number;
   number: string;
+  branchId: number;
+  /** null = every warehouse of the branch. */
+  warehouseId: number | null;
   warehouseName: string;
-  status: 'DRAFT' | 'POSTED' | 'VOID';
+  categoryId: number | null;
+  scope: CountScope;
+  blind: boolean;
+  status: CountStatus;
   note: string | null;
   createdAt: string;
+  submittedAt: string | null;
   postedAt: string | null;
+  lineCount: number;
   counted: number;
-  differences: number;
-  differenceValue: number;
+  differences: number | null;
+  differenceValue: number | null;
+  /** Counted lines flagged for a recount. */
+  moved: number;
   lines: CountLine[];
 }
 
 /**
- * Stock counts (prototype stock-counts.html / stock-count.html, PLAIN.md 11.2): start a count for a warehouse (or one
- * category), type what is on the shelf, save as often as needed, and post: each difference changes the stock.
+ * Stock counts (prototype stock-counts.html / stock-count.html, PLAIN.md 11.2, FR-4.4, FR-4.9): count one warehouse or
+ * all of a branch, every product, one category or the products of one shelf, openly or blind. Quantities are typed or
+ * scanned (a USB scanner or the phone's camera). Products sold during the count are flagged and counted again. The
+ * counter submits; Owner or Manager posts, and each difference changes the stock.
  */
 @Component({
   selector: 'ms-counts-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Dialog, Drawer, IconField, InputIcon,
-    InputNumber, InputText, ProgressBar, Select, ButtonDirective, ButtonIcon, ButtonLabel, FieldLabel,
+    InputNumber, InputText, ProgressBar, Select, SelectButton, ToggleSwitch, AutoComplete, ButtonDirective, ButtonIcon,
+    ButtonLabel, FieldLabel, CameraScanner,
   ],
   templateUrl: './counts-page.html',
   styleUrl: './counts-page.scss',
@@ -72,65 +101,173 @@ export class CountsPage {
   private readonly translate = inject(TranslateService);
 
   protected readonly list = new LazyList<StockCount>((q) => this.api.page('/stock-counts', q), (e) => this.notify.error(e));
-  protected readonly warehouses = computed(() => warehouseOptions(this.business.branches(), this.lang, this.business.branchId()));
+  protected readonly canCount = computed(() => this.business.can('count:manage'));
+  protected readonly canApprove = computed(() => this.business.can('adjustment:approve'));
+
+  // Start dialog: "w:<id>" one warehouse, "b:<id>" every warehouse of a branch
+  protected readonly places = computed<Option<string>[]>(() => {
+    const branches = this.business.branches().filter((b) => b.active && (this.business.branchId() == null || b.id === this.business.branchId()));
+    const warehouses = warehouseOptions(this.business.branches(), this.lang, this.business.branchId());
+    return branches.flatMap((b) => {
+      const own = b.warehouses.filter((w) => w.active).map((w) => w.id);
+      const all: Option<string>[] = own.length > 1
+        ? [{ value: `b:${b.id}`, label: this.translate.instant('counts.allWarehouses', { branch: this.lang.name(b.nameEn, b.nameKm) }) }]
+        : [];
+      return [...all, ...warehouses.filter((w) => own.includes(w.value)).map((w) => ({ value: `w:${w.value}`, label: w.label }))];
+    });
+  });
   protected readonly categories = computed(() =>
     this.catalog.categories().map((c) => ({ value: c.id, label: this.lang.name(c.nameEn, c.nameKm) })),
   );
-
-  // Start dialog
+  protected readonly scopes = [
+    { value: 'ALL', label: 'counts.scopeAll' },
+    { value: 'CATEGORY', label: 'counts.scopeCategory' },
+    { value: 'PRODUCTS', label: 'counts.scopeProducts' },
+  ];
   protected readonly startOpen = signal(false);
-  protected readonly warehouseId = signal<number | null>(null);
+  protected readonly place = signal<string | null>(null);
+  protected readonly scope = signal<CountScope>('ALL');
   protected readonly categoryId = signal<number | null>(null);
+  protected readonly chosen = signal<Product[]>([]);
+  protected readonly found = signal<Product[]>([]);
+  protected readonly blind = signal(false);
+  protected readonly canStart = computed(
+    () =>
+      !!this.place() &&
+      (this.scope() !== 'CATEGORY' || this.categoryId() != null) &&
+      (this.scope() !== 'PRODUCTS' || this.chosen().length > 0),
+  );
 
   // The open count
   protected readonly count = signal<StockCount | null>(null);
   protected readonly filter = signal('');
+  /** With several warehouses in one count, the one being counted now. */
+  protected readonly warehouseId = signal<number | null>(null);
+  protected readonly countWarehouses = computed(() => {
+    const seen = new Map<number, string>();
+    (this.count()?.lines ?? []).forEach((l) => seen.set(l.warehouseId, l.warehouseName));
+    return [...seen].map(([value, label]) => ({ value, label }));
+  });
   protected readonly shown = computed(() => {
     const q = this.filter().trim().toLowerCase();
-    const lines = this.count()?.lines ?? [];
-    return q ? lines.filter((l) => l.productName.toLowerCase().includes(q) || l.sku.toLowerCase().includes(q)) : lines;
+    const where = this.countWarehouses().length > 1 ? this.warehouseId() : null;
+    return (this.count()?.lines ?? []).filter(
+      (l) =>
+        (where == null || l.warehouseId === where) &&
+        (!q || [l.productName, l.productNameKm ?? '', l.sku].some((t) => t.toLowerCase().includes(q)) || l.codes.some((c) => c.barcode === q)),
+    );
   });
   protected readonly progress = computed(() => {
     const lines = this.count()?.lines ?? [];
     return lines.length ? Math.round((lines.filter((l) => l.countedQty != null).length / lines.length) * 100) : 0;
   });
+  protected readonly movedLines = computed(() => (this.count()?.lines ?? []).filter((l) => l.moved));
+  /** Blind and still being counted: no system quantities to show. */
+  protected readonly hidden = computed(() => !!this.count()?.blind && this.count()?.status === 'DRAFT');
+  protected readonly editable = computed(() => this.count()?.status === 'DRAFT' && this.canCount());
   protected readonly busy = signal(false);
+
+  // Scanning
+  protected readonly code = signal('');
+  protected readonly cameraOpen = signal(false);
+  /** What the last scan did, shown under the scan field and the camera picture. */
+  protected readonly scanned = signal<{ lineId: number | null; text: string } | null>(null);
+  protected readonly hasCamera = typeof navigator !== 'undefined' && !!navigator.mediaDevices;
 
   constructor() {
     this.catalog.loadLists();
   }
 
+  protected scopeLabel(c: StockCount): string {
+    if (c.scope === 'CATEGORY') {
+      const cat = this.catalog.categories().find((x) => x.id === c.categoryId);
+      return cat ? this.lang.name(cat.nameEn, cat.nameKm) : this.translate.instant('counts.scopeCategory');
+    }
+    return this.translate.instant(c.scope === 'PRODUCTS' ? 'counts.scopeProducts' : 'counts.scopeAll');
+  }
+
   protected openStart(): void {
-    this.warehouseId.set(this.warehouses()[0]?.value ?? null);
+    this.place.set(this.places()[0]?.value ?? null);
+    this.scope.set('ALL');
     this.categoryId.set(null);
+    this.chosen.set([]);
+    this.blind.set(false);
     this.startOpen.set(true);
   }
 
-  protected start(): void {
-    this.busy.set(true);
-    this.api.post<StockCount>('/stock-counts', { warehouseId: this.warehouseId(), categoryId: this.categoryId() }).subscribe({
-      next: (c) => {
-        this.busy.set(false);
-        this.startOpen.set(false);
-        this.count.set(c);
-        this.list.reload();
-      },
-      error: (e) => {
-        this.busy.set(false);
-        this.notify.error(e);
-      },
+  protected findProducts(event: AutoCompleteCompleteEvent): void {
+    this.catalog.searchProducts({ page: 0, size: 15, sort: 'nameEn,asc', q: event.query }).subscribe({
+      next: (page) => this.found.set(page.content.filter((p) => !this.chosen().some((c) => c.id === p.id))),
+      error: (e) => this.notify.error(e),
     });
   }
 
+  protected start(): void {
+    const [kind, id] = (this.place() ?? '').split(':');
+    this.busy.set(true);
+    this.api
+      .post<StockCount>('/stock-counts', {
+        warehouseId: kind === 'w' ? Number(id) : null,
+        branchId: kind === 'b' ? Number(id) : null,
+        categoryId: this.scope() === 'CATEGORY' ? this.categoryId() : null,
+        productIds: this.scope() === 'PRODUCTS' ? this.chosen().map((p) => p.id) : null,
+        blind: this.blind(),
+      })
+      .subscribe({
+        next: (c) => {
+          this.busy.set(false);
+          this.startOpen.set(false);
+          this.show(c);
+          this.list.reload();
+        },
+        error: (e) => {
+          this.busy.set(false);
+          this.notify.error(e);
+        },
+      });
+  }
+
   protected open(c: StockCount): void {
-    this.filter.set('');
-    this.api.get<StockCount>(`/stock-counts/${c.id}`).subscribe({ next: (full) => this.count.set(full), error: (e) => this.notify.error(e) });
+    this.api.get<StockCount>(`/stock-counts/${c.id}`).subscribe({ next: (full) => this.show(full), error: (e) => this.notify.error(e) });
   }
 
   protected setCounted(line: CountLine, value: number | null): void {
     this.count.update((c) =>
-      c ? { ...c, lines: c.lines.map((l) => (l.id === line.id ? { ...l, countedQty: value, difference: value == null ? null : value - l.systemQty } : l)) } : c,
+      c
+        ? {
+            ...c,
+            lines: c.lines.map((l) =>
+              l.id === line.id ? { ...l, countedQty: value, difference: value == null || l.systemQty == null ? null : value - l.systemQty } : l,
+            ),
+          }
+        : c,
     );
+  }
+
+  /** A scanned or typed barcode adds one of that unit (a carton adds its pieces) in the warehouse being counted. */
+  protected scan(text: string): void {
+    const code = text.trim();
+    if (!code) {
+      return;
+    }
+    const where = this.countWarehouses().length > 1 ? this.warehouseId() : null;
+    let hit: { line: CountLine; factor: number } | null = null;
+    for (const line of this.count()?.lines ?? []) {
+      const match = line.codes.find((c) => c.barcode === code);
+      if (match && (where == null || line.warehouseId === where)) {
+        hit = { line, factor: match.factor };
+        break;
+      }
+    }
+    this.code.set('');
+    if (!hit) {
+      this.scanned.set({ lineId: null, text: this.translate.instant('counts.unknownCode', { code }) });
+      return;
+    }
+    const total = (hit.line.countedQty ?? 0) + hit.factor;
+    this.setCounted(hit.line, total);
+    const name = this.lang.name(hit.line.productName, hit.line.productNameKm);
+    this.scanned.set({ lineId: hit.line.id, text: `+${hit.factor} ${name} → ${total} ${hit.line.unitSymbol}` });
   }
 
   protected save(after?: () => void): void {
@@ -159,28 +296,41 @@ export class CountsPage {
       });
   }
 
+  /** Takes the system quantity again for the products that moved, then they are counted again. */
+  protected recount(): void {
+    const c = this.count();
+    if (c) {
+      this.save(() => this.act(`/stock-counts/${c.id}/recount`, 'counts.recounted'));
+    }
+  }
+
+  protected submit(): void {
+    const c = this.count();
+    if (c) {
+      this.save(() => this.act(`/stock-counts/${c.id}/submit`, 'counts.submitted'));
+    }
+  }
+
+  protected reopen(): void {
+    const c = this.count();
+    if (c) {
+      this.act(`/stock-counts/${c.id}/reopen`, 'counts.reopened');
+    }
+  }
+
   protected post(): void {
     const c = this.count();
     if (!c) {
       return;
     }
+    const post = () => this.act(`/stock-counts/${c.id}/post`, 'counts.posted');
     this.confirm.confirm({
       header: this.translate.instant('counts.post'),
       message: this.translate.instant('counts.postConfirm', { number: c.number }),
       acceptLabel: this.translate.instant('counts.post'),
       rejectLabel: this.translate.instant('common.cancel'),
       rejectButtonProps: { text: true },
-      accept: () =>
-        this.save(() =>
-          this.api.post<StockCount>(`/stock-counts/${c.id}/post`).subscribe({
-            next: (posted) => {
-              this.count.set(posted);
-              this.notify.showKey('counts.posted');
-              this.list.refresh();
-            },
-            error: (e) => this.notify.error(e),
-          }),
-        ),
+      accept: () => (c.status === 'DRAFT' ? this.save(post) : post()),
     });
   }
 
@@ -196,5 +346,29 @@ export class CountsPage {
       },
       error: (e) => this.notify.error(e),
     });
+  }
+
+  private act(path: string, done: string): void {
+    this.busy.set(true);
+    this.api.post<StockCount>(path).subscribe({
+      next: (c) => {
+        this.busy.set(false);
+        this.count.set(c);
+        this.notify.showKey(done);
+        this.list.refresh();
+      },
+      error: (e) => {
+        this.busy.set(false);
+        this.notify.error(e);
+      },
+    });
+  }
+
+  private show(c: StockCount): void {
+    this.filter.set('');
+    this.code.set('');
+    this.scanned.set(null);
+    this.warehouseId.set(c.lines[0]?.warehouseId ?? null);
+    this.count.set(c);
   }
 }

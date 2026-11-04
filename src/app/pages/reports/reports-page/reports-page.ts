@@ -1,122 +1,390 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, ElementRef, computed, inject, linkedSignal, signal, viewChild } from '@angular/core';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
+import { ProgressBar } from 'primeng/progressbar';
+import { Select } from 'primeng/select';
+import { SelectButton } from 'primeng/selectbutton';
 import { TableModule } from 'primeng/table';
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
+import { Tooltip } from 'primeng/tooltip';
+import { catchError, map, Observable, of } from 'rxjs';
 
-import { ApiService } from '../../../core/api/api.service';
-import { BatchRow, StockRow, StockSummary } from '../../../core/api/models';
+import { ApiService, Filters } from '../../../core/api/api.service';
+import {
+  AbcReport, CountReport, CustomerDebtReport, ExpiryReport, LossReport, OnHandReport, ProfitReport, PurchaseReport, PurchasesBy,
+  ReorderReport, SalesBy, SalesReport, ShiftReport, SlowReport, Statement, SupplierDebtReport, VatReport,
+} from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
+import { CatalogService } from '../../../core/catalog/catalog.service';
+import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
+import { BarChart, BarPoint } from '../../../shared/bar-chart/bar-chart';
 import { toIsoDate } from '../../../shared/dates';
+import { PackQtyPipe } from '../../../shared/pack-qty.pipe';
+import { ReportMeta, exportReport, printReport } from '../../../shared/report-export';
 
-interface DayRow {
-  day: string;
-  sales: number;
-  cost: number;
-  profit: number;
+export type ReportId =
+  | 'sales' | 'gross-profit' | 'profit' | 'customer-debt' | 'supplier-debt'
+  | 'stock-on-hand' | 'reorder' | 'expiry' | 'count-differences' | 'abc'
+  | 'losses' | 'slow-moving' | 'cash-shifts' | 'vat' | 'purchases' | 'customer-statement' | 'supplier-statement';
+
+/** Who sees a report: everyone's money (Owner, Manager), sales (a cashier their own), or stock. */
+type Access = 'money' | 'sales' | 'stock';
+
+interface ReportDef {
+  id: ReportId;
+  area: 'sales' | 'purchases' | 'money' | 'stock' | 'analysis';
+  icon: string;
+  access: Access;
+  /** The period it covers by default; none for reports of the present (debts, stock). */
+  period: 'days30' | 'days90' | 'month' | 'year' | null;
 }
 
-interface SalesReport {
-  documents: number;
-  sales: number;
-  cost: number;
-  grossProfit: number;
-  vat: number;
-  days: DayRow[];
-  topProducts: { productId: number; name: string; qty: number; sales: number; profit: number }[];
+const REPORTS: ReportDef[] = [
+  { id: 'sales', area: 'sales', icon: 'pi pi-shopping-cart', access: 'sales', period: 'days30' },
+  { id: 'gross-profit', area: 'sales', icon: 'pi pi-chart-line', access: 'money', period: 'days30' },
+  { id: 'purchases', area: 'purchases', icon: 'pi pi-shopping-bag', access: 'money', period: 'days30' },
+  { id: 'profit', area: 'money', icon: 'pi pi-wallet', access: 'money', period: 'month' },
+  { id: 'customer-debt', area: 'money', icon: 'pi pi-users', access: 'money', period: null },
+  { id: 'supplier-debt', area: 'money', icon: 'pi pi-truck', access: 'money', period: null },
+  { id: 'customer-statement', area: 'money', icon: 'pi pi-file', access: 'money', period: 'days90' },
+  { id: 'supplier-statement', area: 'money', icon: 'pi pi-file-edit', access: 'money', period: 'days90' },
+  { id: 'cash-shifts', area: 'money', icon: 'pi pi-inbox', access: 'money', period: 'days30' },
+  { id: 'vat', area: 'money', icon: 'pi pi-percentage', access: 'money', period: 'year' },
+  { id: 'stock-on-hand', area: 'stock', icon: 'pi pi-box', access: 'stock', period: null },
+  { id: 'reorder', area: 'stock', icon: 'pi pi-arrow-down', access: 'stock', period: null },
+  { id: 'expiry', area: 'stock', icon: 'pi pi-calendar-times', access: 'stock', period: null },
+  { id: 'count-differences', area: 'stock', icon: 'pi pi-list-check', access: 'stock', period: 'days30' },
+  { id: 'losses', area: 'stock', icon: 'pi pi-exclamation-triangle', access: 'stock', period: 'days30' },
+  { id: 'slow-moving', area: 'stock', icon: 'pi pi-hourglass', access: 'stock', period: null },
+  { id: 'abc', area: 'analysis', icon: 'pi pi-sort-amount-down', access: 'money', period: 'year' },
+];
+
+const PATHS: Record<ReportId, string> = {
+  sales: '/reports/sales',
+  'gross-profit': '/reports/sales',
+  profit: '/reports/profit',
+  'customer-debt': '/reports/customer-debt',
+  'supplier-debt': '/reports/supplier-debt',
+  'stock-on-hand': '/reports/stock-on-hand',
+  reorder: '/reports/reorder',
+  expiry: '/reports/expiry',
+  'count-differences': '/reports/count-differences',
+  abc: '/reports/abc',
+  losses: '/reports/losses',
+  'slow-moving': '/reports/slow-moving',
+  'cash-shifts': '/reports/cash-shifts',
+  vat: '/reports/vat',
+  purchases: '/reports/purchases',
+  'customer-statement': '/reports/statement',
+  'supplier-statement': '/reports/statement',
+};
+
+interface Party {
+  id: number;
+  name: string;
+  phone: string | null;
 }
 
-interface ProfitReport {
-  revenue: number;
-  costOfGoods: number;
-  grossProfit: number;
-  expenses: number;
-  netProfit: number;
-  expensesByCategory: { category: string; amount: number }[];
-}
-
-interface DebtReport {
-  customersOwe: number;
-  weOwe: number;
-  customers: { id: number; name: string; phone: string | null; balance: number }[];
-  suppliers: { id: number; name: string; phone: string | null; balance: number }[];
-}
+const USD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+const USD_SHORT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' });
 
 /**
- * Reports (prototype reports.html, PLAIN.md 11.10): sales and profit for a period with a chart by day and the best
- * sellers, the profit and loss with expenses, who owes what, and stock value, low stock and expiry. All for the branch
- * in the top bar.
+ * Reports (PLAIN.md 14): one screen with a report picker, filters, totals, a chart where it helps, and a table.
+ * The picker lists only what the member's role sees; the report is in the URL (?r=reorder), so dashboard cards can
+ * open one. Everything covers the branch in the top bar.
  */
 @Component({
   selector: 'ms-reports-page',
-  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, DatePicker, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel],
+  imports: [
+    FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, DatePicker, ProgressBar, Select, SelectButton, TableModule,
+    BarChart, PackQtyPipe, AutoComplete, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip,
+  ],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
 })
 export class ReportsPage {
   private readonly api = inject(ApiService);
-  private readonly business = inject(BusinessService);
+  protected readonly business = inject(BusinessService);
+  protected readonly lang = inject(LangService);
+  private readonly catalog = inject(CatalogService);
   private readonly notify = inject(NotifyService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
-  protected readonly tab = signal<'sales' | 'profit' | 'debts' | 'stock'>('sales');
-  protected readonly from = signal<Date>(daysAgo(29));
-  protected readonly to = signal<Date>(new Date());
+  private readonly query = toSignal(this.route.queryParamMap, { requireSync: true });
 
-  protected readonly sales = signal<SalesReport | null>(null);
-  protected readonly profit = signal<ProfitReport | null>(null);
-  protected readonly debts = signal<DebtReport | null>(null);
-  protected readonly summary = signal<StockSummary | null>(null);
-  protected readonly low = signal<StockRow[]>([]);
-  protected readonly expiring = signal<BatchRow[]>([]);
-
-  /** Bar heights as a share of the best day. */
-  protected readonly maxDay = computed(() => Math.max(1, ...(this.sales()?.days ?? []).map((d) => d.sales)));
-  protected readonly margin = computed(() => {
-    const s = this.sales();
-    return s && s.sales > 0 ? Math.round((s.grossProfit / s.sales) * 100) : 0;
+  /** The reports this member's role sees, grouped by area for the picker. */
+  protected readonly reports = computed(() => {
+    this.business.current(); // the role follows the business
+    const money = this.business.can('cash_shift:all');
+    const sees: Record<Access, boolean> = {
+      money,
+      sales: money || this.business.can('sale:create'),
+      stock: this.business.can('stock:view'),
+    };
+    return REPORTS.filter((r) => sees[r.access]);
+  });
+  protected readonly areas = computed(() =>
+    (['sales', 'purchases', 'money', 'stock', 'analysis'] as const)
+      .map((area) => ({ area, reports: this.reports().filter((r) => r.area === area) }))
+      .filter((g) => g.reports.length),
+  );
+  protected readonly pickerOptions = computed(() => {
+    this.lang.lang();
+    return this.reports().map((r) => ({ value: r.id, label: this.translate.instant('reports.name.' + r.id) }));
   });
 
+  protected readonly report = computed<ReportDef | null>(() => {
+    const id = this.query().get('r');
+    return this.reports().find((r) => r.id === id) ?? this.reports()[0] ?? null;
+  });
+
+  // Filters. The period starts at the report's own default each time another report opens.
+  protected readonly from = linkedSignal<Date>(() => defaultFrom(this.report()?.period ?? 'days30'));
+  protected readonly to = linkedSignal<Date>(() => {
+    this.report();
+    return new Date();
+  });
+  protected readonly days = linkedSignal<30 | 60 | 90>(() => {
+    const days = Number(this.query().get('days'));
+    return days === 60 || days === 90 ? days : 30;
+  });
+  protected readonly categoryId = signal<number | null>(null);
+  protected readonly slowDays = signal<30 | 60 | 90 | 180>(60);
+  protected readonly slowOptions = [30, 60, 90, 180].map((value) => ({ value, label: 'reports.withinDays' }));
+  protected readonly purchasesBy = computed<PurchasesBy>(() => (this.query().get('by') === 'PRODUCT' ? 'PRODUCT' : 'SUPPLIER'));
+  protected readonly purchasesByOptions = (['SUPPLIER', 'PRODUCT'] as const).map((value) => ({ value, label: 'reports.purchasesBy.' + value }));
+  /** The customer or supplier of a statement; chosen again when another report opens. */
+  protected readonly party = linkedSignal<Party | null>(() => {
+    this.report();
+    return null;
+  });
+  protected readonly parties = signal<Party[]>([]);
+  protected readonly by = computed<SalesBy>(() => {
+    const by = this.query().get('by') as SalesBy | null;
+    const allowed = this.report()?.id === 'gross-profit' ? GROSS_BY : SALES_BY;
+    return by && allowed.includes(by) ? by : this.report()?.id === 'gross-profit' ? 'PRODUCT' : 'DAY';
+  });
+  protected readonly byOptions = computed(() =>
+    (this.report()?.id === 'gross-profit' ? GROSS_BY : SALES_BY).map((value) => ({ value, label: 'reports.by.' + value })),
+  );
+  protected readonly dayOptions = [30, 60, 90].map((value) => ({ value, label: 'reports.withinDays' }));
+  protected readonly categoryOptions = computed(() =>
+    this.catalog.categories().map((c) => ({ value: c.id, label: this.lang.name(c.nameEn, c.nameKm) })),
+  );
+
+  protected readonly data = rxResource({
+    request: () => {
+      const r = this.report();
+      if (!r) {
+        return undefined;
+      }
+      const filters: Filters = {};
+      if (r.period) {
+        filters['from'] = toIsoDate(this.from());
+        filters['to'] = toIsoDate(this.to());
+      }
+      if (r.id === 'sales' || r.id === 'gross-profit') {
+        filters['by'] = this.by();
+      }
+      if (r.id === 'expiry') {
+        filters['days'] = this.days();
+      }
+      if (r.id === 'stock-on-hand') {
+        filters['categoryId'] = this.categoryId();
+      }
+      if (r.id === 'slow-moving') {
+        filters['days'] = this.slowDays();
+      }
+      if (r.id === 'purchases') {
+        filters['by'] = this.purchasesBy();
+      }
+      if (r.id === 'customer-statement' || r.id === 'supplier-statement') {
+        const party = this.party();
+        if (!party) {
+          return undefined;
+        }
+        filters['party'] = r.id === 'customer-statement' ? 'CUSTOMER' : 'SUPPLIER';
+        filters['id'] = party.id;
+      }
+      return { id: r.id, filters, business: this.business.businessId(), branch: this.business.branchId() };
+    },
+    loader: ({ request }): Observable<{ id: ReportId; value: unknown } | null> =>
+      this.api.get<unknown>(PATHS[request.id], request.filters).pipe(
+        map((value) => ({ id: request.id, value })),
+        catchError((e) => {
+          this.notify.error(e);
+          return of(null);
+        }),
+      ),
+  });
+
+  // The loaded report, typed by what it is (null while another one loads).
+  private of<T>(...ids: ReportId[]): T | null {
+    const d = this.data.value();
+    return d && ids.includes(d.id) && d.id === this.report()?.id ? (d.value as T) : null;
+  }
+  protected readonly sales = computed(() => this.of<SalesReport>('sales', 'gross-profit'));
+  protected readonly profit = computed(() => this.of<ProfitReport>('profit'));
+  protected readonly customerDebt = computed(() => this.of<CustomerDebtReport>('customer-debt'));
+  protected readonly supplierDebt = computed(() => this.of<SupplierDebtReport>('supplier-debt'));
+  protected readonly onHand = computed(() => this.of<OnHandReport>('stock-on-hand'));
+  protected readonly reorder = computed(() => this.of<ReorderReport>('reorder'));
+  protected readonly expiry = computed(() => this.of<ExpiryReport>('expiry'));
+  protected readonly counts = computed(() => this.of<CountReport>('count-differences'));
+  protected readonly abc = computed(() => this.of<AbcReport>('abc'));
+  protected readonly losses = computed(() => this.of<LossReport>('losses'));
+  protected readonly slow = computed(() => this.of<SlowReport>('slow-moving'));
+  protected readonly shifts = computed(() => this.of<ShiftReport>('cash-shifts'));
+  protected readonly vat = computed(() => this.of<VatReport>('vat'));
+  protected readonly purchases = computed(() => this.of<PurchaseReport>('purchases'));
+  protected readonly statement = computed(() => this.of<Statement>('customer-statement', 'supplier-statement'));
+
+  // Excel and print (FR-5.7): from what the report shows, every row of it. Excel is in the Basic and Pro plans.
+  private readonly body = viewChild<ElementRef<HTMLElement>>('reportBody');
+  /** Every row on the page (no paging) while exporting or printing. */
+  protected readonly full = signal(false);
+  private readonly features = rxResource({
+    request: () => this.business.businessId() ?? undefined,
+    loader: () => this.api.get<Record<string, boolean>>('/business/features').pipe(catchError(() => of({} as Record<string, boolean>))),
+  });
+  protected readonly canExport = computed(() => !!this.features.value()?.['excel_export']);
+  protected readonly ready = computed(() => !!this.data.value() && !this.data.isLoading());
+
+  /**
+   * Sales by day as bars, every day of the period (days without sales at zero, so the chart reads as a timeline);
+   * other groupings show a share bar in the table instead.
+   */
+  protected readonly dayPoints = computed<BarPoint[]>(() => {
+    const s = this.sales();
+    if (!s || s.by !== 'DAY') {
+      return [];
+    }
+    const byDay = new Map(s.rows.map((r) => [r.key, r]));
+    const sold = this.translate.instant('reports.documentsN', { n: '' }).trim();
+    const points: BarPoint[] = [];
+    for (let date = new Date(s.from + 'T00:00:00'), end = new Date(s.to + 'T00:00:00'); date <= end; date.setDate(date.getDate() + 1)) {
+      const key = toIsoDate(date)!;
+      const row = byDay.get(key);
+      const label = `${date.getDate()}/${date.getMonth() + 1}`;
+      const sales = row?.sales ?? 0;
+      points.push({ key, label, value: sales, tip: `${label}: ${USD.format(sales)} · ${row?.documents ?? 0} ${sold}` });
+    }
+    return points;
+  });
+  protected readonly salesMax = computed(() => Math.max(1, ...(this.sales()?.rows ?? []).map((r) => r.sales)));
+  protected readonly money = (v: number) => USD_SHORT.format(v);
+  /** Riel with the sign in front: −៛47,925. */
+  protected readonly riel = (v: number) => (v < 0 ? '−' : '') + '៛' + Math.abs(Math.round(v)).toLocaleString('en-US');
+
+  /** Today's rate, to show a USD total in riel too. */
+  protected readonly rate = computed(() => this.business.rate()?.usdToKhr ?? null);
+
   constructor() {
-    // Everything follows the period and the branch in the top bar.
-    effect(() => {
-      this.business.branchId();
-      this.from();
-      this.to();
-      untracked(() => this.load());
-    });
+    this.catalog.loadLists();
   }
 
-  protected setFrom(d: Date): void {
+  protected findParty(event: AutoCompleteCompleteEvent): void {
+    const path = this.report()?.id === 'supplier-statement' ? '/suppliers' : '/customers';
+    this.api.page<Party>(path, { page: 0, size: 10 }, { q: event.query }).subscribe({ next: (p) => this.parties.set(p.content) });
+  }
+
+  protected async exportExcel(): Promise<void> {
+    const r = this.report();
+    if (r && this.canExport()) {
+      await this.withEveryRow((el) => exportReport(el, this.meta(), `${r.id}-${toIsoDate(new Date())}.xlsx`));
+    }
+  }
+
+  protected async print(): Promise<void> {
+    await this.withEveryRow((el) => printReport(el, this.meta()));
+  }
+
+  private async withEveryRow(run: (el: HTMLElement) => Promise<void> | void): Promise<void> {
+    const el = this.body()?.nativeElement;
+    if (!el) {
+      return;
+    }
+    this.full.set(true);
+    await new Promise((resolve) => setTimeout(resolve, 50)); // the tables draw every row
+    try {
+      await run(el);
+    } catch (e) {
+      this.notify.error(e);
+    } finally {
+      this.full.set(false);
+    }
+  }
+
+  /** The heading of an exported or printed report: what, whose, which branch and period, and when. */
+  private meta(): ReportMeta {
+    const r = this.report()!;
+    const t = (key: string, params?: object) => this.translate.instant(key, params);
+    const b = this.business.current();
+    const branch = this.business.branches().find((x) => x.id === this.business.branchId());
+    const day = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+    const statement = this.statement();
+    return {
+      title: t('reports.name.' + r.id) + (statement ? ` · ${statement.name}` : ''),
+      lines: [
+        b ? this.lang.name(b.nameEn, b.nameKm) : '',
+        branch ? this.lang.name(branch.nameEn, branch.nameKm) : t('reports.allBranches'),
+        ...(r.period ? [`${day(this.from())} – ${day(this.to())}`] : []),
+        t('reports.printedOn', { date: day(new Date()) }),
+      ].filter(Boolean),
+    };
+  }
+
+  protected pick(id: ReportId): void {
+    this.router.navigate([], { queryParams: { r: id, by: null }, queryParamsHandling: 'merge' });
+  }
+
+  protected setBy(by: SalesBy): void {
+    this.router.navigate([], { queryParams: { by }, queryParamsHandling: 'merge' });
+  }
+
+  protected setFrom(d: Date | null): void {
     if (d) {
       this.from.set(d);
     }
   }
 
-  protected setTo(d: Date): void {
+  protected setTo(d: Date | null): void {
     if (d) {
       this.to.set(d);
     }
   }
 
-  private load(): void {
-    const period = { from: toIsoDate(this.from()), to: toIsoDate(this.to()) };
-    const fail = (e: unknown) => this.notify.error(e);
-    this.api.get<SalesReport>('/reports/sales', period).subscribe({ next: (r) => this.sales.set(r), error: fail });
-    this.api.get<ProfitReport>('/reports/profit', period).subscribe({ next: (r) => this.profit.set(r), error: fail });
-    this.api.get<DebtReport>('/reports/debts').subscribe({ next: (r) => this.debts.set(r), error: fail });
-    if (this.business.can('stock:view')) {
-      this.api.get<StockSummary>('/stock/summary').subscribe({ next: (r) => this.summary.set(r) });
-      this.api.get<StockRow[]>('/stock/low').subscribe({ next: (r) => this.low.set(r) });
-      this.api.get<BatchRow[]>('/stock/batches', { expiringInDays: 30 }).subscribe({ next: (r) => this.expiring.set(r) });
+  /** A sales row's name: the day, a product, category, branch or cashier (none = "No category"...). */
+  protected rowLabel(row: SalesReport['rows'][number], by: SalesBy): string {
+    if (by === 'DAY') {
+      return row.key;
     }
+    return row.label ? this.lang.name(row.label, row.labelKm) : this.translate.instant('reports.none.' + by);
   }
 }
 
-function daysAgo(n: number): Date {
+const SALES_BY: SalesBy[] = ['DAY', 'PRODUCT', 'CATEGORY', 'BRANCH', 'CASHIER'];
+const GROSS_BY: SalesBy[] = ['PRODUCT', 'CATEGORY', 'BRANCH'];
+
+function defaultFrom(period: 'days30' | 'days90' | 'month' | 'year'): Date {
   const d = new Date();
-  d.setDate(d.getDate() - n);
+  if (period === 'month') {
+    d.setDate(1);
+  } else if (period === 'year') {
+    d.setFullYear(d.getFullYear() - 1);
+    d.setDate(d.getDate() + 1);
+  } else if (period === 'days90') {
+    d.setDate(d.getDate() - 89);
+  } else {
+    d.setDate(d.getDate() - 29);
+  }
   return d;
 }

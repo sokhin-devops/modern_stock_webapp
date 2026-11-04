@@ -1,0 +1,25 @@
+@let b = state.billing();
+@if (b?.status === 'PAST_DUE' && !onBillingPage()) {
+  <div class="banner banner-danger" role="alert">
+    <i class="icon pi pi-exclamation-triangle"></i>
+    <div class="text">
+      <b>{{ 'settings.billing.pastDue' | translate }}</b> ·
+      {{ 'settings.billing.pastDueLead' | translate: { date: (b!.pastDueUntil | date: 'dd/MM/yyyy') } }}
+    </div>
+    <a pButton routerLink="/settings/billing" size="small"><span pButtonLabel>{{ 'settings.billing.pay' | translate }}</span></a>
+  </div>
+} @else if (trialEnding() && !onBillingPage()) {
+  <div class="banner banner-warn">
+    <i class="icon pi pi-star"></i>
+    <div class="text">{{ 'shell.trialEnding' | translate: { days: state.trialDaysLeft() } }}</div>
+    <a pButton routerLink="/settings/billing" size="small" [text]="true"><span pButtonLabel>{{ 'shell.choosePlan' | translate }}</span></a>
+  </div>
+} @else if (readOnlyBranch()) {
+  <div class="banner banner-warn">
+    <i class="icon pi pi-lock"></i>
+    <div class="text">{{ 'shell.branchReadOnly' | translate }}</div>
+    @if (business.can('billing:manage')) {
+      <a pButton routerLink="/settings/billing" size="small" [text]="true"><span pButtonLabel>{{ 'nav.billing' | translate }}</span></a>
+    }
+  </div>
+}

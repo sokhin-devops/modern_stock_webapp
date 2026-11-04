@@ -11,6 +11,10 @@ export const authGuard: CanActivateFn = (_route, state) => {
   return auth.loggedIn() || inject(Router).createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
+/** The platform admin area: super admins only (the API checks it too). */
+export const adminGuard: CanActivateFn = () =>
+  !!inject(AuthService).user()?.superAdmin || inject(Router).createUrlTree(['/businesses']);
+
 /** Login and sign-up pages: someone who is already logged in goes to their businesses. */
 export const guestGuard: CanActivateFn = () =>
   !inject(AuthService).loggedIn() || inject(Router).createUrlTree(['/businesses']);

@@ -2,14 +2,23 @@
           [header]="(sale()?.documentType === 'INVOICE' ? 'pos.invoiceTitle' : 'pos.paidTitle') | translate">
   @if (sale(); as s) {
     <div class="receipt-wrap">
-      <div class="receipt print-receipt">
+      <div class="receipt print-receipt" [class.paper-58]="paper() === 58">
         <div class="r-center">
+          @if (logo(); as logo) {
+            <img class="r-logo" [src]="logo | apiFile" alt="" />
+          }
           <b>{{ shop()?.nameKm || shop()?.nameEn }}</b>
           @if (shop()?.nameKm) {
             <br />{{ shop()?.nameEn }}
           }
           @if (branch(); as b) {
             <br /><span class="r-small">{{ b.nameEn }}@if (b.phone) { · {{ b.phone }} }</span>
+          }
+          @if (vatTin(); as tin) {
+            <br /><span class="r-small">{{ 'print.vatTin' | translate }}: {{ tin }}</span>
+          }
+          @if (receiptHeader(); as header) {
+            <br /><span class="r-small">{{ header }}</span>
           }
         </div>
         <hr />

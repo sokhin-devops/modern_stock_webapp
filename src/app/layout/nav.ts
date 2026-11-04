@@ -24,7 +24,7 @@ export const NAV: NavItem[] = [
   {
     id: 'customers', icon: 'pi pi-users', label: 'nav.customerMenu', children: [
       { path: 'customers', label: 'nav.customers', permissions: ['customer:view', 'customer:create_pos'] },
-      { path: 'customers/transactions', label: 'nav.customerTransactions', permissions: ['sale:create', 'customer:view'] },
+      { path: 'customers/transactions', label: 'nav.customerTransactions', permissions: ['sale:create', 'customer:view', 'sales_order:view', 'delivery:manage'] },
       { path: 'customers/cash-shifts', label: 'nav.shifts', permissions: ['cash_shift:own', 'cash_shift:all'] },
     ],
   },

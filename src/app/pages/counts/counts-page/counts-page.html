@@ -4,9 +4,11 @@
       <span>{{ 'nav.inventory' | translate }}</span>
       <span class="current">{{ 'nav.stockCounts' | translate }}</span>
     </nav>
-    <div class="page-actions">
-      <button pButton type="button" (click)="openStart()"><i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'counts.new' | translate }}</span></button>
-    </div>
+    @if (canCount()) {
+      <div class="page-actions">
+        <button pButton type="button" (click)="openStart()"><i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'counts.new' | translate }}</span></button>
+      </div>
+    }
   </div>
   <div class="page-body list-page">
     <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
@@ -14,40 +16,77 @@
       <ng-template #header>
         <tr>
           <th>{{ 'common.number' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.warehouse' | translate }}</th>
+          <th>{{ 'counts.what' | translate }}</th>
           <th class="num">{{ 'counts.counted' | translate }}</th><th class="num">{{ 'counts.difference' | translate }}</th><th>{{ 'common.status' | translate }}</th>
         </tr>
       </ng-template>
       <ng-template #body let-c>
         <tr class="clickable" tabindex="0" (click)="open(c)" (keydown.enter)="open(c)">
           <td class="strong">{{ c.number }}</td>
-          <td>{{ (c.postedAt ?? c.createdAt) | date: 'dd/MM/yyyy' }}</td>
-          <td class="muted">{{ c.warehouseName }}</td>
-          <td class="num">{{ c.counted }}</td>
-          <td class="num" [class.danger-text]="c.differenceValue < 0">{{ c.differenceValue | currency: 'USD' }}</td>
-          <td><span class="tag" [class]="'status-' + c.status">{{ 'docs.status.' + c.status | translate }}</span></td>
+          <td>{{ (c.postedAt ?? c.submittedAt ?? c.createdAt) | date: 'dd/MM/yyyy' }}</td>
+          <td class="muted">{{ c.warehouseName }}@if (c.warehouseId == null) { · {{ 'counts.allWarehousesShort' | translate }} }</td>
+          <td class="muted">
+            {{ scopeLabel(c) }}
+            @if (c.blind) { <span class="tag">{{ 'counts.blind' | translate }}</span> }
+          </td>
+          <td class="num">{{ c.counted }} / {{ c.lineCount }}</td>
+          <td class="num" [class.danger-text]="(c.differenceValue ?? 0) < 0">
+            @if (c.differenceValue != null) { {{ c.differenceValue | currency: 'USD' }} } @else { <span class="muted">—</span> }
+          </td>
+          <td><span class="tag" [class]="'status-' + c.status">{{ 'counts.status.' + c.status | translate }}</span></td>
         </tr>
       </ng-template>
-      <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+      <ng-template #emptymessage><tr><td colspan="7" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
     </p-table>
   </div>
 </div>
 
-<p-dialog [visible]="startOpen()" (visibleChange)="startOpen.set($event)" [modal]="true" [draggable]="false" styleClass="ms-dialog" [header]="'counts.new' | translate">
+<p-dialog [visible]="startOpen()" (visibleChange)="startOpen.set($event)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [style]="{ width: 'min(520px, 96vw)' }" [header]="'counts.new' | translate">
   <div class="ms-form dialog-form">
     <p class="muted small">{{ 'counts.startLead' | translate }}</p>
     <div class="ms-field">
-      <label msLabel for="ct-wh">{{ 'common.warehouse' | translate }}</label>
-      <p-select inputId="ct-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()" (ngModelChange)="warehouseId.set($event)" appendTo="body" />
+      <label msLabel for="ct-wh">{{ 'counts.where' | translate }}</label>
+      <p-select inputId="ct-wh" [options]="places()" optionLabel="label" optionValue="value" [ngModel]="place()" (ngModelChange)="place.set($event)"
+                appendTo="body" />
     </div>
     <div class="ms-field">
-      <label msLabel for="ct-cat">{{ 'counts.category' | translate }}</label>
-      <p-select inputId="ct-cat" [options]="categories()" optionLabel="label" optionValue="value" [ngModel]="categoryId()" (ngModelChange)="categoryId.set($event)"
-                [showClear]="true" [placeholder]="'counts.allProducts' | translate" appendTo="body" />
+      <span msLabel id="ct-scope">{{ 'counts.what' | translate }}</span>
+      <p-selectbutton [options]="scopes" optionValue="value" [ngModel]="scope()" (ngModelChange)="scope.set($event)" [allowEmpty]="false"
+                      ariaLabelledBy="ct-scope" class="scopes">
+        <ng-template #item let-option>{{ option.label | translate }}</ng-template>
+      </p-selectbutton>
     </div>
+    @if (scope() === 'CATEGORY') {
+      <div class="ms-field">
+        <label msLabel for="ct-cat">{{ 'counts.category' | translate }}</label>
+        <p-select inputId="ct-cat" [options]="categories()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
+                  (ngModelChange)="categoryId.set($event)" [filter]="categories().length > 8" appendTo="body" />
+      </div>
+    }
+    @if (scope() === 'PRODUCTS') {
+      <div class="ms-field">
+        <label msLabel for="ct-products">{{ 'counts.products' | translate }}</label>
+        <p-autocomplete inputId="ct-products" [ngModel]="chosen()" (ngModelChange)="chosen.set($event ?? [])" [multiple]="true"
+                        [suggestions]="found()" (completeMethod)="findProducts($event)" optionLabel="nameEn" [forceSelection]="true"
+                        [fluid]="true" [placeholder]="'common.searchProduct' | translate" appendTo="body">
+          <ng-template #selecteditem let-p>{{ lang.name(p.nameEn, p.nameKm) }}</ng-template>
+          <ng-template #item let-p>
+            <div class="option"><b>{{ lang.name(p.nameEn, p.nameKm) }}</b><small class="muted">{{ p.sku }}</small></div>
+          </ng-template>
+        </p-autocomplete>
+        <small class="field-hint">{{ 'counts.productsHint' | translate }}</small>
+      </div>
+    }
+    <div class="ms-check">
+      <p-toggleswitch inputId="ct-blind" [ngModel]="blind()" (ngModelChange)="blind.set($event)" />
+      <label for="ct-blind">{{ 'counts.blind' | translate }}</label>
+    </div>
+    <small class="field-hint">{{ 'counts.blindHint' | translate }}</small>
   </div>
   <ng-template #footer>
     <button pButton type="button" [text]="true" (click)="startOpen.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
-    <button pButton type="button" (click)="start()" [loading]="busy()" [disabled]="busy() || !warehouseId()"><span pButtonLabel>{{ 'counts.new' | translate }}</span></button>
+    <button pButton type="button" (click)="start()" [loading]="busy()" [disabled]="busy() || !canStart()"><span pButtonLabel>{{ 'counts.start' | translate }}</span></button>
   </ng-template>
 </p-dialog>
 
@@ -55,50 +94,138 @@
           [header]="count()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
   @if (count(); as c) {
     <div class="doc-facts">
-      <div><small>{{ 'common.warehouse' | translate }}</small><b>{{ c.warehouseName }}</b></div>
-      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + c.status">{{ 'docs.status.' + c.status | translate }}</span></b></div>
-      <div><small>{{ 'counts.difference' | translate }}</small><b [class.danger-text]="c.differenceValue < 0">{{ c.differenceValue | currency: 'USD' }}</b></div>
+      <div><small>{{ 'common.warehouse' | translate }}</small><b>{{ c.warehouseName }}@if (c.warehouseId == null) { · {{ 'counts.allWarehousesShort' | translate }} }</b></div>
+      <div><small>{{ 'counts.what' | translate }}</small><b>{{ scopeLabel(c) }}</b></div>
+      <div>
+        <small>{{ 'common.status' | translate }}</small>
+        <b>
+          <span class="tag" [class]="'status-' + c.status">{{ 'counts.status.' + c.status | translate }}</span>
+          @if (c.blind) { <span class="tag blind-tag">{{ 'counts.blind' | translate }}</span> }
+        </b>
+      </div>
+      @if (c.differenceValue != null) {
+        <div><small>{{ 'counts.difference' | translate }}</small><b [class.danger-text]="c.differenceValue < 0">{{ c.differenceValue | currency: 'USD' }}</b></div>
+      }
     </div>
+
+    @if (hidden()) {
+      <p class="form-note"><i class="icon pi pi-eye-slash"></i>{{ 'counts.blindNote' | translate }}</p>
+    }
+    @if (c.status === 'SUBMITTED' && !canApprove()) {
+      <p class="form-note"><i class="icon pi pi-clock"></i>{{ 'counts.waitingNote' | translate }}</p>
+    }
+
     <div class="progress-line">
-      <small class="muted">{{ 'counts.progress' | translate: { counted: c.counted, total: c.lines.length } }}</small>
+      <small class="muted">{{ 'counts.progress' | translate: { counted: c.counted, total: c.lineCount } }}</small>
       <p-progressbar [value]="progress()" [showValue]="false" />
     </div>
+
+    @if (movedLines().length && c.status !== 'POSTED') {
+      <div class="moved-bar">
+        <i class="icon pi pi-exclamation-triangle"></i>
+        <span class="grow">{{ 'counts.movedNote' | translate: { n: movedLines().length } }}</span>
+        @if (editable()) {
+          <button pButton type="button" size="small" [outlined]="true" (click)="recount()" [disabled]="busy()">
+            <span pButtonLabel>{{ 'counts.recount' | translate }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    @if (countWarehouses().length > 1) {
+      <p-selectbutton [options]="countWarehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+                      (ngModelChange)="warehouseId.set($event)" [allowEmpty]="false" class="warehouse-switch" />
+    }
+
+    @if (editable()) {
+      <div class="scan-row">
+        <p-iconfield class="grow">
+          <p-inputicon class="pi pi-barcode" />
+          <input pInputText type="text" inputmode="numeric" [placeholder]="'counts.scanPh' | translate" [attr.aria-label]="'counts.scanPh' | translate"
+                 [ngModel]="code()" (ngModelChange)="code.set($event)" (keydown.enter)="scan(code())" />
+        </p-iconfield>
+        @if (hasCamera) {
+          <button pButton type="button" [outlined]="true" (click)="cameraOpen.set(true)">
+            <i class="pi pi-camera" pButtonIcon></i><span pButtonLabel>{{ 'counts.camera' | translate }}</span>
+          </button>
+        }
+      </div>
+      @if (scanned(); as s) {
+        <p class="scan-result" [class.danger-text]="s.lineId == null" aria-live="polite">{{ s.text }}</p>
+      }
+    }
+
     <p-iconfield class="filter">
       <p-inputicon class="pi pi-search" />
       <input pInputText type="search" [placeholder]="'counts.searchPh' | translate" [ngModel]="filter()" (ngModelChange)="filter.set($event)" />
     </p-iconfield>
     <p-table class="ms-table" [value]="shown()" dataKey="id">
       <ng-template #header>
-        <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'counts.system' | translate }}</th>
-          <th class="num counted-col">{{ 'counts.counted' | translate }}</th><th class="num">{{ 'counts.difference' | translate }}</th></tr>
+        <tr>
+          <th>{{ 'common.product' | translate }}</th>
+          @if (!hidden()) {
+            <th class="num">{{ 'counts.system' | translate }}</th>
+          }
+          <th class="num counted-col">{{ 'counts.counted' | translate }}</th>
+          @if (!hidden()) {
+            <th class="num">{{ 'counts.difference' | translate }}</th>
+          }
+        </tr>
       </ng-template>
       <ng-template #body let-l>
-        <tr>
-          <td><div class="strong">{{ l.productName }}</div><small class="muted">{{ l.sku }}</small></td>
-          <td class="num">{{ l.systemQty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+        <tr [class.scanned]="scanned()?.lineId === l.id">
+          <td>
+            <div class="strong">{{ lang.name(l.productName, l.productNameKm) }}</div>
+            <small class="muted">{{ l.sku }}</small>
+            @if (l.moved && c.status !== 'POSTED') {
+              <span class="tag moved-tag" [title]="'counts.movedHint' | translate">{{ 'counts.moved' | translate }}</span>
+            }
+          </td>
+          @if (!hidden()) {
+            <td class="num">{{ l.systemQty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+          }
           <td class="num counted-col">
-            @if (c.status === 'DRAFT') {
+            @if (editable()) {
               <p-inputnumber [ngModel]="l.countedQty" (ngModelChange)="setCounted(l, $event)" [min]="0" [maxFractionDigits]="3" locale="en-US"
-                             [fluid]="true" [ariaLabel]="'counts.counted' | translate" />
+                             [fluid]="true" [suffix]="hidden() ? ' ' + l.unitSymbol : ''" [ariaLabel]="'counts.counted' | translate" />
             } @else {
               {{ l.countedQty | number: '1.0-3' }}
             }
           </td>
-          <td class="num" [class.danger-text]="(l.difference ?? 0) < 0">
-            @if (l.difference != null && l.difference !== 0) { {{ l.difference > 0 ? '+' : '' }}{{ l.difference | number: '1.0-3' }} }
-          </td>
+          @if (!hidden()) {
+            <td class="num" [class.danger-text]="(l.difference ?? 0) < 0">
+              @if (l.difference != null && l.difference !== 0) { {{ l.difference > 0 ? '+' : '' }}{{ l.difference | number: '1.0-3' }} }
+            </td>
+          }
         </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td [attr.colspan]="hidden() ? 2 : 4" class="empty-cell">{{ 'common.noResults' | translate }}</td></tr>
       </ng-template>
     </p-table>
   }
   <ng-template #footer>
-    @if (count()?.status === 'DRAFT') {
-      <div class="drawer-actions">
-        <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.deleteDraft' | translate }}</span></button>
-        <span class="spacer"></span>
-        <button pButton type="button" [outlined]="true" (click)="save()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.save' | translate }}</span></button>
-        <button pButton type="button" (click)="post()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.post' | translate }}</span></button>
-      </div>
+    @if (count(); as c) {
+      @if (c.status === 'DRAFT' && canCount()) {
+        <div class="drawer-actions">
+          <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.deleteDraft' | translate }}</span></button>
+          <span class="spacer"></span>
+          <button pButton type="button" [outlined]="true" (click)="save()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.save' | translate }}</span></button>
+          @if (canApprove() && !c.blind) {
+            <button pButton type="button" (click)="post()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.post' | translate }}</span></button>
+          } @else {
+            <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.submit' | translate }}</span></button>
+          }
+        </div>
+      } @else if (c.status === 'SUBMITTED' && canApprove()) {
+        <div class="drawer-actions">
+          <button pButton type="button" [text]="true" (click)="reopen()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.reopen' | translate }}</span></button>
+          <span class="spacer"></span>
+          <button pButton type="button" (click)="post()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.post' | translate }}</span></button>
+        </div>
+      }
     }
   </ng-template>
 </p-drawer>
+
+<ms-camera-scanner [(visible)]="cameraOpen" [message]="scanned()?.text ?? null" (scan)="scan($event)" />
