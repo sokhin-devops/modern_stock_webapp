@@ -2,7 +2,7 @@
           [header]="(sale()?.documentType === 'INVOICE' ? 'pos.invoiceTitle' : 'pos.paidTitle') | translate">
   @if (sale(); as s) {
     <div class="receipt-wrap">
-      <div #paper class="receipt print-receipt" [class.paper-58]="paper() === 58">
+      <div #sheet class="receipt print-receipt" [class.paper-58]="paper() === 58">
         <div class="r-center">
           @if (logo(); as logo) {
             <img class="r-logo" [src]="logo | apiFile" alt="" />

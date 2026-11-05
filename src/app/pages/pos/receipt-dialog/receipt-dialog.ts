@@ -36,7 +36,7 @@ export class ReceiptDialog {
   protected readonly vatTin = computed(() => (this.showVatTin() ? (this.business.profile()?.vatTin ?? null) : null));
   protected readonly branch = computed(() => this.business.branch());
   protected readonly now = new Date();
-  private readonly paperEl = viewChild<ElementRef<HTMLElement>>('paper');
+  private readonly paperEl = viewChild<ElementRef<HTMLElement>>('sheet');
 
   protected print(): void {
     const el = this.paperEl()?.nativeElement;
