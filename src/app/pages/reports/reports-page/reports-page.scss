@@ -246,3 +246,16 @@
 .party-pick {
   min-width: 280px;
 }
+
+// EOQ inputs: a short label beside each small number field.
+.eoq-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+
+  :deep(input) {
+    width: 96px;
+  }
+}

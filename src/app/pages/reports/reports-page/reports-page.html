@@ -53,8 +53,21 @@
         <p class="muted report-lead">{{ 'reports.lead.' + r.id | translate }}</p>
 
         @if (r.id === 'sales' || r.id === 'gross-profit' || r.id === 'expiry' || r.id === 'stock-on-hand' || r.id === 'slow-moving'
-             || r.id === 'purchases' || r.id === 'customer-statement' || r.id === 'supplier-statement') {
+             || r.id === 'purchases' || r.id === 'customer-statement' || r.id === 'supplier-statement' || r.id === 'eoq') {
           <div class="filters no-print">
+            @if (r.id === 'eoq') {
+              <!-- S and H of the formula; the report reloads when either changes -->
+              <label class="eoq-input">
+                <span>{{ 'reports.eoqOrderCost' | translate }}</span>
+                <p-inputnumber [ngModel]="orderCost()" (ngModelChange)="$event > 0 && orderCost.set($event)" mode="currency" currency="USD"
+                               locale="en-US" [min]="0.01" [max]="10000" size="small" [ariaLabel]="'reports.eoqOrderCost' | translate" />
+              </label>
+              <label class="eoq-input">
+                <span>{{ 'reports.eoqHolding' | translate }}</span>
+                <p-inputnumber [ngModel]="holdingPercent()" (ngModelChange)="$event > 0 && holdingPercent.set($event)" suffix="%"
+                               [min]="1" [max]="100" size="small" [ariaLabel]="'reports.eoqHolding' | translate" />
+              </label>
+            }
             @if (r.id === 'slow-moving') {
               <p-selectbutton [options]="slowOptions" optionValue="value" [ngModel]="slowDays()" (ngModelChange)="slowDays.set($event)"
                               [allowEmpty]="false" size="small" [ariaLabel]="'reports.notSoldFor' | translate">
@@ -556,6 +569,39 @@
                   <td class="num strong">{{ row.value | currency: 'USD' }}</td>
                   <td class="num">{{ row.share | number: '1.1-1' }}%</td>
                   <td class="num muted">{{ row.cumulative | number: '1.1-1' }}%</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="7" class="empty-cell">{{ 'reports.noData' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
+        }
+        <!-- Economic order quantity -->
+        @if (eoq(); as q) {
+          <p class="form-note"><i class="icon pi pi-info-circle"></i>{{ 'reports.eoqHow' | translate: { days: q.salesDays } }}</p>
+          <section class="card table-card">
+            <p-table class="ms-table" [value]="q.rows" [paginator]="!full() && q.rows.length > 50" [rows]="50" dataKey="productId">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
+                  <th class="num" pSortableColumn="annualDemand">{{ 'reports.eoqDemand' | translate }}</th>
+                  <th class="num" pSortableColumn="unitCost">{{ 'reports.avgCost' | translate }}</th>
+                  <th class="num" pSortableColumn="eoq">{{ 'reports.eoqQty' | translate }}</th>
+                  <th class="num" pSortableColumn="ordersPerYear">{{ 'reports.eoqOrders' | translate }}</th>
+                  <th class="num" pSortableColumn="daysBetweenOrders">{{ 'reports.eoqEvery' | translate }}</th>
+                  <th class="num" pSortableColumn="onHand">{{ 'reports.onHandNow' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr>
+                  <td><div class="strong">{{ lang.name(row.name, row.nameKm) }}</div><div class="muted small">{{ row.sku }}</div></td>
+                  <td class="num">{{ row.annualDemand | number: '1.0-1' }} {{ row.unitSymbol }}</td>
+                  <td class="num muted">{{ row.unitCost | currency: 'USD' : 'symbol' : '1.2-4' }}</td>
+                  <td class="num strong">{{ row.eoq | packQty: row.pack : row.unitSymbol }}</td>
+                  <td class="num">{{ row.ordersPerYear | number: '1.0-1' }}</td>
+                  <td class="num">{{ 'reports.eoqDays' | translate: { n: row.daysBetweenOrders } }}</td>
+                  <td class="num muted">{{ row.onHand | packQty: row.pack : row.unitSymbol }}</td>
                 </tr>
               </ng-template>
               <ng-template #emptymessage>

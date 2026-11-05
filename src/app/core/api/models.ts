@@ -488,6 +488,28 @@ export interface AbcReport {
   }[];
 }
 
+/** Economic order quantity (FR-5.9): √(2 × D × S / H) per product. */
+export interface EoqReport {
+  /** Days of sales the yearly demand comes from (30 to 365). */
+  salesDays: number;
+  orderCost: number;
+  holdingPercent: number;
+  rows: {
+    productId: number;
+    sku: string;
+    name: string;
+    nameKm: string | null;
+    unitSymbol: string;
+    pack: Pack | null;
+    annualDemand: number;
+    unitCost: number;
+    eoq: number;
+    ordersPerYear: number;
+    daysBetweenOrders: number;
+    onHand: number;
+  }[];
+}
+
 export interface OnHandReport {
   value: number | null;
   products: number;

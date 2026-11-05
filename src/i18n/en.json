@@ -954,8 +954,16 @@
         "EXP": "Expense",
         "ADJ": "Adjustment",
         "TRF": "Transfer",
-        "CNT": "Stock count"
+        "CNT": "Stock count",
+        "TRQ": "Transfer request"
       }
+    },
+    "export": {
+      "title": "Export all data",
+      "lead": "Everything in this business in one Excel file, a sheet each: products, stock, customers, sales, money, purchases and stock moves.",
+      "notInPlan": "Exporting to Excel is part of the Basic and Pro plans.",
+      "button": "Download Excel",
+      "done": "Excel file downloaded"
     }
   },
   "docs": {
@@ -1201,7 +1209,8 @@
       "vat": "VAT summary",
       "purchases": "Purchases",
       "customer-statement": "Customer statement",
-      "supplier-statement": "Supplier statement"
+      "supplier-statement": "Supplier statement",
+      "eoq": "Economic order quantity"
     },
     "lead": {
       "sales": "Sales from receipts and invoices, before VAT and the whole-sale discount.",
@@ -1220,7 +1229,8 @@
       "vat": "VAT collected on sales (returns taken off) and paid on purchases, month by month.",
       "purchases": "Goods received from suppliers, less what went back.",
       "customer-statement": "Every invoice, payment, credit note and refund of a customer, with the balance after each.",
-      "supplier-statement": "Every bill, payment, supplier credit and refund of a supplier, with the balance after each."
+      "supplier-statement": "Every bill, payment, supplier credit and refund of a supplier, with the balance after each.",
+      "eoq": "How much to order at a time so that ordering and holding stock cost the least: √(2 × yearly demand × order cost ÷ holding cost)."
     },
     "groupBy": "Group by",
     "by": {
@@ -1367,7 +1377,16 @@
     "debit": "Owed more",
     "credit": "Owed less",
     "noMovements": "Nothing in this period.",
-    "makeOrder": "Create purchase order"
+    "makeOrder": "Create purchase order",
+    "eoqOrderCost": "One order costs",
+    "eoqHolding": "Holding a year",
+    "eoqHow": "Yearly demand from the last {{days}} days of sales. Holding cost is a share of the average cost.",
+    "eoqDemand": "Sold a year",
+    "eoqQty": "Order size",
+    "eoqOrders": "Orders a year",
+    "eoqEvery": "Order every",
+    "eoqDays": "{{n}} days",
+    "onHandNow": "On hand"
   },
   "telegram": {
     "lead": "Get yesterday's sales and stock news every morning in a Telegram chat or group.",
@@ -1444,7 +1463,8 @@
     "EXPIRING_1": "{{n}} batches expire within {{days}} days",
     "EXPIRING_2": "{{n}} batches expire within {{days}} days",
     "EXPIRING_3": "{{n}} batches expire within {{days}} days",
-    "TRANSFERS_LATE": "{{n}} transfers in transit for over {{days}} days"
+    "TRANSFERS_LATE": "{{n}} transfers in transit for over {{days}} days",
+    "TRANSFER_REQUESTS": "{{n}} transfer requests from other branches"
   },
   "admin": {
     "title": "Platform admin",
@@ -1856,7 +1876,10 @@
       "PURCHASE_RETURN_APPROVED": "Supplier return approved",
       "PURCHASE_RETURN_REJECTED": "Supplier return rejected",
       "BUSINESS_ARCHIVED": "Business archived",
-      "BUSINESS_RESTORED": "Business restored"
+      "BUSINESS_RESTORED": "Business restored",
+      "DEBIT_NOTE_CREATED": "Debit note made",
+      "DEBIT_NOTE_VOIDED": "Debit note voided",
+      "DATA_EXPORTED": "All data exported"
     },
     "types": {
       "PRODUCT": "Products",
@@ -1974,5 +1997,142 @@
     "open": "{{amount}} open",
     "chosenTotal": "Chosen: {{amount}}",
     "overChosen": "more than the payment"
+  },
+  "debit": {
+    "title": "Debit note",
+    "new": "New debit note",
+    "button": "Debit note",
+    "lead": "The customer owes more after an invoice: a price corrected up, a delivery charge… It is paid like an invoice.",
+    "invoice": "For invoice",
+    "noInvoice": "No invoice",
+    "reason": "Reason",
+    "reasonPh": "e.g. Price of rice corrected",
+    "amount": "Amount before VAT",
+    "addVat": "Add VAT {{rate}}%",
+    "total": "The customer will owe {{amount}} more.",
+    "created": "Debit note {{number}} made",
+    "forInvoice": "For invoice",
+    "void": "Void debit note",
+    "voidAsk": "Void {{number}}? The customer will no longer owe it.",
+    "voided": "{{number}} voided"
+  },
+  "requests": {
+    "tab": "Requests",
+    "new": "New request",
+    "lead": "Ask another branch for goods. They make the transfer, or say why they can't.",
+    "forBranch": "For branch",
+    "askBranch": "Asked of",
+    "noOtherBranch": "No other branch",
+    "neededBy": "Needed by",
+    "send": "Send request",
+    "sent": "Request {{number}} sent",
+    "empty": "No requests.",
+    "forUs": "For us",
+    "askedBy": "Asked by",
+    "transfer": "Transfer",
+    "available": "In stock at {{branch}}",
+    "makeTransfer": "Make the transfer",
+    "decline": "Decline",
+    "declineReason": "Why not?",
+    "declinedBecause": "Declined: {{reason}}",
+    "cancel": "Cancel request",
+    "cancelAsk": "Cancel {{number}}? The other branch will no longer see it as open.",
+    "fulfilled": "Transfer made from {{number}}: check it and send",
+    "declined": "{{number}} declined",
+    "cancelled": "{{number}} cancelled",
+    "status": {
+      "OPEN": "Open",
+      "FULFILLED": "Transfer made",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "export": {
+    "sheets": {
+      "products": "Products",
+      "stock": "Stock",
+      "batches": "Batches",
+      "customers": "Customers",
+      "suppliers": "Suppliers",
+      "salesReceipts": "Sales receipts",
+      "saleLines": "Sale lines",
+      "invoices": "Invoices",
+      "payments": "Payments",
+      "creditNotes": "Credit notes",
+      "purchaseOrders": "Purchase orders",
+      "bills": "Bills",
+      "expenses": "Expenses",
+      "transfers": "Transfers",
+      "adjustments": "Adjustments",
+      "movements": "Stock moves"
+    },
+    "cols": {
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "nameEn": "Name (English)",
+      "nameKm": "Name (Khmer)",
+      "category": "Category",
+      "unit": "Unit",
+      "sellPrice": "Sell price",
+      "avgCost": "Average cost",
+      "reorderLevel": "Reorder level",
+      "trackExpiry": "Tracks expiry",
+      "vatExempt": "VAT exempt",
+      "active": "Active",
+      "product": "Product",
+      "branch": "Branch",
+      "warehouse": "Warehouse",
+      "qty": "Quantity",
+      "value": "Value",
+      "batchNo": "Batch",
+      "expiryDate": "Expiry date",
+      "unitCost": "Unit cost",
+      "name": "Name",
+      "type": "Type",
+      "phone": "Phone",
+      "address": "Address",
+      "vatTin": "VAT TIN",
+      "creditLimit": "Credit limit",
+      "paymentTermsDays": "Payment terms (days)",
+      "openingBalance": "Opening balance",
+      "contactPerson": "Contact person",
+      "telegram": "Telegram",
+      "number": "Number",
+      "date": "Date",
+      "cashier": "Cashier",
+      "customer": "Customer",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "vat": "VAT",
+      "total": "Total",
+      "totalKhr": "Total (KHR)",
+      "status": "Status",
+      "unitPrice": "Unit price",
+      "cost": "Cost",
+      "dueDate": "Due date",
+      "paid": "Paid",
+      "balance": "Balance",
+      "note": "Note",
+      "direction": "In / out",
+      "partyType": "Who",
+      "party": "Customer or supplier",
+      "method": "Method",
+      "currency": "Currency",
+      "amount": "Amount",
+      "amountUsd": "Amount (USD)",
+      "reference": "Reference",
+      "used": "Used",
+      "refunded": "Refunded",
+      "reason": "Reason",
+      "supplier": "Supplier",
+      "supplierInvoiceNo": "Supplier's invoice no.",
+      "kind": "Kind",
+      "from": "From",
+      "to": "To",
+      "sentAt": "Sent",
+      "receivedAt": "Received",
+      "balanceAfter": "Balance after",
+      "referenceType": "Document"
+    }
   }
 }

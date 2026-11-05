@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
+import { InputNumber } from 'primeng/inputnumber';
 import { ProgressBar } from 'primeng/progressbar';
 import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
@@ -16,7 +17,7 @@ import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 import { ApiService, Filters } from '../../../core/api/api.service';
 import {
-  AbcReport, CountReport, CustomerDebtReport, ExpiryReport, LossReport, OnHandReport, Product, ProfitReport, PurchaseReport, PurchasesBy,
+  AbcReport, CountReport, EoqReport, CustomerDebtReport, ExpiryReport, LossReport, OnHandReport, Product, ProfitReport, PurchaseReport, PurchasesBy,
   ReorderReport, SalesBy, SalesReport, ShiftReport, SlowReport, Statement, SupplierDebtReport, VatReport,
 } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
@@ -32,7 +33,7 @@ import { PurchaseForm } from '../../purchases/purchase-form/purchase-form';
 
 export type ReportId =
   | 'sales' | 'gross-profit' | 'profit' | 'customer-debt' | 'supplier-debt'
-  | 'stock-on-hand' | 'reorder' | 'expiry' | 'count-differences' | 'abc'
+  | 'stock-on-hand' | 'reorder' | 'expiry' | 'count-differences' | 'abc' | 'eoq'
   | 'losses' | 'slow-moving' | 'cash-shifts' | 'vat' | 'purchases' | 'customer-statement' | 'supplier-statement';
 
 /** Who sees a report: everyone's money (Owner, Manager), sales (a cashier their own), or stock. */
@@ -65,6 +66,7 @@ const REPORTS: ReportDef[] = [
   { id: 'losses', area: 'stock', icon: 'pi pi-exclamation-triangle', access: 'stock', period: 'days30' },
   { id: 'slow-moving', area: 'stock', icon: 'pi pi-hourglass', access: 'stock', period: null },
   { id: 'abc', area: 'analysis', icon: 'pi pi-sort-amount-down', access: 'money', period: 'year' },
+  { id: 'eoq', area: 'analysis', icon: 'pi pi-calculator', access: 'money', period: null },
 ];
 
 const PATHS: Record<ReportId, string> = {
@@ -78,6 +80,7 @@ const PATHS: Record<ReportId, string> = {
   expiry: '/reports/expiry',
   'count-differences': '/reports/count-differences',
   abc: '/reports/abc',
+  eoq: '/reports/eoq',
   losses: '/reports/losses',
   'slow-moving': '/reports/slow-moving',
   'cash-shifts': '/reports/cash-shifts',
@@ -105,7 +108,7 @@ const USD_SHORT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 
   selector: 'ms-reports-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, DatePicker, ProgressBar, Select, SelectButton, TableModule,
-    BarChart, PackQtyPipe, AutoComplete, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, PurchaseForm,
+    BarChart, PackQtyPipe, AutoComplete, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, PurchaseForm, InputNumber,
   ],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
@@ -161,6 +164,9 @@ export class ReportsPage {
   });
   protected readonly categoryId = signal<number | null>(null);
   protected readonly slowDays = signal<30 | 60 | 90 | 180>(60);
+  /** EOQ inputs (FR-5.9): what one order costs (S, USD) and what holding a unit costs a year (H, % of its cost). */
+  protected readonly orderCost = signal(5);
+  protected readonly holdingPercent = signal(20);
   protected readonly slowOptions = [30, 60, 90, 180].map((value) => ({ value, label: 'reports.withinDays' }));
   protected readonly purchasesBy = computed<PurchasesBy>(() => (this.query().get('by') === 'PRODUCT' ? 'PRODUCT' : 'SUPPLIER'));
   protected readonly purchasesByOptions = (['SUPPLIER', 'PRODUCT'] as const).map((value) => ({ value, label: 'reports.purchasesBy.' + value }));
@@ -213,6 +219,10 @@ export class ReportsPage {
       if (r.id === 'slow-moving') {
         filters['days'] = this.slowDays();
       }
+      if (r.id === 'eoq') {
+        filters['orderCost'] = this.orderCost();
+        filters['holdingPercent'] = this.holdingPercent();
+      }
       if (r.id === 'purchases') {
         filters['by'] = this.purchasesBy();
       }
@@ -255,6 +265,7 @@ export class ReportsPage {
   protected readonly expiry = computed(() => this.of<ExpiryReport>('expiry'));
   protected readonly counts = computed(() => this.of<CountReport>('count-differences'));
   protected readonly abc = computed(() => this.of<AbcReport>('abc'));
+  protected readonly eoq = computed(() => this.of<EoqReport>('eoq'));
   protected readonly losses = computed(() => this.of<LossReport>('losses'));
   protected readonly slow = computed(() => this.of<SlowReport>('slow-moving'));
   protected readonly shifts = computed(() => this.of<ShiftReport>('cash-shifts'));
