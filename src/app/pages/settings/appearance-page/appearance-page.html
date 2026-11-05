@@ -19,7 +19,20 @@
               <span>{{ 'settings.appearance.colors.' + p.name | translate }}</span>
             </button>
           }
+          <!-- An own color (FR-6.26): the browser's color picker behind a swatch -->
+          <label class="swatch swatch-custom" [class.selected]="!!custom()" [class.disabled]="!canManage() || busy()"
+                 [style.--sw]="custom() ?? 'conic-gradient(#1a73e8, #00796b, #188038, #b06000, #6750a4, #1a73e8)'">
+            <input type="color" class="picker" [value]="custom() ?? '#1a73e8'" (change)="pickCustom($event)" [disabled]="!canManage() || busy()"
+                   [attr.aria-label]="'settings.appearance.own' | translate" />
+            <i><span class="icon pi" [class.pi-check]="!!custom()" [class.pi-palette]="!custom()"></span></i>
+            <span>{{ 'settings.appearance.own' | translate }}</span>
+          </label>
         </div>
+        @if (problem(); as p) {
+          <small class="danger-text">{{ p | translate }}</small>
+        } @else {
+          <small class="field-hint">{{ 'settings.appearance.ownHint' | translate }}</small>
+        }
       </div>
       <div class="ms-field">
         <span msLabel id="ap-mode">{{ 'settings.appearance.mode' | translate }}</span>
@@ -27,6 +40,14 @@
                         [allowEmpty]="false" ariaLabelledBy="ap-mode">
           <ng-template #item let-option><i [class]="option.icon"></i>&nbsp;{{ option.label | translate }}</ng-template>
         </p-selectbutton>
+      </div>
+      <div class="ms-field">
+        <span msLabel id="ap-density">{{ 'settings.appearance.density' | translate }}</span>
+        <p-selectbutton [options]="densities" optionValue="value" [ngModel]="theme.density()" (ngModelChange)="setDensity($event)"
+                        [allowEmpty]="false" ariaLabelledBy="ap-density">
+          <ng-template #item let-option><i [class]="option.icon"></i>&nbsp;{{ option.label | translate }}</ng-template>
+        </p-selectbutton>
+        <small class="field-hint">{{ 'settings.appearance.densityHint' | translate }}</small>
       </div>
     </div>
   </div>

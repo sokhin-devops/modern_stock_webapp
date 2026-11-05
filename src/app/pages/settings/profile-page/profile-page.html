@@ -65,8 +65,19 @@
         </div>
       }
     </form>
+    @if (canExport()) {
+      <section class="settings-card side-card">
+        <div class="grow">
+          <h3 class="form-section">{{ 'settings.export.title' | translate }}</h3>
+          <p class="muted small">{{ (exportInPlan() ? 'settings.export.lead' : 'settings.export.notInPlan') | translate }}</p>
+        </div>
+        <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !exportInPlan()">
+          <i class="pi pi-file-excel" pButtonIcon></i><span pButtonLabel>{{ 'settings.export.button' | translate }}</span>
+        </button>
+      </section>
+    }
     @if (canArchive()) {
-      <section class="settings-card archive-card">
+      <section class="settings-card side-card">
         <div class="grow">
           <h3 class="form-section">{{ 'settings.archive.title' | translate }}</h3>
           <p class="muted small">{{ 'settings.archive.lead' | translate }}</p>

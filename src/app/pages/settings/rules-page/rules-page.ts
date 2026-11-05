@@ -22,7 +22,7 @@ import { revealErrors } from '../../../shared/forms';
 const NUMBER_GROUPS = [
   { key: 'sales', types: ['QO', 'SO', 'DO', 'INV', 'TAX', 'RCT', 'RCV', 'SR', 'CN', 'DN'] },
   { key: 'purchases', types: ['PO', 'GRN', 'BILL', 'PAY', 'PRT', 'SC', 'EXP'] },
-  { key: 'stock', types: ['ADJ', 'TRF', 'CNT'] },
+  { key: 'stock', types: ['ADJ', 'TRF', 'TRQ', 'CNT'] },
 ];
 /** 1 to 6 letters or digits, starting with a letter (saved in capitals). */
 const PREFIX = /^[A-Za-z][A-Za-z0-9]{0,5}$/;

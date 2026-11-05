@@ -15,7 +15,7 @@
       <div class="ms-field">
         <label msLabel for="pay-amount" required>{{ 'common.amount' | translate }}</label>
         <p-inputnumber inputId="pay-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" [min]="0"
-                       [maxFractionDigits]="currency() === 'USD' ? 2 : 0" locale="en-US" [prefix]="currency() === 'USD' ? '$' : '៛'" />
+                       [minFractionDigits]="currency() === 'USD' ? 2 : 0" [maxFractionDigits]="currency() === 'USD' ? 2 : 0" locale="en-US" [prefix]="currency() === 'USD' ? '$' : '៛'" />
       </div>
       <p-selectbutton [options]="currencies" optionLabel="label" optionValue="value" [ngModel]="currency()" (ngModelChange)="currency.set($event)" [allowEmpty]="false" />
     </div>

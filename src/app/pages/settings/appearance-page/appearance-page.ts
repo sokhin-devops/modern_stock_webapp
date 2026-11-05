@@ -7,12 +7,14 @@ import { ApiService } from '../../../core/api/api.service';
 import { BusinessProfile } from '../../../core/api/models';
 import { BusinessService, PALETTES } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
-import { ThemeModeService, UiMode } from '../../../core/theme-mode.service';
+import { ThemeModeService, UiDensity, UiMode } from '../../../core/theme-mode.service';
+import { fitColor, isHexColor } from '../../../shared/colors';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 
 /**
- * Appearance (prototype appearance.html): the business color, one of five tested palettes, for everyone in the
- * business; and my own light, dark or device mode, saved to my account.
+ * Appearance (prototype appearance.html): the business color for everyone in the business, one of five tested palettes
+ * or an own color (FR-6.26, made readable and checked like the API does); and my own light, dark or device mode and
+ * row density, saved to my account.
  */
 @Component({
   selector: 'ms-appearance-page',
@@ -32,6 +34,10 @@ export class AppearancePage {
     color: { blue: '#1a73e8', indigo: '#3f51b5', purple: '#6750a4', teal: '#00796b', green: '#188038' }[name] ?? '#1a73e8',
   }));
   protected readonly selected = computed(() => this.business.profile()?.themeColor || 'blue');
+  /** The own color in use, if any. */
+  protected readonly custom = computed(() => (isHexColor(this.selected()) ? this.selected() : null));
+  /** Why the color just picked cannot be used. */
+  protected readonly problem = signal<string | null>(null);
   protected readonly canManage = computed(() => this.business.can('business:manage'));
   protected readonly busy = signal(false);
   protected readonly modes = [
@@ -40,7 +46,7 @@ export class AppearancePage {
     { value: 'system', label: 'settings.appearance.system', icon: 'pi pi-desktop' },
   ];
 
-  protected pick(color: string): void {
+  protected pick(color: string, done = 'settings.saved'): void {
     const profile = this.business.profile();
     if (!profile || !this.canManage() || color === this.selected()) {
       return;
@@ -51,13 +57,34 @@ export class AppearancePage {
       next: (saved) => {
         this.busy.set(false);
         this.business.setProfile(saved);
-        this.notify.showKey('settings.saved');
+        this.notify.showKey(done);
       },
       error: (e) => {
         this.busy.set(false);
         this.notify.error(e);
       },
     });
+  }
+
+  protected readonly densities = [
+    { value: 'comfortable', label: 'settings.appearance.comfortable', icon: 'pi pi-bars' },
+    { value: 'compact', label: 'settings.appearance.compact', icon: 'pi pi-align-justify' },
+  ];
+
+  /** An own color from the picker: refused, or made dark enough for white text, then saved. */
+  protected pickCustom(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    const fitted = fitColor(value);
+    if ('problem' in fitted) {
+      this.problem.set(`settings.appearance.problem.${fitted.problem}`);
+      return;
+    }
+    this.problem.set(null);
+    this.pick(fitted.color, fitted.darkened ? 'settings.appearance.darkened' : 'settings.saved');
+  }
+
+  protected setDensity(density: UiDensity): void {
+    this.theme.setDensity(density);
   }
 
   protected setMode(mode: UiMode): void {

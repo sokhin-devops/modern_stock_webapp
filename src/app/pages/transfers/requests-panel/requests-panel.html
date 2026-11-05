@@ -1,0 +1,110 @@
+<div class="toolbar">
+  <p-select [options]="statuses" optionValue="value" [ngModel]="status()" (ngModelChange)="setStatus($event)" [showClear]="true"
+            [placeholder]="'docs.all' | translate" [ariaLabel]="'common.status' | translate" class="filter" appendTo="body">
+    <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
+    <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+  </p-select>
+</div>
+<p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+         [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
+         dataKey="id" [rowHover]="true">
+  <ng-template #header>
+    <tr>
+      <th>{{ 'common.number' | translate }}</th>
+      <th>{{ 'requests.askBranch' | translate }}</th>
+      <th>{{ 'requests.forBranch' | translate }}</th>
+      <th>{{ 'common.date' | translate }}</th>
+      <th>{{ 'requests.neededBy' | translate }}</th>
+      <th>{{ 'common.status' | translate }}</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-r>
+    <tr class="clickable" tabindex="0" (click)="open(r)" (keydown.enter)="open(r)">
+      <td>
+        <span class="strong doc-no">{{ r.number }}</span>
+        @if (incoming(r) && r.status === 'OPEN') {
+          <span class="tag tag-primary type-tag">{{ 'requests.forUs' | translate }}</span>
+        }
+      </td>
+      <td>{{ branchName(r.fromBranchId, r.fromBranchName) }}</td>
+      <td>{{ branchName(r.toBranchId, r.toBranchName) }}</td>
+      <td class="muted">{{ r.createdAt | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ r.neededBy ? (r.neededBy | date: 'dd/MM/yyyy') : '—' }}</td>
+      <td><span class="tag" [class]="'status-' + r.status">{{ 'requests.status.' + r.status | translate }}</span></td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr><td colspan="6" class="empty-cell">{{ 'requests.empty' | translate }}</td></tr>
+  </ng-template>
+</p-table>
+
+<ms-request-form [(visible)]="formOpen" (saved)="created($event)" />
+
+<p-drawer [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" position="right" styleClass="ms-doc-drawer"
+          [header]="viewing()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+  @if (viewing(); as r) {
+    <div class="doc-facts">
+      <div><small>{{ 'requests.askBranch' | translate }}</small><b>{{ branchName(r.fromBranchId, r.fromBranchName) }}</b></div>
+      <div><small>{{ 'requests.forBranch' | translate }}</small><b>{{ branchName(r.toBranchId, r.toBranchName) }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + r.status">{{ 'requests.status.' + r.status | translate }}</span></b></div>
+      <div><small>{{ 'requests.askedBy' | translate }}</small><b>{{ r.requestedByName ?? '—' }} · {{ r.createdAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
+      @if (r.neededBy) {
+        <div><small>{{ 'requests.neededBy' | translate }}</small><b>{{ r.neededBy | date: 'dd/MM/yyyy' }}</b></div>
+      }
+      @if (r.transferNumber) {
+        <div><small>{{ 'requests.transfer' | translate }}</small><b>{{ r.transferNumber }}</b></div>
+      }
+    </div>
+    <p-table class="ms-table" [value]="r.lines">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'common.product' | translate }}</th>
+          <th class="num">{{ 'common.qty' | translate }}</th>
+          <th class="num">{{ 'requests.available' | translate: { branch: branchName(r.fromBranchId, r.fromBranchName) } }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-l>
+        <tr>
+          <td class="strong">{{ productName(l) }}</td>
+          <td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+          <td class="num" [class.danger-text]="l.available < l.baseQty">{{ l.available | number: '1.0-3' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    @if (r.note) {
+      <p class="muted note">{{ r.note }}</p>
+    }
+    @if (r.declineReason) {
+      <p class="danger-text note">{{ 'requests.declinedBecause' | translate: { reason: r.declineReason } }}</p>
+    }
+    @if (declining()) {
+      <div class="ms-field note">
+        <label for="rq-reason">{{ 'requests.declineReason' | translate }}</label>
+        <input pInputText id="rq-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255" />
+      </div>
+    }
+  }
+  <ng-template #footer>
+    @if (viewing(); as r) {
+      <div class="drawer-actions">
+        @if (r.canCancel) {
+          <button pButton type="button" [text]="true" severity="danger" (click)="cancel(r)" [disabled]="busy()">
+            <span pButtonLabel>{{ 'requests.cancel' | translate }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+        @if (r.canFulfil) {
+          <button pButton type="button" [outlined]="true" severity="danger" (click)="decline(r)"
+                  [disabled]="busy() || (declining() && !reason().trim())">
+            <span pButtonLabel>{{ 'requests.decline' | translate }}</span>
+          </button>
+          @if (!declining()) {
+            <button pButton type="button" (click)="fulfil(r)" [loading]="busy()" [disabled]="busy()">
+              <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'requests.makeTransfer' | translate }}</span>
+            </button>
+          }
+        }
+      </div>
+    }
+  </ng-template>
+</p-drawer>

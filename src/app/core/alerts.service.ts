@@ -6,7 +6,7 @@ import { BusinessService } from './business/business.service';
 
 export type AlertKind =
   | 'PAYMENT_DUE' | 'EXPIRED' | 'OVERDUE_BILLS' | 'TRIAL_ENDING' | 'LOW_STOCK' | 'EXPIRING_1' | 'OVERDUE_INVOICES'
-  | 'TRANSFERS_LATE' | 'APPROVALS' | 'TO_RECEIVE' | 'COUNTS_OPEN' | 'COUNTS_TO_APPROVE' | 'RETURNS_TO_APPROVE'
+  | 'TRANSFERS_LATE' | 'APPROVALS' | 'TO_RECEIVE' | 'TRANSFER_REQUESTS' | 'COUNTS_OPEN' | 'COUNTS_TO_APPROVE' | 'RETURNS_TO_APPROVE'
   | 'PURCHASE_RETURNS_TO_APPROVE' | 'RENEWAL_SOON' | 'EXPIRING_2' | 'EXPIRING_3' | 'RATE_MISSING';
 
 export interface Alert {
@@ -30,6 +30,7 @@ export const ALERT_TARGETS: Record<AlertKind, { icon: string; link: string; quer
   APPROVALS: { icon: 'pi pi-check-square', link: '/inventory/adjustments' },
   TRANSFERS_LATE: { icon: 'pi pi-clock', link: '/inventory/transfers', query: { status: 'IN_TRANSIT' } },
   TO_RECEIVE: { icon: 'pi pi-truck', link: '/inventory/transfers', query: { status: 'IN_TRANSIT' } },
+  TRANSFER_REQUESTS: { icon: 'pi pi-inbox', link: '/inventory/transfers', query: { view: 'requests' } },
   COUNTS_OPEN: { icon: 'pi pi-list-check', link: '/inventory/stock-counts' },
   COUNTS_TO_APPROVE: { icon: 'pi pi-check-square', link: '/inventory/stock-counts' },
   RETURNS_TO_APPROVE: { icon: 'pi pi-replay', link: '/customers/transactions', query: { tab: 'returns' } },

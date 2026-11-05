@@ -21,3 +21,13 @@
     cursor: default;
   }
 }
+
+// The own color: the swatch is a label, so a click opens the color input hidden under it (the prototype's .picker).
+.swatch-custom {
+  position: relative;
+
+  &.disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+}

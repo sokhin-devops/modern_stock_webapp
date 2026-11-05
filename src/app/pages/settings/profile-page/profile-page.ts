@@ -15,6 +15,7 @@ import { BusinessService } from '../../../core/business/business.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { ApiFilePipe } from '../../../shared/api-file.pipe';
+import { ExportData, downloadExport } from '../../../shared/export-all';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { revealErrors } from '../../../shared/forms';
 import { ImageField } from '../../../shared/image-field/image-field';
@@ -44,6 +45,10 @@ export class ProfilePage {
   /** Archiving is the Owner's: the one who manages the business and its billing. */
   protected readonly canArchive = computed(() => this.business.can('business:manage') && this.business.can('billing:manage'));
   protected readonly archiving = signal(false);
+  /** Export all data (FR-7.12): the Owner, when the plan has Excel export. */
+  protected readonly canExport = computed(() => this.business.can('business:manage'));
+  protected readonly exportInPlan = signal(true);
+  protected readonly exporting = signal(false);
   /** The logo is saved as soon as it is chosen or removed (not with the form). */
   protected readonly logoUrl = signal<string | null>(null);
   protected readonly logoBusy = signal(false);
@@ -86,9 +91,32 @@ export class ProfilePage {
         });
         if (!this.business.can('business:manage')) {
           this.form.disable();
+        } else {
+          this.api.get<Record<string, boolean>>('/business/features').subscribe({ next: (f) => this.exportInPlan.set(!!f['excel_export']) });
         }
       },
       error: (e) => this.notify.error(e),
+    });
+  }
+
+  /** Every table of the business in one Excel file, a sheet each. */
+  protected exportAll(): void {
+    this.exporting.set(true);
+    this.api.get<ExportData>('/business/export').subscribe({
+      next: async (data) => {
+        try {
+          const day = new Date().toISOString().slice(0, 10);
+          const name = data.businessName.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'business';
+          await downloadExport(data, (key) => this.translate.instant(key), `${name}-${day}.xlsx`);
+          this.notify.showKey('settings.export.done');
+        } finally {
+          this.exporting.set(false);
+        }
+      },
+      error: (e) => {
+        this.exporting.set(false);
+        this.notify.error(e);
+      },
     });
   }
 

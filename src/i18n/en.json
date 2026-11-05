@@ -715,7 +715,7 @@
       "negativeHint": "Off by default: a sale stops when the stock is not there."
     },
     "appearance": {
-      "lead": "The color of the app for everyone in this business, and your own light or dark mode.",
+      "lead": "The color of the app for everyone in this business, and your own light or dark mode and rows.",
       "color": "Business color",
       "mode": "My mode",
       "light": "Light",
@@ -727,7 +727,19 @@
         "purple": "Purple",
         "teal": "Teal",
         "green": "Green"
-      }
+      },
+      "own": "Own color",
+      "ownHint": "Any color but red or gray. It is made darker if white text on it would be hard to read.",
+      "darkened": "Saved, a little darker so text on it stays easy to read",
+      "problem": {
+        "invalid": "Pick a color with the color picker.",
+        "red": "Red is kept for problems and warnings in the app. Pick another color.",
+        "gray": "This color is too gray to stand out. Pick a stronger one."
+      },
+      "density": "My rows",
+      "densityHint": "Compact fits more rows of a list on the screen. Only for you.",
+      "comfortable": "Comfortable",
+      "compact": "Compact"
     },
     "billing": {
       "plan": "Your plan",
@@ -913,6 +925,37 @@
       "button": "Archive business",
       "ask": "Archive {{name}}? Its members lose access until you restore it. Nothing is deleted.",
       "done": "{{name}} is archived"
+    },
+    "numbers": {
+      "title": "Document numbers",
+      "lead": "The letters in front of each number, e.g. INV-202611-0001. Leave them as they are, or use your own.",
+      "sales": "Sales",
+      "purchases": "Purchases and expenses",
+      "stock": "Stock",
+      "twice": "Each kind of document needs its own prefix.",
+      "hint": "1 to 6 letters or digits, starting with a letter. New documents use the new prefix; old numbers stay.",
+      "types": {
+        "QO": "Quotation",
+        "SO": "Sales order",
+        "DO": "Delivery note",
+        "INV": "Invoice",
+        "TAX": "Tax invoice",
+        "RCT": "Sales receipt",
+        "RCV": "Payment received",
+        "SR": "Customer return",
+        "CN": "Credit note",
+        "DN": "Debit note",
+        "PO": "Purchase order",
+        "GRN": "Goods received",
+        "BILL": "Bill",
+        "PAY": "Supplier payment",
+        "PRT": "Supplier return",
+        "SC": "Supplier credit",
+        "EXP": "Expense",
+        "ADJ": "Adjustment",
+        "TRF": "Transfer",
+        "CNT": "Stock count"
+      }
     }
   },
   "docs": {
@@ -1355,7 +1398,9 @@
     "instantLead": "Sent straight away, not only in the morning summary.",
     "outOfStock": "A product sells out",
     "shiftShort": "A cash shift closes with less cash than expected",
-    "saleVoid": "A sale is voided"
+    "saleVoid": "A sale is voided",
+    "debts": "Include customer invoices overdue, and supplier bills overdue or due within 7 days",
+    "approvals": "Something waits for approval (adjustment, stock count, return)"
   },
   "import": {
     "template": "Download the template",
@@ -1881,7 +1926,8 @@
       "bankEnabled": "Bank",
       "cycle": "Billing",
       "quantity": "How many",
-      "expiryDays": "Near-expiry days"
+      "expiryDays": "Near-expiry days",
+      "numberPrefixes": "Number prefix"
     }
   },
   "labels": {
@@ -1918,5 +1964,15 @@
     "saved": "Photo saved",
     "removed": "Photo removed",
     "openFull": "Open at full size"
+  },
+  "payments": {
+    "whichInvoices": "Which invoices it pays",
+    "whichBills": "Which bills it pays",
+    "oldestFirst": "Oldest first",
+    "choose": "Choose",
+    "due": "Due {{date}}",
+    "open": "{{amount}} open",
+    "chosenTotal": "Chosen: {{amount}}",
+    "overChosen": "more than the payment"
   }
 }

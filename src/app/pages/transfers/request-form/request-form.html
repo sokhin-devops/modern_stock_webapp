@@ -1,0 +1,39 @@
+<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-doc-drawer" [header]="'requests.new' | translate"
+          [ariaCloseLabel]="'common.close' | translate">
+  <div class="ms-form">
+    <p class="muted">{{ 'requests.lead' | translate }}</p>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="rq-to">{{ 'requests.forBranch' | translate }}</label>
+        <p-select inputId="rq-to" [options]="toOptions()" optionLabel="label" optionValue="value" [ngModel]="toBranchId()"
+                  (ngModelChange)="setTo($event)" appendTo="body" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="rq-from">{{ 'requests.askBranch' | translate }}</label>
+        <p-select inputId="rq-from" [options]="fromOptions()" optionLabel="label" optionValue="value" [ngModel]="fromBranchId()"
+                  (ngModelChange)="fromBranchId.set($event)" appendTo="body" [placeholder]="'requests.noOtherBranch' | translate" />
+      </div>
+    </div>
+    <ms-lines-editor [(lines)]="lines" />
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="rq-needed" optional>{{ 'requests.neededBy' | translate }}</label>
+        <p-datepicker inputId="rq-needed" [ngModel]="neededBy()" (ngModelChange)="neededBy.set($event)" dateFormat="dd/mm/yy"
+                      [minDate]="today" [showIcon]="true" [showClear]="true" appendTo="body" />
+      </div>
+      <div class="ms-field">
+        <label msLabel for="rq-note" optional>{{ 'common.note' | translate }}</label>
+        <input pInputText id="rq-note" [ngModel]="note()" (ngModelChange)="note.set($event)" maxlength="500" />
+      </div>
+    </div>
+  </div>
+  <ng-template #footer>
+    <div class="drawer-actions">
+      <span class="spacer"></span>
+      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+      <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !fromBranchId()">
+        <span pButtonLabel>{{ 'requests.send' | translate }}</span>
+      </button>
+    </div>
+  </ng-template>
+</p-drawer>

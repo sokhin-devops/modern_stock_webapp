@@ -8,3 +8,25 @@
   margin-inline-start: 8px;
   font-size: 11px;
 }
+
+// A debit note in the drawer: its reason and amounts instead of goods.
+.debit-box {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+
+  p {
+    margin: 4px 0 12px;
+  }
+}
+
+.debit-lines {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 16px;
+  font-variant-numeric: tabular-nums;
+
+  span:nth-child(even) {
+    text-align: right;
+  }
+}

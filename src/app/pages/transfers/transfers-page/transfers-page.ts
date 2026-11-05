@@ -6,12 +6,14 @@ import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Drawer } from 'primeng/drawer';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 import { Observable } from 'rxjs';
 
 import { ApiService } from '../../../core/api/api.service';
 import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
 import { LazyList } from '../../../shared/lazy-list';
+import { RequestsPanel } from '../requests-panel/requests-panel';
 import { TransferForm } from '../transfer-form/transfer-form';
 
 interface Transfer {
@@ -33,14 +35,16 @@ interface Transfer {
 
 /**
  * Transfers (prototype transfers.html, PLAIN.md 11.3): moves between warehouses and transfers between branches, with
- * their status. From the document: move or send a draft, receive what arrived, or return it to the sender.
+ * their status. From the document: move or send a draft, receive what arrived, or return it to the sender. A second tab
+ * holds the transfer requests between branches (FR-4.11).
  */
 /** Days in transit before a transfer is late (TransferService.LATE_DAYS in the API). */
 const LATE_DAYS = 3;
 
 @Component({
   selector: 'ms-transfers-page',
-  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, TransferForm],
+  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, TransferForm,
+    Tabs, TabList, Tab, TabPanels, TabPanel, RequestsPanel],
   templateUrl: './transfers-page.html',
   styleUrl: './transfers-page.scss',
 })
@@ -50,6 +54,10 @@ export class TransfersPage {
   private readonly notify = inject(NotifyService);
   private readonly translate = inject(TranslateService);
 
+  /** ?view=requests from the alerts (FR-4.11). */
+  readonly viewParam = input<string | undefined>(undefined, { alias: 'view' });
+  protected readonly view = linkedSignal<'transfers' | 'requests'>(() => (this.viewParam() === 'requests' ? 'requests' : 'transfers'));
+  protected readonly requestFormOpen = signal(false);
   /** ?status=IN_TRANSIT from the alerts. */
   readonly statusParam = input<string | undefined>(undefined, { alias: 'status' });
   protected readonly status = linkedSignal<string | null>(() => this.statusParam() ?? null);
@@ -66,6 +74,13 @@ export class TransfersPage {
   protected readonly formOpen = signal(false);
   protected readonly viewing = signal<Transfer | null>(null);
   protected readonly busy = signal(false);
+
+  /** A transfer made from a request: its draft opens here, to check and send. */
+  protected showTransfer(id: number): void {
+    this.view.set('transfers');
+    this.list.reload();
+    this.api.get<Transfer>(`/transfers/${id}`).subscribe({ next: (t) => this.viewing.set(t), error: (e) => this.notify.error(e) });
+  }
 
   protected isLate(t: Transfer): boolean {
     return t.status === 'IN_TRANSIT' && !!t.sentAt && Date.now() - new Date(t.sentAt).getTime() > this.lateMs;

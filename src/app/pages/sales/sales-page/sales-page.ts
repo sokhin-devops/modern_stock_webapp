@@ -16,6 +16,7 @@ import { LazyList } from '../../../shared/lazy-list';
 import { PaymentDialog } from '../../../shared/payment-dialog/payment-dialog';
 import { PrintDialog, PrintDocument } from '../../../shared/print-dialog/print-dialog';
 import { CreditDialog } from '../../../shared/credit-dialog/credit-dialog';
+import { DebitDialog, DebitStart, SavedDebit } from '../debit-dialog/debit-dialog';
 import { Credit } from '../../../shared/credit-drawer/credit';
 import { CreditDrawer } from '../../../shared/credit-drawer/credit-drawer';
 import { ReturnDoc, ReturnDrawer } from '../../../shared/return-drawer/return-drawer';
@@ -62,6 +63,10 @@ interface Invoice {
   status: 'UNPAID' | 'PARTLY_PAID' | 'PAID' | 'VOID';
   overdue: boolean;
   lines: SaleLine[];
+  /** A debit note: why the customer owes more, and the invoice it adds to (FR-3.19). */
+  note: string | null;
+  relatedInvoiceId: number | null;
+  relatedInvoiceNumber: string | null;
 }
 
 interface Delivery {
@@ -90,7 +95,7 @@ interface Row {
 @Component({
   selector: 'ms-sales-page',
   imports: [TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, PaymentDialog, PrintDialog,
-    ReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, OrderForm, OrderDrawer, Tooltip],
+    ReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, OrderForm, OrderDrawer, Tooltip, DebitDialog],
   templateUrl: './sales-page.html',
   styleUrl: './sales-page.scss',
 })
@@ -144,6 +149,9 @@ export class SalesPage {
   protected readonly returnOpen = signal(false);
   protected readonly creditNote = signal<Credit | null>(null);
   protected readonly newCreditOpen = signal(false);
+  /** A debit note (FR-3.19): from the Invoices tab, or raised from an open invoice. */
+  protected readonly debitOpen = signal(false);
+  protected readonly debitStart = signal<DebitStart | null>(null);
 
   constructor() {
     effect(() => {
@@ -236,17 +244,50 @@ export class SalesPage {
     this.api.get<Invoice>(`/invoices/${row.id}`).subscribe({ next: (i) => this.viewingInvoice.set(i), error: this.onError });
   }
 
+  protected newDebit(start: DebitStart | null): void {
+    this.debitStart.set(start);
+    this.debitOpen.set(true);
+  }
+
+  /** The note just made opens, so it can be printed and given to the customer. */
+  protected debitSaved(d: SavedDebit): void {
+    this.invoices.refresh();
+    this.openInvoice({ id: d.id, number: d.number });
+  }
+
+  protected voidDebit(i: Invoice): void {
+    this.confirm.confirm({
+      header: this.translate.instant('debit.void'),
+      message: this.translate.instant('debit.voidAsk', { number: i.number }),
+      acceptLabel: this.translate.instant('debit.void'),
+      rejectLabel: this.translate.instant('common.cancel'),
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { text: true },
+      accept: () =>
+        this.api.post<Invoice>(`/debit-notes/${i.id}/void`).subscribe({
+          next: (v) => {
+            this.viewingInvoice.set(v);
+            this.invoices.refresh();
+            this.notify.showKey('debit.voided', { number: i.number });
+          },
+          error: this.onError,
+        }),
+    });
+  }
+
   protected printInvoice(i: Invoice): void {
     const t = (key: string) => this.translate.instant(key);
     const usd = (n: number) => `$${n.toFixed(2)}`;
     const tax = i.type === 'TAX';
+    const debit = i.type === 'DEBIT_NOTE';
     const khr = (n: number) => `៛${Math.round(n).toLocaleString('en-US')}`;
     this.withCustomer(i, (lines) => this.showPrint({
       // A tax invoice carries its Khmer title whatever the screen language (FR-3.9)
-      title: tax ? `វិក្កយបត្រអាករ · ${t('print.taxInvoiceEn')}` : t('print.invoice'),
+      title: debit ? t('debit.title') : tax ? `វិក្កយបត្រអាករ · ${t('print.taxInvoiceEn')}` : t('print.invoice'),
       number: i.number,
       date: i.invoiceDate,
       facts: [
+        ...(i.relatedInvoiceNumber ? [{ label: t('debit.forInvoice'), value: i.relatedInvoiceNumber }] : []),
         { label: t('sales.due'), value: this.day(i.dueDate) },
         ...(tax ? [{ label: t('print.rate'), value: `$1 = ${khr(i.exchangeRate)}` }] : []),
       ],
@@ -254,7 +295,11 @@ export class SalesPage {
       partyName: i.customerName,
       partyLines: lines,
       withPrices: true,
-      lines: i.lines.map((l) => ({ name: l.productName, qty: l.qty, unit: l.unitSymbol, price: l.unitPrice, total: l.lineTotal })),
+      // A debit note has no goods: its reason is the one line
+      itemLabel: debit ? t('debit.reason') : undefined,
+      lines: debit
+        ? [{ name: i.note ?? t('debit.title'), qty: 1, unit: '', price: i.subtotal, total: i.subtotal }]
+        : i.lines.map((l) => ({ name: l.productName, qty: l.qty, unit: l.unitSymbol, price: l.unitPrice, total: l.lineTotal })),
       totals: [
         { label: t('print.subtotal'), value: usd(i.subtotal) },
         ...(i.discount ? [{ label: t('print.discount'), value: `−${usd(i.discount)}` }] : []),

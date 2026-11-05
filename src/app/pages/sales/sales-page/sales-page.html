@@ -15,6 +15,11 @@
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'orders.newOrder' | translate }}</span>
         </button>
       }
+      @if (tab() === 'invoices' && canVoid()) {
+        <button pButton type="button" [outlined]="true" (click)="newDebit(null)">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'debit.new' | translate }}</span>
+        </button>
+      }
       @if (tab() === 'credits' && canReturn()) {
         <button pButton type="button" [outlined]="true" (click)="newCreditOpen.set(true)">
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'credits.customer.new' | translate }}</span>
@@ -127,7 +132,7 @@
               </ng-template>
               <ng-template #body let-i>
                 <tr class="clickable" tabindex="0" (click)="openInvoice(i)" (keydown.enter)="openInvoice(i)">
-                  <td><span class="strong doc-no">{{ i.number }}</span>@if ($any(i).type === 'TAX') { <span class="tag tag-primary type-tag">{{ 'sales.taxInvoice' | translate }}</span> }</td>
+                  <td><span class="strong doc-no">{{ i.number }}</span>@if ($any(i).type === 'TAX') { <span class="tag tag-primary type-tag">{{ 'sales.taxInvoice' | translate }}</span> }@if ($any(i).type === 'DEBIT_NOTE') { <span class="tag type-tag">{{ 'debit.title' | translate }}</span> }</td>
                   <td>{{ $any(i).customerName }}</td><td>{{ $any(i).invoiceDate | date: 'dd/MM/yyyy' }}</td>
                   <td [class.danger-text]="$any(i).overdue">{{ $any(i).dueDate | date: 'dd/MM/yyyy' }}</td>
                   <td class="num">{{ $any(i).total | currency: 'USD' }}</td><td class="num strong">{{ $any(i).balance | currency: 'USD' }}</td>
@@ -262,8 +267,27 @@
       <div><small>{{ 'common.date' | translate }}</small><b>{{ i.invoiceDate | date: 'dd/MM/yyyy' }}</b></div>
       <div><small>{{ 'sales.due' | translate }}</small><b [class.danger-text]="i.overdue">{{ i.dueDate | date: 'dd/MM/yyyy' }}</b></div>
       <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + i.status">{{ 'docs.status.' + i.status | translate }}</span></b></div>
-      <div><small>{{ 'sales.invoiceType' | translate }}</small><b>{{ (i.type === 'TAX' ? 'sales.taxInvoice' : 'sales.standardInvoice') | translate }}</b></div>
+      <div><small>{{ 'sales.invoiceType' | translate }}</small><b>{{ (i.type === 'TAX' ? 'sales.taxInvoice' : i.type === 'DEBIT_NOTE' ? 'debit.title' : 'sales.standardInvoice') | translate }}</b></div>
+      @if (i.relatedInvoiceNumber) {
+        <div><small>{{ 'debit.forInvoice' | translate }}</small><b>{{ i.relatedInvoiceNumber }}</b></div>
+      }
     </div>
+    @if (i.type === 'DEBIT_NOTE') {
+      <!-- A debit note has no goods: why the customer owes more, and how much -->
+      <div class="debit-box">
+        <small class="muted">{{ 'debit.reason' | translate }}</small>
+        <p>{{ i.note }}</p>
+        <div class="debit-lines">
+          <span>{{ 'print.subtotal' | translate }}</span><span>{{ i.subtotal | currency: 'USD' }}</span>
+          @if (i.vat) {
+            <span>{{ 'print.vat' | translate }}</span><span>{{ i.vat | currency: 'USD' }}</span>
+          }
+          <span class="strong">{{ 'common.total' | translate }}</span><span class="strong">{{ i.total | currency: 'USD' }}</span>
+          <span class="strong">{{ 'sales.balance' | translate }}</span>
+          <span class="strong" [class.danger-text]="i.balance > 0">{{ i.balance | currency: 'USD' }}</span>
+        </div>
+      </div>
+    } @else {
     <p-table class="ms-table" [value]="i.lines">
       <ng-template #header>
         <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th></tr>
@@ -276,11 +300,22 @@
         <tr><td colspan="2" class="num">{{ 'sales.balance' | translate }}</td><td class="num strong" [class.danger-text]="i.balance > 0">{{ i.balance | currency: 'USD' }}</td></tr>
       </ng-template>
     </p-table>
+    }
   }
   <ng-template #footer>
     @if (viewingInvoice(); as i) {
       <div class="drawer-actions">
-        @if (canStartReturn() && i.status !== 'VOID') {
+        @if (i.type === 'DEBIT_NOTE' && canVoid() && i.status === 'UNPAID' && !i.paidAmount) {
+          <button pButton type="button" [text]="true" severity="danger" (click)="voidDebit(i)">
+            <span pButtonLabel>{{ 'debit.void' | translate }}</span>
+          </button>
+        }
+        @if (i.type !== 'DEBIT_NOTE' && canVoid() && i.status !== 'VOID') {
+          <button pButton type="button" [outlined]="true" (click)="newDebit({ customerId: i.customerId, customerName: i.customerName, invoiceId: i.id })">
+            <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'debit.button' | translate }}</span>
+          </button>
+        }
+        @if (canStartReturn() && i.status !== 'VOID' && i.type !== 'DEBIT_NOTE') {
           <button pButton type="button" [outlined]="true" (click)="startReturn(null, i.id)">
             <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ (canVoid() ? 'returns.button' : 'returns.askButton') | translate }}</span>
           </button>
@@ -305,6 +340,7 @@
                   (saved)="returned($event)" />
 <ms-return-drawer kind="customer" [(doc)]="returnDoc" (changed)="returnDecided($event)" />
 <ms-credit-drawer kind="customer" [(credit)]="creditNote" (changed)="creditChanged()" />
+<ms-debit-dialog [(visible)]="debitOpen" [start]="debitStart()" (saved)="debitSaved($event)" />
 <ms-credit-dialog kind="customer" [(visible)]="newCreditOpen" (saved)="credits.refresh(); creditNote.set($event)" />
 
 <ms-order-form [target]="formTarget()" [(visible)]="formOpen" (saved)="docSaved($event)" />

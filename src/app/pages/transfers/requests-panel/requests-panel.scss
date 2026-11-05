@@ -1,0 +1,15 @@
+// Fills the tab: the toolbar, then the table takes the height left.
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.filter {
+  min-width: 200px;
+}
+
+.note {
+  margin-top: 12px;
+}

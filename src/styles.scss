@@ -602,7 +602,7 @@
 
 // Status tags for documents: done (primary), waiting (plain), stopped (danger).
 .tag.status-POSTED, .tag.status-RECEIVED, .tag.status-MOVED, .tag.status-PAID, .tag.status-CLOSED,
-.tag.status-ACCEPTED, .tag.status-DELIVERED {
+.tag.status-ACCEPTED, .tag.status-DELIVERED, .tag.status-FULFILLED {
   background: var(--primary-container);
   color: var(--on-primary-container);
 }
@@ -643,5 +643,18 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+}
+
+// Compact density (FR-6.26, each person's choice in Settings › Appearance): tighter rows for long lists.
+.compact .ms-table .p-datatable {
+  .p-datatable-thead > tr > th {
+    height: 34px;
+  }
+
+  .p-datatable-tbody > tr > td {
+    height: 40px;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
 }

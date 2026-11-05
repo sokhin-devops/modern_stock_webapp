@@ -4,11 +4,14 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { isHexColor, paletteCss } from '../../shared/colors';
 import { Branch, BusinessProfile, MyBusiness, MyInvitation, Rate } from '../api/models';
 
 const API = environment.apiUrl;
 /** The business colors of the prototype (Settings: Appearance). */
 export const PALETTES = ['blue', 'indigo', 'purple', 'teal', 'green'];
+/** The <style> with the shades of an own business color. */
+const CUSTOM_STYLE = 'ms-custom-palette';
 const OPEN_KEY = 'ms-business';
 const BRANCH_KEY = 'ms-branch';
 const LAST_KEY = 'ms-last-business';
@@ -116,14 +119,22 @@ export class BusinessService {
 
   /**
    * The business profile, and its color on <html data-palette> (the prototype's palettes, which PrimeNG follows
-   * through the theme preset). Blue is the default and needs no attribute.
+   * through the theme preset). Blue is the default and needs no attribute. An own color (FR-6.26) is "custom", with
+   * its shades written into a <style> of its own.
    */
   setProfile(profile: BusinessProfile | null): void {
     this.profile.set(profile);
     const color = profile?.themeColor;
     const root = this.document.documentElement;
+    this.document.getElementById(CUSTOM_STYLE)?.remove();
     if (color && color !== 'blue' && PALETTES.includes(color)) {
       root.setAttribute('data-palette', color);
+    } else if (isHexColor(color)) {
+      const style = this.document.createElement('style');
+      style.id = CUSTOM_STYLE;
+      style.textContent = paletteCss(color);
+      this.document.head.append(style);
+      root.setAttribute('data-palette', 'custom');
     } else {
       root.removeAttribute('data-palette');
     }
