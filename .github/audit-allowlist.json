@@ -1,0 +1,51 @@
+[
+  {
+    "id": "GHSA-48r7-hpm6-gfxm",
+    "package": "@angular/common",
+    "reason": "formatDate runs out of memory with a crafted format string; every date format in the app is a fixed string in the code",
+    "fixedIn": "Angular 21+",
+    "reviewed": "2026-11-05"
+  },
+  {
+    "id": "GHSA-39pv-4j6c-2g6v",
+    "package": "@angular/common",
+    "reason": "HttpTransferCache leaks between server-side renders; the web app renders only in the browser",
+    "fixedIn": "Angular 21+",
+    "reviewed": "2026-11-05"
+  },
+  {
+    "id": "GHSA-jhpw-976m-542j",
+    "package": "@angular/common",
+    "reason": "HttpTransferCache reuses responses between server-side renders; the web app renders only in the browser",
+    "fixedIn": "Angular 21+",
+    "reviewed": "2026-11-05"
+  },
+  {
+    "id": "GHSA-jj27-h5hq-8x99",
+    "package": "@angular/core",
+    "reason": "XSS through Angular's own i18n ($localize, i18n attributes); the app translates with ngx-translate and has no i18n attributes",
+    "fixedIn": "Angular 21+",
+    "reviewed": "2026-11-05"
+  },
+  {
+    "id": "GHSA-rgjc-h3x7-9mwg",
+    "package": "@angular/core",
+    "reason": "Needs client hydration of server-rendered HTML; the web app doesn't hydrate (no provideClientHydration)",
+    "fixedIn": "Angular 21+",
+    "reviewed": "2026-11-05"
+  },
+  {
+    "id": "GHSA-ff3f-86qr-9cv3",
+    "package": "@angular/router",
+    "reason": "Denial of service of a server-side rendering server; the web app is static files with no server",
+    "fixedIn": "Angular 21+",
+    "reviewed": "2026-11-05"
+  },
+  {
+    "id": "GHSA-62vg-58rm-qff7",
+    "package": "@angular/router",
+    "reason": "Denial of service of a server-side rendering server; the web app is static files with no server",
+    "fixedIn": "Angular 21+",
+    "reviewed": "2026-11-05"
+  }
+]
