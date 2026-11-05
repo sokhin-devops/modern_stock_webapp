@@ -46,6 +46,11 @@
           <td class="num strong">{{ e.amountUsd | currency: 'USD' }}</td>
           <td><span class="tag" [class]="'status-' + e.status">{{ 'docs.status.' + e.status | translate }}</span></td>
           <td class="actions">
+            <button pButton type="button" [rounded]="true" [text]="true" [severity]="e.hasPhoto ? 'primary' : 'secondary'" (click)="openPhoto(e)"
+                    [attr.aria-label]="(e.hasPhoto ? 'docPhoto.receiptView' : 'docPhoto.receiptAdd') | translate"
+                    [pTooltip]="(e.hasPhoto ? 'docPhoto.receiptView' : 'docPhoto.receiptAdd') | translate" tooltipPosition="top">
+              <i class="pi" [class.pi-image]="e.hasPhoto" [class.pi-camera]="!e.hasPhoto" pButtonIcon></i>
+            </button>
             @if (e.status === 'POSTED') {
               <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="voidExpense(e)"
                       [attr.aria-label]="'common.void' | translate" [pTooltip]="'common.void' | translate" tooltipPosition="top"><i class="pi pi-ban" pButtonIcon></i></button>
@@ -98,3 +103,8 @@
     <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !fCategory() || !fAmount()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>
+
+@if (photoOf(); as e) {
+  <ms-doc-photo-dialog [(visible)]="photoOpen" [path]="'/expenses/' + e.id + '/photo'" [hasPhoto]="e.hasPhoto"
+                       [header]="('docPhoto.receipt' | translate) + ' · ' + e.number" (changed)="photoChanged(e, $event)" />
+}

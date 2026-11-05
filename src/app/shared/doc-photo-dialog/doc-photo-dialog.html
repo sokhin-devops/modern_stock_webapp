@@ -22,9 +22,9 @@
         </button>
       }
       <span class="spacer"></span>
-      <!-- A real file input behind a button: the camera on a phone, a file on a computer -->
+      <!-- A real file input behind a button: the camera or the gallery on a phone, a file on a computer -->
       <label class="file-btn" [class.disabled]="busy() || loading()">
-        <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" (change)="choose($event)"
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="choose($event)"
                [disabled]="busy() || loading()" [attr.aria-label]="(image() ? 'docPhoto.change' : 'docPhoto.add') | translate" />
         <span class="p-button p-component" [class.p-button-outlined]="!!image()">
           <i class="pi" [class.pi-spin]="busy()" [class.pi-spinner]="busy()" [class.pi-camera]="!busy()"></i>

@@ -17,8 +17,8 @@ const MAX_SIDE = 1600;
 
 /**
  * The photo of a paper document kept with its record (FR-2.10 expense receipt, FR-2.14 supplier invoice). The photo
- * is private, so it comes from the API with the login and shows from memory. On a phone "Take a photo" opens the
- * camera; big pictures are made smaller first.
+ * is private, so it comes from the API with the login and shows from memory. On a phone the picker offers the camera;
+ * big pictures are made smaller first.
  */
 @Component({
   selector: 'ms-doc-photo-dialog',
@@ -47,13 +47,13 @@ export class DocPhotoDialog {
   protected readonly busy = signal(false);
 
   constructor() {
+    // On opening (not when the page passes back the change made here: the picture is already shown)
     effect(() => {
       const open = this.visible();
       const path = this.path();
-      const has = this.hasPhoto();
       untracked(() => {
         this.drop();
-        if (open && has) {
+        if (open && this.hasPhoto()) {
           this.fetch(path);
         }
       });

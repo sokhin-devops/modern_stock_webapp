@@ -13,6 +13,7 @@ import { Supplier } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
 import { CreditDialog } from '../../../shared/credit-dialog/credit-dialog';
+import { DocPhotoDialog } from '../../../shared/doc-photo-dialog/doc-photo-dialog';
 import { Credit } from '../../../shared/credit-drawer/credit';
 import { CreditDrawer } from '../../../shared/credit-drawer/credit-drawer';
 import { PrintDialog, PrintDocument } from '../../../shared/print-dialog/print-dialog';
@@ -84,6 +85,7 @@ interface GoodsReceipt {
   imports: [
     TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Drawer, ButtonDirective, ButtonIcon,
     ButtonLabel, PurchaseForm, PaymentDialog, PurchaseReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, Tooltip, PrintDialog,
+    DocPhotoDialog,
   ],
   templateUrl: './purchases-page.html',
   styleUrl: './purchases-page.scss',
@@ -167,6 +169,20 @@ export class PurchasesPage {
       this.viewingReceipt.set(null);
       this.tab.set('credits');
     }
+  }
+
+  /** The bill whose supplier invoice photo is open (FR-2.14). */
+  protected readonly billPhoto = signal<Row | null>(null);
+  protected readonly billPhotoOpen = signal(false);
+
+  protected openBillPhoto(b: Row): void {
+    this.billPhoto.set(b);
+    this.billPhotoOpen.set(true);
+  }
+
+  protected billPhotoChanged(b: Row, hasPhoto: boolean): void {
+    this.bills.rows.update((rows) => rows.map((r) => (r.id === b.id ? { ...r, hasPhoto } : r)));
+    this.billPhoto.set({ ...b, hasPhoto });
   }
 
   protected printOrder(o: PurchaseOrder): void {

@@ -87,7 +87,8 @@
                      [paginator]="true" [rows]="20" [first]="bills.first()" [totalRecords]="bills.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
               <ng-template #header>
                 <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'purchase.supplier' | translate }}</th><th>{{ 'purchase.due' | translate }}</th>
-                  <th class="num">{{ 'common.total' | translate }}</th><th class="num">{{ 'purchase.balance' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
+                  <th class="num">{{ 'common.total' | translate }}</th><th class="num">{{ 'purchase.balance' | translate }}</th><th>{{ 'common.status' | translate }}</th>
+                  <th class="actions"></th></tr>
               </ng-template>
               <ng-template #body let-b>
                 <tr>
@@ -97,9 +98,16 @@
                   <td class="num">{{ $any(b).total | currency: 'USD' }}</td>
                   <td class="num strong">{{ $any(b).balance | currency: 'USD' }}</td>
                   <td><span class="tag" [class]="'status-' + $any(b).status">{{ 'docs.status.' + $any(b).status | translate }}</span></td>
+                  <td class="actions">
+                    <button pButton type="button" [rounded]="true" [text]="true" [severity]="$any(b).hasPhoto ? 'primary' : 'secondary'" (click)="openBillPhoto(b)"
+                            [attr.aria-label]="($any(b).hasPhoto ? 'docPhoto.invoiceView' : 'docPhoto.invoiceAdd') | translate"
+                            [pTooltip]="($any(b).hasPhoto ? 'docPhoto.invoiceView' : 'docPhoto.invoiceAdd') | translate" tooltipPosition="left">
+                      <i class="pi" [class.pi-image]="$any(b).hasPhoto" [class.pi-camera]="!$any(b).hasPhoto" pButtonIcon></i>
+                    </button>
+                  </td>
                 </tr>
               </ng-template>
-              <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+              <ng-template #emptymessage><tr><td colspan="7" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
             </p-table>
           </p-tabpanel>
         }
@@ -296,3 +304,8 @@
 <ms-credit-drawer kind="supplier" [(credit)]="credit" (changed)="reloadAll()" />
 <ms-credit-dialog kind="supplier" [(visible)]="newCreditOpen" (saved)="credits.refresh(); credit.set($event)" />
 <ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />
+
+@if (billPhoto(); as b) {
+  <ms-doc-photo-dialog [(visible)]="billPhotoOpen" [path]="'/bills/' + b.id + '/photo'" [hasPhoto]="!!b['hasPhoto']"
+                       [header]="('docPhoto.invoice' | translate) + ' · ' + b.number" (changed)="billPhotoChanged(b, $event)" />
+}

@@ -19,6 +19,7 @@ import { BusinessService } from '../../../core/business/business.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { toIsoDate } from '../../../shared/dates';
+import { DocPhotoDialog } from '../../../shared/doc-photo-dialog/doc-photo-dialog';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { LazyList } from '../../../shared/lazy-list';
 
@@ -42,6 +43,8 @@ interface Expense {
   reference: string | null;
   note: string | null;
   status: 'POSTED' | 'VOID';
+  /** A photo of the receipt is kept (GET /expenses/{id}/photo). */
+  hasPhoto: boolean;
 }
 
 /**
@@ -52,7 +55,7 @@ interface Expense {
   selector: 'ms-expenses-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, SelectButton, DatePicker, Dialog,
-    InputNumber, InputText, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel,
+    InputNumber, InputText, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel, DocPhotoDialog,
   ],
   templateUrl: './expenses-page.html',
   styleUrl: './expenses-page.scss',
@@ -80,6 +83,10 @@ export class ExpensesPage {
   protected readonly pageTotal = computed(() =>
     this.list.rows().filter((e) => e.status === 'POSTED').reduce((s, e) => s + e.amountUsd, 0),
   );
+
+  /** The expense whose receipt photo is open. */
+  protected readonly photoOf = signal<Expense | null>(null);
+  protected readonly photoOpen = signal(false);
 
   // New expense dialog
   protected readonly formOpen = signal(false);
@@ -155,6 +162,16 @@ export class ExpensesPage {
           this.notify.error(e);
         },
       });
+  }
+
+  protected openPhoto(e: Expense): void {
+    this.photoOf.set(e);
+    this.photoOpen.set(true);
+  }
+
+  protected photoChanged(e: Expense, hasPhoto: boolean): void {
+    this.list.rows.update((rows) => rows.map((r) => (r.id === e.id ? { ...r, hasPhoto } : r)));
+    this.photoOf.set({ ...e, hasPhoto });
   }
 
   protected voidExpense(e: Expense): void {
