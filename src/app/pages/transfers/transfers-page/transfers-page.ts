@@ -2,6 +2,7 @@ import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Drawer } from 'primeng/drawer';
 import { Select } from 'primeng/select';
@@ -53,6 +54,7 @@ export class TransfersPage {
   private readonly business = inject(BusinessService);
   private readonly notify = inject(NotifyService);
   private readonly translate = inject(TranslateService);
+  private readonly confirm = inject(ConfirmationService);
 
   /** ?view=requests from the alerts (FR-4.11). */
   readonly viewParam = input<string | undefined>(undefined, { alias: 'view' });
@@ -63,7 +65,7 @@ export class TransfersPage {
   protected readonly status = linkedSignal<string | null>(() => this.statusParam() ?? null);
   /** In transit for longer than this is late (FR-4.13, as the API's alert). */
   private readonly lateMs = LATE_DAYS * 24 * 3600_000;
-  protected readonly statuses = ['DRAFT', 'IN_TRANSIT', 'MOVED', 'RECEIVED', 'RETURNED'].map((s) => ({ value: s, label: `docs.status.${s}` }));
+  protected readonly statuses = ['DRAFT', 'IN_TRANSIT', 'MOVED', 'RECEIVED', 'RETURNED', 'VOID'].map((s) => ({ value: s, label: `docs.status.${s}` }));
   protected readonly canManage = computed(() => this.business.can('transfer:manage'));
   protected readonly canReturn = computed(() => this.business.can('transfer:return_void'));
   protected readonly list = new LazyList<Transfer>(
@@ -91,7 +93,20 @@ export class TransfersPage {
     this.list.reload();
   }
 
-  protected act(t: Transfer, action: 'move' | 'send' | 'receive' | 'return' | 'delete'): void {
+  /** A moved or received transfer back to its source (PLAIN.md 11.9), while the destination still has the goods. */
+  protected voidIt(t: Transfer): void {
+    this.confirm.confirm({
+      header: this.translate.instant('transfer.void'),
+      message: this.translate.instant('transfer.voidAsk', { number: t.number }),
+      acceptLabel: this.translate.instant('transfer.void'),
+      rejectLabel: this.translate.instant('common.cancel'),
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { text: true },
+      accept: () => this.act(t, 'void'),
+    });
+  }
+
+  protected act(t: Transfer, action: 'move' | 'send' | 'receive' | 'return' | 'delete' | 'void'): void {
     const call: Observable<Transfer | void> =
       action === 'delete'
         ? this.api.delete(`/transfers/${t.id}`)

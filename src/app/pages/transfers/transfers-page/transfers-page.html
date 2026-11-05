@@ -124,6 +124,11 @@
             <span pButtonLabel>{{ 'transfer.deleteDraft' | translate }}</span>
           </button>
         }
+        @if ((t.status === 'MOVED' || t.status === 'RECEIVED') && canReturn()) {
+          <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(t)" [disabled]="busy()">
+            <span pButtonLabel>{{ 'transfer.void' | translate }}</span>
+          </button>
+        }
         @if (t.status === 'IN_TRANSIT' && canReturn()) {
           <button pButton type="button" [text]="true" severity="danger" (click)="act(t, 'return')" [disabled]="busy()">
             <span pButtonLabel>{{ 'transfer.returnIt' | translate }}</span>

@@ -1035,7 +1035,10 @@
     "qtyHint": "Positive adds stock, negative takes it out.",
     "approveDone": "Approved.",
     "rejectDone": "Rejected.",
-    "rejectReason": "Why is it rejected?"
+    "rejectReason": "Why is it rejected?",
+    "void": "Void adjustment",
+    "voidAsk": "Void {{number}}? Its stock changes are undone. This only works while what it added is still in stock.",
+    "voided": "{{number}} voided"
   },
   "transfer": {
     "new": "New transfer",
@@ -1052,7 +1055,9 @@
     "deleteDraft": "Delete draft",
     "short": "{{n}} lines short",
     "done": "Done.",
-    "late": "Late"
+    "late": "Late",
+    "void": "Void transfer",
+    "voidAsk": "Void {{number}}? The goods go back to where they came from. This only works while the destination still has them."
   },
   "purchase": {
     "tabOrders": "Purchase orders",
@@ -1939,7 +1944,9 @@
       "DATA_EXPORTED": "All data exported",
       "CASHIER_SWITCHED": "Cashier switched with a PIN",
       "COUPON_REDEEMED": "Coupon used",
-      "FREE_MONTHS_GIVEN": "Free months given"
+      "FREE_MONTHS_GIVEN": "Free months given",
+      "ADJUSTMENT_VOIDED": "Adjustment voided",
+      "TRANSFER_VOIDED": "Transfer voided"
     },
     "types": {
       "PRODUCT": "Products",

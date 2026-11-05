@@ -95,5 +95,12 @@
         </button>
       </div>
     }
+    @if (viewing()?.status === 'POSTED' && canVoid() && viewing()?.reason !== 'LOST_IN_TRANSIT') {
+      <div class="drawer-actions">
+        <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(viewing()!)" [loading]="busy()" [disabled]="busy()">
+          <span pButtonLabel>{{ 'adjust.void' | translate }}</span>
+        </button>
+      </div>
+    }
   </ng-template>
 </p-drawer>
