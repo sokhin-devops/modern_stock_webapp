@@ -30,6 +30,8 @@ export interface PrintDocument {
   /** "Delivered by" and "Received by" lines to sign (delivery notes). */
   signatures: boolean;
   note?: string | null;
+  /** A boxed line under the totals, e.g. "a proforma invoice is not a tax invoice". */
+  notice?: string;
 }
 
 /**

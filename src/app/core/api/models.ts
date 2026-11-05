@@ -120,7 +120,10 @@ export interface StockSummary {
   /** null when one branch is selected. */
   inTransitValue: number | null;
   lowStockItems: number;
-  expiringIn30Days: number;
+  /** Batches expiring within the first near-expiry window (FR-7.10). */
+  expiringSoon: number;
+  /** That window in days: 30 unless changed in Sales rules. */
+  expiringDays: number;
   expiredBatches: number;
 }
 
@@ -526,7 +529,9 @@ export interface ReorderReport {
 }
 
 export interface ExpiryReport {
-  days: 30 | 60 | 90;
+  days: number;
+  /** The business's three near-expiry windows, to pick from. */
+  windows: number[];
   expired: number;
   expiring: number;
   expiredValue: number | null;
@@ -700,6 +705,8 @@ export interface BusinessSettings {
   /** Customers may pay by KHQR or bank (cash is always on). */
   khqrEnabled: boolean;
   bankEnabled: boolean;
+  /** Near-expiry windows in days (FR-7.10), each longer than the one before; the first one warns. */
+  expiryDays: number[];
   /** The shop's KHQR image under the API, shown at the POS. Read only. */
   khqrImageUrl: string | null;
 }

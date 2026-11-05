@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
@@ -35,6 +35,9 @@ interface Transfer {
  * Transfers (prototype transfers.html, PLAIN.md 11.3): moves between warehouses and transfers between branches, with
  * their status. From the document: move or send a draft, receive what arrived, or return it to the sender.
  */
+/** Days in transit before a transfer is late (TransferService.LATE_DAYS in the API). */
+const LATE_DAYS = 3;
+
 @Component({
   selector: 'ms-transfers-page',
   imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, TransferForm],
@@ -47,7 +50,11 @@ export class TransfersPage {
   private readonly notify = inject(NotifyService);
   private readonly translate = inject(TranslateService);
 
-  protected readonly status = signal<string | null>(null);
+  /** ?status=IN_TRANSIT from the alerts. */
+  readonly statusParam = input<string | undefined>(undefined, { alias: 'status' });
+  protected readonly status = linkedSignal<string | null>(() => this.statusParam() ?? null);
+  /** In transit for longer than this is late (FR-4.13, as the API's alert). */
+  private readonly lateMs = LATE_DAYS * 24 * 3600_000;
   protected readonly statuses = ['DRAFT', 'IN_TRANSIT', 'MOVED', 'RECEIVED', 'RETURNED'].map((s) => ({ value: s, label: `docs.status.${s}` }));
   protected readonly canManage = computed(() => this.business.can('transfer:manage'));
   protected readonly canReturn = computed(() => this.business.can('transfer:return_void'));
@@ -59,6 +66,10 @@ export class TransfersPage {
   protected readonly formOpen = signal(false);
   protected readonly viewing = signal<Transfer | null>(null);
   protected readonly busy = signal(false);
+
+  protected isLate(t: Transfer): boolean {
+    return t.status === 'IN_TRANSIT' && !!t.sentAt && Date.now() - new Date(t.sentAt).getTime() > this.lateMs;
+  }
 
   protected setStatus(value: string | null): void {
     this.status.set(value);

@@ -10,6 +10,7 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth/auth.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
+import { PlatformService } from '../../core/platform.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
 import { FieldLabel } from '../../shared/field-label/field-label';
 import { revealErrors, showError } from '../../shared/forms';
@@ -29,6 +30,9 @@ export class SignUp {
   private readonly auth = inject(AuthService);
   private readonly lang = inject(LangService);
   private readonly notify = inject(NotifyService);
+  /** The trial length the super admin set (FR-8.8), for the lead line. */
+  protected readonly platform = inject(PlatformService);
+
 
   protected readonly websiteUrl = environment.websiteUrl;
   protected readonly showError = showError;
@@ -46,6 +50,10 @@ export class SignUp {
   });
 
   protected lang$ = this.lang.lang;
+
+  constructor() {
+    this.platform.load();
+  }
 
   protected submit(): void {
     if (this.form.invalid) {

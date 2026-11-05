@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { ScreenService } from '../../core/screen.service';
+import { AnnouncementBanner } from '../announcement-banner/announcement-banner';
 import { AppSidebar } from '../app-sidebar/app-sidebar';
 import { AppTopbar } from '../app-topbar/app-topbar';
 import { PlanBanner } from '../plan-banner/plan-banner';
@@ -15,7 +16,7 @@ const COLLAPSED_KEY = 'ms-collapsed';
  */
 @Component({
   selector: 'ms-app-shell',
-  imports: [RouterOutlet, AppTopbar, AppSidebar, PlanBanner],
+  imports: [RouterOutlet, AppTopbar, AppSidebar, PlanBanner, AnnouncementBanner],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })

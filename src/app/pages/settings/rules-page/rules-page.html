@@ -78,6 +78,25 @@
           <p-toggleswitch formControlName="bankEnabled" inputId="st-bank" />
           <label for="st-bank">{{ 'pos.bank' | translate }}</label>
         </div>
+
+        <h3 class="form-section">{{ 'settings.expiry.title' | translate }}</h3>
+        <p class="muted small">{{ 'settings.expiry.lead' | translate }}</p>
+        <div class="expiry-days">
+          <div class="ms-field">
+            <label msLabel for="st-exp1" control="expiry1" error="settings.expiry.range">{{ 'settings.expiry.first' | translate }}</label>
+            <p-inputnumber inputId="st-exp1" formControlName="expiry1" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+          </div>
+          <div class="ms-field">
+            <label msLabel for="st-exp2" control="expiry2" error="settings.expiry.range">{{ 'settings.expiry.second' | translate }}</label>
+            <p-inputnumber inputId="st-exp2" formControlName="expiry2" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+          </div>
+          <div class="ms-field">
+            <label msLabel for="st-exp3" control="expiry3" error="settings.expiry.order"
+                   [invalid]="form.hasError('expiryOrder')">{{ 'settings.expiry.third' | translate }}</label>
+            <p-inputnumber inputId="st-exp3" formControlName="expiry3" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+          </div>
+        </div>
+        <small class="field-hint">{{ 'settings.expiry.hint' | translate }}</small>
       }
       @if (form.enabled) {
         <div class="settings-actions">

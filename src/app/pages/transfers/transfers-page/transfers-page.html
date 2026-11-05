@@ -44,6 +44,9 @@
           <td class="num">{{ t.value | currency: 'USD' }}</td>
           <td>
             <span class="tag" [class]="'status-' + t.status">{{ 'docs.status.' + t.status | translate }}</span>
+            @if (isLate(t)) {
+              <span class="tag tag-danger">{{ 'transfer.late' | translate }}</span>
+            }
             @if (t.shortLines) {
               <small class="danger-text"> {{ 'transfer.short' | translate: { n: t.shortLines } }}</small>
             }

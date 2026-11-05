@@ -10,6 +10,7 @@ import { MyBusiness } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
 import { NotifyService } from '../../core/notify.service';
+import { PlatformService } from '../../core/platform.service';
 import { FieldLabel } from '../../shared/field-label/field-label';
 import { revealErrors } from '../../shared/forms';
 
@@ -31,6 +32,8 @@ export class CreateBusinessDialog {
   private readonly lang = inject(LangService);
   private readonly translate = inject(TranslateService);
   private readonly notify = inject(NotifyService);
+  protected readonly platform = inject(PlatformService);
+
 
   protected readonly busy = signal(false);
   /** Business types in the current language. */
@@ -43,6 +46,10 @@ export class CreateBusinessDialog {
     nameKm: ['', Validators.maxLength(120)],
     businessType: ['MINI_MART', Validators.required],
   });
+
+  constructor() {
+    this.platform.load();
+  }
 
   protected submit(): void {
     if (this.form.invalid) {

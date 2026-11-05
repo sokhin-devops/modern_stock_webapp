@@ -83,6 +83,9 @@
           }
         </div>
       }
+      @if (d.notice) {
+        <p class="notice small">{{ d.notice }}</p>
+      }
       @if (d.note) {
         <p class="note small">{{ d.note }}</p>
       }

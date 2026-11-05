@@ -9,7 +9,7 @@ import { Popover } from 'primeng/popover';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
 
-import { ALERT_TARGETS, AlertsService } from '../../core/alerts.service';
+import { ALERT_TARGETS, AlertsService, alertQuery } from '../../core/alerts.service';
 import { MyBusiness } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
@@ -39,6 +39,7 @@ export class AppTopbar {
   protected readonly theme = inject(ThemeModeService);
   protected readonly alerts = inject(AlertsService);
   protected readonly targets = ALERT_TARGETS;
+  protected readonly queryOf = alertQuery;
   private readonly screen = inject(ScreenService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);

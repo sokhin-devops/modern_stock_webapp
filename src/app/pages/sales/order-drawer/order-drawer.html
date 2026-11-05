@@ -109,6 +109,11 @@
         <button pButton type="button" [outlined]="true" (click)="print()">
           <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
         </button>
+        @if (proformaOk()) {
+          <button pButton type="button" [outlined]="true" (click)="print(true)">
+            <i class="pi pi-file" pButtonIcon></i><span pButtonLabel>{{ 'print.proforma' | translate }}</span>
+          </button>
+        }
         @if (quotation(); as q) {
           @if (canManage() && (q.status === 'DRAFT' || q.status === 'SENT' || q.status === 'EXPIRED')) {
             <button pButton type="button" [outlined]="true" (click)="startEdit()" [disabled]="busy()">

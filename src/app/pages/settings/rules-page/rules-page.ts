@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormsModule, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -17,6 +17,12 @@ import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { ImageField } from '../../../shared/image-field/image-field';
 import { revealErrors } from '../../../shared/forms';
+
+/** The near-expiry windows must grow: 30 < 60 < 90. */
+function growing(group: AbstractControl): ValidationErrors | null {
+  const { expiry1, expiry2, expiry3 } = group.getRawValue() as { expiry1: number; expiry2: number; expiry3: number };
+  return expiry1 == null || expiry2 == null || expiry3 == null || (expiry1 < expiry2 && expiry2 < expiry3) ? null : { expiryOrder: true };
+}
 
 /**
  * "Tax and receipt" and "Sales rules" (prototype tax.html, sales-rules.html): two views of the business settings
@@ -56,7 +62,11 @@ export class RulesPage {
     receiptShowVatTin: [true],
     khqrEnabled: [true],
     bankEnabled: [true],
-  });
+    // Near expiry (FR-7.10): three windows in days, each longer than the one before
+    expiry1: [30, [Validators.required, Validators.min(1), Validators.max(365)]],
+    expiry2: [60, [Validators.required, Validators.min(1), Validators.max(365)]],
+    expiry3: [90, [Validators.required, Validators.min(1), Validators.max(365)]],
+  }, { validators: growing });
   protected readonly papers = [
     { value: 80, label: '80 mm' },
     { value: 58, label: '58 mm' },
@@ -68,7 +78,8 @@ export class RulesPage {
   constructor() {
     this.api.get<BusinessSettings>('/business/settings').subscribe({
       next: (s) => {
-        this.form.reset({ ...s, receiptFooter: s.receiptFooter ?? '', receiptHeader: s.receiptHeader ?? '' });
+        const [expiry1, expiry2, expiry3] = s.expiryDays;
+        this.form.reset({ ...s, receiptFooter: s.receiptFooter ?? '', receiptHeader: s.receiptHeader ?? '', expiry1, expiry2, expiry3 });
         this.khqrUrl.set(s.khqrImageUrl);
         if (!this.business.can('business:manage')) {
           this.form.disable();
@@ -105,9 +116,14 @@ export class RulesPage {
       revealErrors(this.form);
       return;
     }
-    const v = this.form.getRawValue();
+    const { expiry1, expiry2, expiry3, ...v } = this.form.getRawValue();
     this.busy.set(true);
-    const body = { ...v, receiptFooter: v.receiptFooter.trim() || null, receiptHeader: v.receiptHeader.trim() || null };
+    const body = {
+      ...v,
+      receiptFooter: v.receiptFooter.trim() || null,
+      receiptHeader: v.receiptHeader.trim() || null,
+      expiryDays: [expiry1, expiry2, expiry3],
+    };
     this.api.put<BusinessSettings>('/business/settings', body).subscribe({
       next: () => {
         this.busy.set(false);

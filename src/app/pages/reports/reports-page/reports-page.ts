@@ -154,9 +154,10 @@ export class ReportsPage {
     this.report();
     return new Date();
   });
-  protected readonly days = linkedSignal<30 | 60 | 90>(() => {
+  /** A near-expiry window picked here or in the link; null = the business's first one (FR-7.10). */
+  protected readonly days = linkedSignal<number | null>(() => {
     const days = Number(this.query().get('days'));
-    return days === 60 || days === 90 ? days : 30;
+    return days > 0 ? days : null;
   });
   protected readonly categoryId = signal<number | null>(null);
   protected readonly slowDays = signal<30 | 60 | 90 | 180>(60);
@@ -177,7 +178,14 @@ export class ReportsPage {
   protected readonly byOptions = computed(() =>
     (this.report()?.id === 'gross-profit' ? GROSS_BY : SALES_BY).map((value) => ({ value, label: 'reports.by.' + value })),
   );
-  protected readonly dayOptions = [30, 60, 90].map((value) => ({ value, label: 'reports.withinDays' }));
+  /** The business's windows, from the last expiry report (kept while the next one loads). */
+  protected readonly dayOptions = linkedSignal<ExpiryReport | undefined, { value: number; label: string }[]>({
+    source: () => this.expiry(),
+    computation: (report, previous) =>
+      report?.windows.map((value) => ({ value, label: 'reports.withinDays' })) ??
+      previous?.value ??
+      [30, 60, 90].map((value) => ({ value, label: 'reports.withinDays' })),
+  });
   protected readonly categoryOptions = computed(() =>
     this.catalog.categories().map((c) => ({ value: c.id, label: this.lang.name(c.nameEn, c.nameKm) })),
   );
@@ -196,7 +204,7 @@ export class ReportsPage {
       if (r.id === 'sales' || r.id === 'gross-profit') {
         filters['by'] = this.by();
       }
-      if (r.id === 'expiry') {
+      if (r.id === 'expiry' && this.days()) {
         filters['days'] = this.days();
       }
       if (r.id === 'stock-on-hand') {

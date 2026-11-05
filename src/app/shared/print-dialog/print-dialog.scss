@@ -109,6 +109,13 @@
   margin-top: 16px;
 }
 
+.notice {
+  margin-top: 16px;
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+
 .signatures {
   display: grid;
   grid-template-columns: 1fr 1fr;

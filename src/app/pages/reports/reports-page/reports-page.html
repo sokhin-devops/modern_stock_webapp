@@ -82,7 +82,7 @@
               </p-selectbutton>
             }
             @if (r.id === 'expiry') {
-              <p-selectbutton [options]="dayOptions" optionValue="value" [ngModel]="days()" (ngModelChange)="days.set($event)"
+              <p-selectbutton [options]="dayOptions()" optionValue="value" [ngModel]="days() ?? expiry()?.days" (ngModelChange)="days.set($event)"
                               [allowEmpty]="false" size="small" [ariaLabel]="'reports.withinDays' | translate: { n: '' }">
                 <ng-template #item let-o>{{ o.label | translate: { n: o.value } }}</ng-template>
               </p-selectbutton>

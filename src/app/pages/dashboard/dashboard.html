@@ -59,10 +59,10 @@
           <div class="kpi-sub">{{ (s.lowStockItems === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
         </a>
         <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'expiry' }">
-          <div class="kpi-label"><i class="icon pi pi-calendar-times"></i>{{ 'dashboard.expiring' | translate }}</div>
-          <div class="kpi-value">{{ s.expiringIn30Days }}</div>
+          <div class="kpi-label"><i class="icon pi pi-calendar-times"></i>{{ 'dashboard.expiring' | translate: { n: s.expiringDays } }}</div>
+          <div class="kpi-value">{{ s.expiringSoon }}</div>
           <div class="kpi-sub">
-            {{ (s.expiringIn30Days === 1 ? 'dashboard.batch' : 'dashboard.batches') | translate }}
+            {{ (s.expiringSoon === 1 ? 'dashboard.batch' : 'dashboard.batches') | translate }}
             @if (s.expiredBatches) {
               · <span class="danger-text">{{ 'dashboard.expired' | translate: { n: s.expiredBatches } }}</span>
             }

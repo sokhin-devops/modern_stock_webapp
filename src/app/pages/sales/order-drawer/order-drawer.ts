@@ -25,7 +25,8 @@ interface Customer {
 /**
  * One quotation or sales order (FR-3.10, FR-3.11): who, what, at what prices, and where it stands. A quotation is sent,
  * declined or made into a sales order; an order is delivered (all or part, each delivery with its invoice), closed
- * early or cancelled. Both print as an A4 document to give the customer.
+ * early or cancelled. Both print as an A4 document to give the customer, or as a proforma invoice (FR-3.18) when the
+ * customer pays before delivery: it asks for the money and is not a tax invoice.
  */
 @Component({
   selector: 'ms-order-drawer',
@@ -53,6 +54,12 @@ export class OrderDrawer {
   protected readonly order = computed(() => {
     const v = this.view();
     return v?.kind === 'order' ? v.doc : null;
+  });
+  /** A proforma invoice asks for money before delivery: from a quotation still open, or an order still to deliver. */
+  protected readonly proformaOk = computed(() => {
+    const q = this.quotation();
+    const o = this.order();
+    return q ? q.status === 'DRAFT' || q.status === 'SENT' : !!o && (o.status === 'CONFIRMED' || o.status === 'PARTIALLY_DELIVERED');
   });
   protected readonly nothingDelivered = computed(() => this.order()?.lines.every((l) => l.qtyDelivered === 0) ?? false);
   protected readonly busy = signal(false);
@@ -111,7 +118,7 @@ export class OrderDrawer {
 
   // ---------------------------------------------------------------- print
 
-  protected print(): void {
+  protected print(proforma = false): void {
     const v = this.view();
     if (!v) {
       return;
@@ -132,7 +139,7 @@ export class OrderDrawer {
     });
     const show = (partyLines: string[]) => {
       this.printDoc.set({
-        title: t(v.kind === 'quotation' ? 'print.quotation' : 'print.salesOrder'),
+        title: t(proforma ? 'print.proforma' : v.kind === 'quotation' ? 'print.quotation' : 'print.salesOrder'),
         number: d.number,
         date: v.kind === 'quotation' ? v.doc.quoteDate : v.doc.orderDate,
         facts,
@@ -151,6 +158,7 @@ export class OrderDrawer {
         ],
         signatures: false,
         note: d.note,
+        notice: proforma ? t('print.proformaNotice') : undefined,
       });
       this.printOpen.set(true);
     };

@@ -1,4 +1,4 @@
-<ms-auth-frame [title]="'auth.signUpTitle' | translate" [sub]="'auth.signUpLead' | translate">
+<ms-auth-frame [title]="'auth.signUpTitle' | translate" [sub]="'auth.signUpLead' | translate: { days: platform.trialDays() }">
   @if (sent(); as sent) {
     <div class="check-email" role="status">
       <span class="big-icon"><i class="icon pi pi-envelope"></i></span>

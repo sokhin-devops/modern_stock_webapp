@@ -76,10 +76,10 @@
   <div class="notifications">
     <b>{{ 'shell.notifications' | translate }}</b>
     @for (a of alerts.alerts(); track a.kind) {
-      <a class="alert-row" [class]="'level-' + a.level" [routerLink]="targets[a.kind].link" [queryParams]="targets[a.kind].query"
+      <a class="alert-row" [class]="'level-' + a.level" [routerLink]="targets[a.kind].link" [queryParams]="queryOf(a)"
          (click)="notifications.hide()">
         <i class="icon" [class]="targets[a.kind].icon"></i>
-        <span class="grow">{{ 'alerts.' + a.kind | translate: { n: a.count } }}</span>
+        <span class="grow">{{ 'alerts.' + a.kind | translate: { n: a.count, days: a.days } }}</span>
         <i class="icon pi pi-chevron-right chev"></i>
       </a>
     } @empty {
