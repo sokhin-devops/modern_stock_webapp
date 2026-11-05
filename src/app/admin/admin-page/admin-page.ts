@@ -4,16 +4,21 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { TableModule } from 'primeng/table';
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 
 import { ApiService } from '../../core/api/api.service';
 import { SubscriptionStatus } from '../../core/api/models';
 import { NotifyService } from '../../core/notify.service';
+import { AdminAccounts } from '../admin-accounts/admin-accounts';
+import { AdminMessages } from '../admin-messages/admin-messages';
+import { AdminPlans } from '../admin-plans/admin-plans';
+import { AdminTransfers } from '../admin-transfers/admin-transfers';
 
 interface BusinessRow {
   id: number;
   nameEn: string;
   nameKm: string | null;
-  status: string;
+  status: 'SETTING_UP' | 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
   createdAt: string;
   ownerEmail: string | null;
   members: number;
@@ -25,15 +30,24 @@ interface BusinessRow {
   pastDueSince: string | null;
   cancelAtPeriodEnd: boolean;
   openInvoiceAmount: number | null;
+  billingCycle: 'MONTHLY' | 'YEARLY' | null;
+  /** Active add-ons, e.g. "Extra branch ×2". */
+  addons: string | null;
 }
 
+type AdminTab = 'businesses' | 'accounts' | 'transfers' | 'plans' | 'messages';
+
 /**
- * Platform admin (PLAIN.md M8), for super admins: every business with its plan and billing status, and the demo
- * controls that show a whole month of billing in two minutes (FR-8.7): End trial now, Run renewal now.
+ * Platform admin (PLAIN.md M8, FR-8.1 to FR-8.7), for super admins: businesses with their plan (suspend, reactivate, and
+ * the demo controls End trial now / Run renewal now), accounts, bank transfers to approve, plans and add-ons, and the
+ * website's contact messages.
  */
 @Component({
   selector: 'ms-admin-page',
-  imports: [TranslatePipe, DatePipe, CurrencyPipe, TableModule, ButtonDirective, ButtonLabel],
+  imports: [
+    TranslatePipe, DatePipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, ButtonDirective, ButtonLabel,
+    AdminAccounts, AdminTransfers, AdminPlans, AdminMessages,
+  ],
   templateUrl: './admin-page.html',
   styleUrl: './admin-page.scss',
 })
@@ -43,6 +57,7 @@ export class AdminPage {
   private readonly confirm = inject(ConfirmationService);
   private readonly translate = inject(TranslateService);
 
+  protected readonly tab = signal<AdminTab>('businesses');
   protected readonly rows = signal<BusinessRow[]>([]);
   protected readonly loading = signal(true);
   protected readonly busy = signal<number | null>(null);
@@ -57,6 +72,20 @@ export class AdminPage {
 
   protected runRenewal(row: BusinessRow): void {
     this.control(row, 'run-renewal', row.subscriptionStatus === 'PAST_DUE' ? 'admin.expireAsk' : 'admin.renewAsk');
+  }
+
+  /** FR-8.2: a suspended business can't be opened by its members; nothing is deleted. */
+  protected suspend(row: BusinessRow): void {
+    this.control(row, row.status === 'SUSPENDED' ? 'reactivate' : 'suspend',
+      row.status === 'SUSPENDED' ? 'admin.reactivateBusinessAsk' : 'admin.suspendBusinessAsk');
+  }
+
+  /** Demo control (FR-10.15): sends today's billing reminders now. */
+  protected sendReminders(): void {
+    this.api.post<number>('/admin/billing/reminders').subscribe({
+      next: (n) => this.notify.showKey('admin.remindersSent', { n }),
+      error: (e) => this.notify.error(e),
+    });
   }
 
   private control(row: BusinessRow, action: string, ask: string): void {

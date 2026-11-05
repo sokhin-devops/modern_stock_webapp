@@ -10,6 +10,8 @@ import { ApiFilePipe } from '../api-file.pipe';
 
 /** A document to print on A4: an invoice, a delivery note... Texts come translated, amounts formatted. */
 export interface PrintDocument {
+  /** Who issues it, when not the business itself (ModernStock on billing invoices); the business letterhead otherwise. */
+  issuer?: { name: string; lines: string[] };
   title: string;
   number: string;
   date: string;
@@ -20,6 +22,8 @@ export interface PrintDocument {
   partyLines: string[];
   /** Columns after the product: quantity always; price and amount for money documents. */
   withPrices: boolean;
+  /** Heading of the first column; "Product" by default. */
+  itemLabel?: string;
   lines: { name: string; qty: number; unit: string; price?: number; total?: number }[];
   totals: { label: string; value: string; strong?: boolean }[];
   /** "Delivered by" and "Received by" lines to sign (delivery notes). */

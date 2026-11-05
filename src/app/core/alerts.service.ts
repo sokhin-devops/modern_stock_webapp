@@ -6,7 +6,7 @@ import { BusinessService } from './business/business.service';
 
 export type AlertKind =
   | 'PAYMENT_DUE' | 'EXPIRED' | 'OVERDUE_BILLS' | 'TRIAL_ENDING' | 'LOW_STOCK' | 'EXPIRING_30' | 'OVERDUE_INVOICES'
-  | 'APPROVALS' | 'TO_RECEIVE' | 'COUNTS_OPEN' | 'COUNTS_TO_APPROVE' | 'EXPIRING_60' | 'EXPIRING_90' | 'RATE_MISSING';
+  | 'APPROVALS' | 'TO_RECEIVE' | 'COUNTS_OPEN' | 'COUNTS_TO_APPROVE' | 'RENEWAL_SOON' | 'EXPIRING_60' | 'EXPIRING_90' | 'RATE_MISSING';
 
 export interface Alert {
   kind: AlertKind;
@@ -18,6 +18,7 @@ export interface Alert {
 export const ALERT_TARGETS: Record<AlertKind, { icon: string; link: string; query?: Params }> = {
   PAYMENT_DUE: { icon: 'pi pi-credit-card', link: '/settings/billing' },
   TRIAL_ENDING: { icon: 'pi pi-star', link: '/settings/billing' },
+  RENEWAL_SOON: { icon: 'pi pi-calendar-clock', link: '/settings/billing' },
   EXPIRED: { icon: 'pi pi-ban', link: '/reports', query: { r: 'expiry' } },
   OVERDUE_BILLS: { icon: 'pi pi-receipt', link: '/reports', query: { r: 'supplier-debt' } },
   LOW_STOCK: { icon: 'pi pi-arrow-down', link: '/reports', query: { r: 'reorder' } },

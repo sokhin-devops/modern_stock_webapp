@@ -1,0 +1,41 @@
+// Shared by the admin tabs: each fills its tab panel, with its table taking the height left.
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.search {
+  width: min(320px, 100%);
+
+  input {
+    width: 100%;
+  }
+}
+
+.tag {
+  margin-inline-start: 6px;
+}
+
+.actions-col {
+  width: 240px;
+  text-align: end;
+
+  .p-button {
+    white-space: nowrap;
+  }
+}
+
+.small {
+  font-size: 12px;
+}
+
+.section-title {
+  margin: 8px 0 12px;
+}
+
+.lead {
+  margin: 0 0 12px;
+  font-size: inherit;
+}

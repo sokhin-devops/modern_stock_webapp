@@ -1,0 +1,156 @@
+<div class="scroll">
+  <h3 class="section-title">{{ 'admin.plans.plans' | translate }}</h3>
+  <p class="muted lead">{{ 'admin.plans.lead' | translate }}</p>
+  <section class="card table-card">
+    <p-table class="ms-table" [value]="plans()" dataKey="id" [rowHover]="true">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'admin.plan' | translate }}</th>
+          <th class="num">{{ 'admin.plans.priceMonth' | translate }}</th>
+          <th class="num">{{ 'admin.plans.priceYear' | translate }}</th>
+          @for (k of counts; track k) {
+            <th class="num">{{ 'dashboard.limit.' + k | translate }}</th>
+          }
+          <th>{{ 'admin.plans.features' | translate }}</th>
+          <th class="num">{{ 'admin.plans.subscribers' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-p>
+        <tr class="clickable" tabindex="0" (click)="editPlan(p)" (keydown.enter)="editPlan(p)">
+          <td><span class="strong">{{ p.name }}</span>@if (!p.publicPlan) { <span class="tag">{{ 'admin.plans.hidden' | translate }}</span> }</td>
+          <td class="num">{{ p.priceMonthly | currency: 'USD' }}</td>
+          <td class="num">{{ p.priceYearly | currency: 'USD' }}</td>
+          @for (k of counts; track k) {
+            <td class="num">{{ p.limits[k] != null ? (p.limits[k] | number) : ('dashboard.unlimited' | translate) }}</td>
+          }
+          <td>
+            @for (f of features; track f) {
+              @if (p.limits[f] !== 0) {
+                <span class="tag">{{ 'settings.billing.limit.' + f | translate }}</span>
+              }
+            }
+          </td>
+          <td class="num">{{ p.subscriptions }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+
+  <h3 class="section-title">{{ 'admin.plans.addons' | translate }}</h3>
+  <section class="card table-card">
+    <p-table class="ms-table" [value]="addons()" dataKey="id" [rowHover]="true">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'admin.plans.addon' | translate }}</th>
+          <th>{{ 'admin.plans.adds' | translate }}</th>
+          <th class="num">{{ 'admin.plans.priceMonth' | translate }}</th>
+          <th class="num">{{ 'admin.plans.inUse' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-a>
+        <tr class="clickable" tabindex="0" (click)="editAddon(a)" (keydown.enter)="editAddon(a)">
+          <td>
+            <span class="strong">{{ a.name }}</span>@if (!a.active) { <span class="tag">{{ 'admin.plans.off' | translate }}</span> }
+            @if (a.nameKm) { <div class="muted small">{{ a.nameKm }}</div> }
+          </td>
+          <td class="muted">
+            @if (counts.includes(a.limitKey)) {
+              +{{ a.quantity | number }} {{ (a.quantity === 1 ? 'settings.billing.limitOne.' : 'settings.billing.limit.') + a.limitKey | translate }}
+            } @else {
+              {{ 'settings.billing.limit.' + a.limitKey | translate }}
+            }
+          </td>
+          <td class="num">{{ a.priceMonthly | currency: 'USD' }}</td>
+          <td class="num">{{ a.inUse }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog [visible]="!!plan()" (visibleChange)="!$event && plan.set(null)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [style]="{ width: 'min(560px, 96vw)' }" [header]="plan()?.name ?? ''">
+  @if (plan(); as p) {
+    <div class="ms-form dialog-form">
+      <div class="ms-field">
+        <label msLabel for="pl-name" required>{{ 'admin.plans.name' | translate }}</label>
+        <input pInputText id="pl-name" [ngModel]="p.name" (ngModelChange)="setPlan('name', $event)" maxlength="60" />
+      </div>
+      <div class="ms-form-row">
+        <div class="ms-field">
+          <label msLabel for="pl-month">{{ 'admin.plans.priceMonth' | translate }}</label>
+          <p-inputnumber inputId="pl-month" [ngModel]="p.priceMonthly" (ngModelChange)="setPlan('priceMonthly', $event)" mode="currency"
+                         currency="USD" locale="en-US" [min]="0" [disabled]="p.code === 'FREE'" [fluid]="true" />
+        </div>
+        <div class="ms-field">
+          <label msLabel for="pl-year" optional>{{ 'admin.plans.priceYear' | translate }}</label>
+          <p-inputnumber inputId="pl-year" [ngModel]="p.priceYearly" (ngModelChange)="setPlan('priceYearly', $event)" mode="currency"
+                         currency="USD" locale="en-US" [min]="0" [disabled]="p.code === 'FREE'" [fluid]="true" />
+        </div>
+      </div>
+      <div class="ms-form-row three">
+        @for (k of counts; track k) {
+          <div class="ms-field">
+            <label msLabel [for]="'pl-' + k" optional>{{ 'dashboard.limit.' + k | translate }}</label>
+            <p-inputnumber [inputId]="'pl-' + k" [ngModel]="p.limits[k]" (ngModelChange)="setLimit(k, $event)" [min]="0" [fluid]="true"
+                           [placeholder]="'dashboard.unlimited' | translate" />
+          </div>
+        }
+      </div>
+      @for (f of features; track f) {
+        <div class="ms-check">
+          <p-toggleswitch [inputId]="'pl-' + f" [ngModel]="p.limits[f] !== 0" (ngModelChange)="setLimit(f, $event ? 1 : 0)" />
+          <label [for]="'pl-' + f">{{ 'settings.billing.limit.' + f | translate }}</label>
+        </div>
+      }
+      <div class="ms-check">
+        <p-toggleswitch inputId="pl-public" [ngModel]="p.publicPlan" (ngModelChange)="setPlan('publicPlan', $event)" />
+        <label for="pl-public">{{ 'admin.plans.public' | translate }}</label>
+      </div>
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="plan.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="savePlan()" [loading]="busy()" [disabled]="busy() || !plan()?.name"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [visible]="!!addon()" (visibleChange)="!$event && addon.set(null)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [style]="{ width: 'min(460px, 96vw)' }" [header]="addon()?.name ?? ''">
+  @if (addon(); as a) {
+    <div class="ms-form dialog-form">
+      <div class="ms-form-row">
+        <div class="ms-field">
+          <label msLabel for="ad-name" required>{{ 'admin.plans.nameEn' | translate }}</label>
+          <input pInputText id="ad-name" [ngModel]="a.name" (ngModelChange)="setAddon('name', $event)" maxlength="60" />
+        </div>
+        <div class="ms-field">
+          <label msLabel for="ad-name-km" optional>{{ 'admin.plans.nameKm' | translate }}</label>
+          <input pInputText id="ad-name-km" [ngModel]="a.nameKm" (ngModelChange)="setAddon('nameKm', $event)" maxlength="60" />
+        </div>
+      </div>
+      <div class="ms-form-row">
+        @if (counts.includes(a.limitKey)) {
+          <div class="ms-field">
+            <label msLabel for="ad-qty">{{ 'admin.plans.adds' | translate }}</label>
+            <p-inputnumber inputId="ad-qty" [ngModel]="a.quantity" (ngModelChange)="setAddon('quantity', $event)" [min]="1" [fluid]="true"
+                           [suffix]="' ' + ((a.quantity === 1 ? 'settings.billing.limitOne.' : 'settings.billing.limit.') + a.limitKey | translate)" />
+          </div>
+        }
+        <div class="ms-field">
+          <label msLabel for="ad-price">{{ 'admin.plans.priceMonth' | translate }}</label>
+          <p-inputnumber inputId="ad-price" [ngModel]="a.priceMonthly" (ngModelChange)="setAddon('priceMonthly', $event)" mode="currency"
+                         currency="USD" locale="en-US" [min]="0" [fluid]="true" />
+        </div>
+      </div>
+      <div class="ms-check">
+        <p-toggleswitch inputId="ad-active" [ngModel]="a.active" (ngModelChange)="setAddon('active', $event)" />
+        <label for="ad-active">{{ 'admin.plans.forSale' | translate }}</label>
+      </div>
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="addon.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="saveAddon()" [loading]="busy()" [disabled]="busy() || !addon()?.name"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+  </ng-template>
+</p-dialog>

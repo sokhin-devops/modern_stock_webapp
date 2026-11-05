@@ -1,0 +1,38 @@
+<div class="toolbar">
+  <p-selectbutton [options]="filters" optionValue="value" [ngModel]="filter()" (ngModelChange)="setFilter($event)" [allowEmpty]="false">
+    <ng-template #item let-option>{{ option.label | translate }}</ng-template>
+  </p-selectbutton>
+</div>
+<div class="messages">
+  @for (m of rows(); track m.id) {
+    <article class="card message" [class.new]="m.status === 'NEW'">
+      <header>
+        <div>
+          <b>{{ m.name }}</b>
+          <div class="muted small">
+            @if (m.phone) { <a [href]="'tel:' + m.phone">{{ m.phone }}</a> }
+            @if (m.phone && m.email) { · }
+            @if (m.email) { <a [href]="'mailto:' + m.email">{{ m.email }}</a> }
+          </div>
+        </div>
+        <div class="when">
+          <span class="tag" [class.tag-primary]="m.status === 'NEW'">{{ 'admin.message.' + m.status | translate }}</span>
+          <small class="muted">{{ m.createdAt | date: 'dd/MM/yyyy HH:mm' }} · {{ m.language === 'km' ? 'ខ្មែរ' : 'English' }}</small>
+        </div>
+      </header>
+      <p class="text">{{ m.message }}</p>
+      <footer>
+        @if (m.status === 'NEW') {
+          <button pButton type="button" size="small" [text]="true" (click)="mark(m, 'READ')"><span pButtonLabel>{{ 'admin.message.markRead' | translate }}</span></button>
+        }
+        @if (m.status !== 'DONE') {
+          <button pButton type="button" size="small" [outlined]="true" (click)="mark(m, 'DONE')"><span pButtonLabel>{{ 'admin.message.markDone' | translate }}</span></button>
+        } @else {
+          <button pButton type="button" size="small" [text]="true" (click)="mark(m, 'NEW')"><span pButtonLabel>{{ 'admin.message.reopen' | translate }}</span></button>
+        }
+      </footer>
+    </article>
+  } @empty {
+    <p class="muted empty">{{ (loading() ? 'common.loading' : 'admin.message.none') | translate }}</p>
+  }
+</div>

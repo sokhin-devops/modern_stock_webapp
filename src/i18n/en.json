@@ -738,7 +738,10 @@
       "onFree": "You are on Free. Extra branches are read-only and extra members are switched off until you subscribe. Nothing was deleted.",
       "proTrial": "Pro trial",
       "trialEndsLeft": "Ends {{date}} · {{days}} days left",
-      "afterTrial": "After the trial: {{plan}}, {{price}} a month. The first invoice comes when the trial ends.",
+      "afterTrial": {
+        "MONTHLY": "After the trial: {{plan}}, {{price}} a month. The first invoice comes when the trial ends.",
+        "YEARLY": "After the trial: {{plan}}, {{price}} a year. The first invoice comes when the trial ends."
+      },
       "dontRenew": "Don't continue after the trial",
       "trialChoose": "Choose a plan below to keep going after the trial. Without one, the business moves to Free; nothing is deleted.",
       "endsOn": "Ends {{date}}",
@@ -770,7 +773,8 @@
       "kind": {
         "NEW": "new plan",
         "RENEWAL": "renewal",
-        "UPGRADE": "upgrade"
+        "UPGRADE": "upgrade",
+        "ADDON": "add-on"
       },
       "invoice": {
         "OPEN": "To pay",
@@ -789,7 +793,7 @@
       "payDemo": "Pay (demo)",
       "chosenToast": "{{plan}} is chosen. The first invoice comes on {{date}}, when the trial ends.",
       "upgradeTitle": "Upgrade",
-      "upgradeAsk": "Upgrade to {{plan}} for ${{price}} a month? A new month starts today once you pay.",
+      "upgradeAsk": "Upgrade to {{plan}} now? You pay only the difference for the days left until {{date}}. After that it renews at the {{plan}} price.",
       "downgradeTitle": "Downgrade",
       "downgradeAsk": "Change to {{plan}} on {{date}}, at the end of this period? You keep your current plan until then.",
       "cancelTitle": "Cancel plan",
@@ -799,6 +803,63 @@
         "branches": "branch",
         "members": "member",
         "products": "product"
+      },
+      "perYear": "/ year",
+      "yearSaves": "Save {{amount}} a year",
+      "switchTo": {
+        "MONTHLY": "Pay monthly",
+        "YEARLY": "Pay yearly"
+      },
+      "cycleFrom": {
+        "MONTHLY": "From {{date}} you pay monthly.",
+        "YEARLY": "From {{date}} you pay yearly."
+      },
+      "keepCycle": "Keep it as it is",
+      "cycleToast": "Saved. The change starts on {{date}}, at the end of this period.",
+      "addons": "Add-ons",
+      "addonsLead": "Add more without changing plan. You pay for the days left in this period, then each add-on renews with the plan.",
+      "addonsNeedPlan": "Add-ons need an active paid plan.",
+      "addonAdd": "Add",
+      "addonQty": "How many",
+      "addonLead": "{{price}} each billing period, renewed with your plan. Today you pay only for the days left until {{date}}.",
+      "addonUnpaid": "Waiting for payment",
+      "addonEnding": "Ends {{date}}",
+      "addonOn": "On",
+      "addonKeep": "Keep",
+      "addonRemove": "Remove",
+      "addonRemoveTitle": "Remove add-on",
+      "addonRemoveAsk": "Remove {{name}}? It stays until {{date}} and is not renewed.",
+      "addonRemoveNowAsk": "Remove {{name}}? It is not paid yet, so it goes now and its invoice is voided.",
+      "addonIncluded": "Included in your plan",
+      "payCard": "Card",
+      "payTransfer": "Bank transfer",
+      "transferLead": "Send {{amount}} to this account from your bank app, then add a screenshot of the transfer. We check it and switch it on, usually within a working day.",
+      "bank": "Paid from",
+      "otherBank": "Other bank",
+      "screenshot": "Screenshot of the transfer in your bank app",
+      "sendTransfer": "Send",
+      "transferSending": "Sending…",
+      "transferSent": "Sent. We will check the transfer and let you know here.",
+      "transferWaiting": "We are checking your transfer for invoice {{number}}",
+      "transferWaitingLead": "This usually takes less than a working day. There is nothing else to do.",
+      "transferRejected": "The transfer was not accepted: {{reason}}",
+      "transferPendingTag": "Checking",
+      "keepOpen": "What stays on",
+      "keepTitle": "What stays on with fewer places",
+      "keepLead": "When your plan allows fewer branches or members, the ones ticked here stay on. Other branches become read-only and other members are switched off. Nothing is deleted.",
+      "keepCount": "{{n}} of {{of}} ticked",
+      "keepAlways": "Always on",
+      "readOnly": "Read-only now",
+      "switchedOff": "Switched off now",
+      "print": {
+        "invoice": "Billing invoice",
+        "receipt": "Receipt",
+        "invoiceDate": "Invoice date",
+        "paidBy": "Paid by",
+        "item": "Description",
+        "toPay": "To pay",
+        "voidNote": "This invoice is void. Nothing is owed on it.",
+        "demo": "Card (demo)"
       }
     },
     "receipt": {
@@ -1294,7 +1355,8 @@
     "RATE_MISSING": "Today's exchange rate is not set yet",
     "PAYMENT_DUE": "A billing invoice is waiting to be paid",
     "TRIAL_ENDING": "Your Pro trial ends within 7 days",
-    "COUNTS_TO_APPROVE": "{{n}} stock counts wait for your approval"
+    "COUNTS_TO_APPROVE": "{{n}} stock counts wait for your approval",
+    "RENEWAL_SOON": "Your plan renews within 7 days"
   },
   "admin": {
     "title": "Platform admin",
@@ -1302,7 +1364,7 @@
     "business": "Business",
     "owner": "Owner",
     "size": "Size",
-    "sizeValue": "Branches: {{branches}} · members: {{members}}",
+    "sizeValue": "Branches: {{branches}} · Members: {{members}}",
     "plan": "Plan",
     "until": "Until",
     "demo": "Demo controls",
@@ -1317,7 +1379,87 @@
     "renewAsk": "End the billing period of {{name}} now? A renewal invoice is made (or it moves to Free after a cancel).",
     "expireAsk": "Treat the 7 past-due days of {{name}} as over? Its plan expires to Free.",
     "done": "Done.",
-    "none": "No businesses yet."
+    "none": "No businesses yet.",
+    "tabBusinesses": "Businesses",
+    "tabAccounts": "Accounts",
+    "tabTransfers": "Transfers",
+    "tabPlans": "Plans",
+    "tabMessages": "Messages",
+    "sendReminders": "Send renewal reminders now",
+    "remindersSent": "{{n}} reminders sent.",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "suspendBusinessAsk": "Suspend {{name}}? Its members can no longer open it. Nothing is deleted, and you can reactivate it later.",
+    "reactivateBusinessAsk": "Reactivate {{name}}? Its members can open it again.",
+    "businessStatus": {
+      "SETTING_UP": "Setting up",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "ARCHIVED": "Archived"
+    },
+    "account": {
+      "searchPh": "Name, email or phone",
+      "name": "Name",
+      "contact": "Email / phone",
+      "status": "Status",
+      "signedUp": "Signed up",
+      "admin": "Platform admin",
+      "verified": "Verified",
+      "lastLogin": "Last signed in {{date}}",
+      "verify": "Mark verified",
+      "UNVERIFIED": "Not verified",
+      "ACTIVE": "Active",
+      "DISABLED": "Suspended",
+      "suspendAsk": "Suspend {{name}}? They are signed out everywhere and can't sign in until you reactivate the account.",
+      "reactivateAsk": "Reactivate {{name}}? They can sign in again.",
+      "verifyAsk": "Mark {{name}} as verified without the email link?"
+    },
+    "transfer": {
+      "waiting": "To check",
+      "all": "All",
+      "invoice": "Invoice",
+      "bank": "Paid from",
+      "proof": "Transfer screenshot",
+      "noProof": "The screenshot could not be loaded.",
+      "reason": "Why it is rejected",
+      "reasonPh": "Shown to the owner, e.g. the amount does not match",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "Approved. The invoice is paid.",
+      "rejected": "Rejected. The owner sees the reason.",
+      "noneWaiting": "No transfers to check.",
+      "PENDING": "To check",
+      "SUCCEEDED": "Approved",
+      "FAILED": "Rejected"
+    },
+    "plans": {
+      "plans": "Plans",
+      "lead": "Prices and limits for new invoices. Empty limit = unlimited. Free always stays at $0.",
+      "priceMonth": "Price a month",
+      "priceYear": "Price a year",
+      "features": "Features",
+      "subscribers": "Businesses",
+      "hidden": "Hidden",
+      "public": "Shown to businesses",
+      "name": "Name",
+      "addons": "Add-ons",
+      "addon": "Add-on",
+      "adds": "Adds",
+      "inUse": "In use",
+      "off": "Not for sale",
+      "forSale": "For sale",
+      "nameEn": "Name (English)",
+      "nameKm": "Name (Khmer)"
+    },
+    "message": {
+      "NEW": "New",
+      "READ": "Read",
+      "DONE": "Done",
+      "markRead": "Mark read",
+      "markDone": "Done",
+      "reopen": "Reopen",
+      "none": "No messages here."
+    }
   },
   "image": {
     "choose": "Choose a picture",
@@ -1554,7 +1696,9 @@
       "SUBSCRIBED": "Plan chosen",
       "PLAN_CHANGED": "Plan changed",
       "SUBSCRIPTION_CANCELLED": "Plan cancelled",
-      "SUBSCRIPTION_RESUMED": "Plan kept"
+      "SUBSCRIPTION_RESUMED": "Plan kept",
+      "ADDON_ADDED": "added an add-on",
+      "ADDON_REMOVED": "removed an add-on"
     },
     "types": {
       "PRODUCT": "Products",
@@ -1619,7 +1763,9 @@
       "receiptPaper": "Receipt paper (mm)",
       "receiptShowVatTin": "VAT TIN on receipts",
       "khqrEnabled": "KHQR",
-      "bankEnabled": "Bank"
+      "bankEnabled": "Bank",
+      "cycle": "Billing",
+      "quantity": "How many"
     }
   }
 }

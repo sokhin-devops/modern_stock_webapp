@@ -1,0 +1,18 @@
+// Two short tables: the page scrolls, not the tables.
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.table-card {
+  margin-bottom: 20px;
+}
+
+.dialog-form {
+  padding-top: 6px;
+}
+
+.ms-form-row.three {
+  grid-template-columns: repeat(3, 1fr);
+}

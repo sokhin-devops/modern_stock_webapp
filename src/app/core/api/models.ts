@@ -163,7 +163,9 @@ export interface Billing {
   /** Where the limits come from: PRO during the trial, FREE after a plan ends. */
   effectivePlanCode: string;
   status: SubscriptionStatus;
-  billingCycle: 'MONTHLY' | 'YEARLY';
+  billingCycle: BillingCycle;
+  /** The cycle from the next period (FR-10.13). */
+  pendingBillingCycle: BillingCycle | null;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
@@ -177,13 +179,68 @@ export interface Billing {
   /** The demo payment buttons are on. */
   demo: boolean;
   openInvoice: BillingInvoice | null;
+  openInvoices: BillingInvoice[];
   plans: PlanView[];
+  /** Add-ons for sale (FR-10.2). */
+  addons: AddonView[];
+  /** The business's add-ons, paid or waiting for their invoice. */
+  myAddons: MyAddon[];
+  /** Banks a transfer can come from (FR-10.14). */
+  banks: string[];
+  /** Where to send a bank transfer; empty = transfers are off on this server. */
+  transferAccounts: TransferAccount[];
+  /** Who issues the billing invoices (printed at the top of them). */
+  issuer: BillingIssuer;
+}
+
+export interface BillingIssuer {
+  name: string;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  vatTin: string | null;
+}
+
+export interface TransferAccount {
+  bank: string;
+  name: string;
+  number: string;
+}
+
+export type BillingCycle = 'MONTHLY' | 'YEARLY';
+
+export interface AddonView {
+  code: string;
+  name: string;
+  nameKm: string | null;
+  /** branches, members, products, or a feature key. */
+  limitKey: string;
+  /** Added to the limit for each one bought. */
+  quantity: number;
+  priceMonthly: number;
+  priceYearly: number;
+}
+
+export interface MyAddon {
+  id: number;
+  code: string;
+  name: string;
+  nameKm: string | null;
+  limitKey: string;
+  quantity: number;
+  status: 'PENDING' | 'ACTIVE' | 'ENDED';
+  /** Removed: ends with the period. */
+  removeAtPeriodEnd: boolean;
+  /** For this subscription's cycle. */
+  price: number;
 }
 
 export interface PlanView {
   code: string;
   name: string;
   priceMonthly: number;
+  /** A year: 10 months' price. */
+  priceYearly: number;
   /** null = unlimited; features are 0 or 1. */
   limits: Record<string, number | null>;
 }
@@ -192,15 +249,24 @@ export interface PlanView {
 export interface BillingInvoice {
   id: number;
   number: string;
-  kind: 'NEW' | 'RENEWAL' | 'UPGRADE';
+  kind: 'NEW' | 'RENEWAL' | 'UPGRADE' | 'ADDON';
   planCode: string;
   planName: string;
+  billingCycle: BillingCycle;
+  /** What the amount is for, e.g. "Pro, yearly + Extra branch". */
+  description: string | null;
+  /** A bank transfer waits for the super admin. */
+  transferPending: boolean;
+  /** Why the last bank transfer was rejected. */
+  transferRejected: string | null;
   periodStart: string;
   periodEnd: string;
   amount: number;
   status: 'OPEN' | 'PAID' | 'VOID';
   createdAt: string;
   paidAt: string | null;
+  /** The payment that paid it, for the receipt. */
+  paidWith: BillingPayment | null;
 }
 
 export interface BillingPayment {
@@ -211,6 +277,7 @@ export interface BillingPayment {
   amount: number;
   status: 'PENDING' | 'SUCCEEDED' | 'FAILED';
   failureReason: string | null;
+  bank: string | null;
 }
 
 /** Dashboard numbers by role (GET /dashboard, PLAIN.md 12.3); a part the member's role does not see is null. */

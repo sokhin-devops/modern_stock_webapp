@@ -169,3 +169,135 @@ h3 {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+// Plans: the title, and Monthly / Yearly on the right
+.plans-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1000px;
+  margin-top: 28px;
+
+  .plans-title {
+    margin: 0;
+  }
+}
+
+.plans {
+  margin-top: 14px;
+}
+
+.save {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.keep-btn {
+  margin-top: 8px;
+}
+
+// Add-ons: one row each, what it adds and its price, then the button
+// Not the big page lead: a line under a section title
+.lead {
+  margin: 0 0 12px;
+  font-size: inherit;
+}
+
+.addons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  max-width: 1000px;
+  margin-bottom: 8px;
+}
+
+.addon {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+
+  .addon-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .owned {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .p-button {
+    white-space: nowrap;
+  }
+}
+
+.transfer-form {
+  margin-top: 4px;
+
+  .accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    list-style: none;
+  }
+
+  .number {
+    font-variant-numeric: tabular-nums;
+    user-select: all;
+  }
+
+  input[type='file'] {
+    font: inherit;
+  }
+}
+
+.methods {
+  display: flex;
+}
+
+// What stays active when limits go down
+.keep-head {
+  margin: 16px 0 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.keep-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+
+  &.locked {
+    cursor: default;
+  }
+
+  small {
+    margin-inline-start: auto;
+  }
+}
+
+// Pay and print on an invoice row
+.row-actions {
+  white-space: nowrap;
+
+  .p-button + .p-button {
+    margin-inline-start: 4px;
+  }
+}

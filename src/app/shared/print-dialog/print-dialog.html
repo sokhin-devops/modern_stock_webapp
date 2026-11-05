@@ -3,23 +3,34 @@
   @if (doc(); as d) {
     <div class="print-doc">
       <header class="letterhead">
-        <div class="shop">
-          @if (profile()?.logoUrl; as logo) {
-            <img class="logo" [src]="logo | apiFile" alt="" />
-          }
-          <div>
-            <div class="shop-name">{{ profile()?.nameKm || profile()?.nameEn }}</div>
-            @if (profile()?.nameKm) {
-              <div>{{ profile()?.nameEn }}</div>
-            }
-            @if (branch(); as b) {
-              <div class="small">{{ lang.name(b.nameEn, b.nameKm) }}@if (b.address) { · {{ b.address }} }@if (b.phone || profile()?.phone) { · {{ b.phone || profile()?.phone }} }</div>
-            }
-            @if (profile()?.vatTin) {
-              <div class="small">{{ 'print.vatTin' | translate }}: {{ profile()?.vatTin }}</div>
-            }
+        @if (d.issuer; as issuer) {
+          <div class="shop">
+            <div>
+              <div class="shop-name">{{ issuer.name }}</div>
+              @for (line of issuer.lines; track line) {
+                <div class="small">{{ line }}</div>
+              }
+            </div>
           </div>
-        </div>
+        } @else {
+          <div class="shop">
+            @if (profile()?.logoUrl; as logo) {
+              <img class="logo" [src]="logo | apiFile" alt="" />
+            }
+            <div>
+              <div class="shop-name">{{ profile()?.nameKm || profile()?.nameEn }}</div>
+              @if (profile()?.nameKm) {
+                <div>{{ profile()?.nameEn }}</div>
+              }
+              @if (branch(); as b) {
+                <div class="small">{{ lang.name(b.nameEn, b.nameKm) }}@if (b.address) { · {{ b.address }} }@if (b.phone || profile()?.phone) { · {{ b.phone || profile()?.phone }} }</div>
+              }
+              @if (profile()?.vatTin) {
+                <div class="small">{{ 'print.vatTin' | translate }}: {{ profile()?.vatTin }}</div>
+              }
+            </div>
+          </div>
+        }
         <div class="doc-id">
           <div class="doc-title">{{ d.title }}</div>
           <div class="strong">{{ d.number }}</div>
@@ -42,7 +53,7 @@
         <thead>
           <tr>
             <th class="n">#</th>
-            <th>{{ 'common.product' | translate }}</th>
+            <th>{{ d.itemLabel ?? ('common.product' | translate) }}</th>
             <th class="num">{{ 'common.qty' | translate }}</th>
             @if (d.withPrices) {
               <th class="num">{{ 'print.price' | translate }}</th>

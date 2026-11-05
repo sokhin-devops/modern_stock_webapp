@@ -1,0 +1,30 @@
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+// The screenshot, as large as fits
+.proof {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  max-height: 55vh;
+  margin-bottom: 14px;
+  overflow: auto;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+}
