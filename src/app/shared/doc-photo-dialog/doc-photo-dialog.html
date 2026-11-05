@@ -1,0 +1,36 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [dismissableMask]="true" styleClass="ms-dialog"
+          [style]="{ width: 'min(640px, 96vw)' }" [header]="header()">
+  <div class="photo" [class.empty]="!image()">
+    @if (image(); as src) {
+      <button type="button" class="zoom" (click)="openFull()" [attr.aria-label]="'docPhoto.openFull' | translate">
+        <img [src]="src" [alt]="header()" />
+      </button>
+    } @else if (loading()) {
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+    } @else {
+      <i class="pi pi-camera big" aria-hidden="true"></i>
+      <p class="muted">{{ 'docPhoto.empty' | translate }}</p>
+    }
+  </div>
+  <small class="field-hint">{{ 'docPhoto.hint' | translate }}</small>
+
+  <ng-template #footer>
+    <div class="drawer-actions">
+      @if (image()) {
+        <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()">
+          <i class="pi pi-trash" pButtonIcon></i><span pButtonLabel>{{ 'docPhoto.remove' | translate }}</span>
+        </button>
+      }
+      <span class="spacer"></span>
+      <!-- A real file input behind a button: the camera on a phone, a file on a computer -->
+      <label class="file-btn" [class.disabled]="busy() || loading()">
+        <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" (change)="choose($event)"
+               [disabled]="busy() || loading()" [attr.aria-label]="(image() ? 'docPhoto.change' : 'docPhoto.add') | translate" />
+        <span class="p-button p-component" [class.p-button-outlined]="!!image()">
+          <i class="pi" [class.pi-spin]="busy()" [class.pi-spinner]="busy()" [class.pi-camera]="!busy()"></i>
+          &nbsp;{{ (image() ? 'docPhoto.change' : 'docPhoto.add') | translate }}
+        </span>
+      </label>
+    </div>
+  </ng-template>
+</p-dialog>
