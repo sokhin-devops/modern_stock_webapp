@@ -81,12 +81,15 @@
           </div>
         }
       }
+      @if (!canPost()) {
+        <p class="form-note"><i class="icon pi pi-clock"></i>{{ 'returns.requestNote' | translate }}</p>
+      }
     </div>
   }
   <ng-template #footer>
     <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || total() <= 0 || missingExpiry()">
-      <span pButtonLabel>{{ 'returns.save' | translate: { amount: (total() | currency: 'USD') } }}</span>
+      <span pButtonLabel>{{ (canPost() ? 'returns.save' : 'returns.request') | translate: { amount: (total() | currency: 'USD') } }}</span>
     </button>
   </ng-template>
 </p-dialog>

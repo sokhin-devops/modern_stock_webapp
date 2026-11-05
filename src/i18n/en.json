@@ -255,7 +255,9 @@
       "member:manage": "Invite and manage members, roles and reset links",
       "business:manage": "Business profile, branches, settings, Telegram",
       "billing:manage": "Plan and billing",
-      "activity:view": "Activity log"
+      "activity:view": "Activity log",
+      "sales_return:request": "Ask for sales returns (an Owner or Manager approves)",
+      "purchase_return:prepare": "Prepare purchase returns (an Owner or Manager approves)"
     }
   },
   "shell": {
@@ -373,7 +375,9 @@
     "nothingWaiting": "Nothing is waiting for you.",
     "topProducts": "Best sellers (30 days)",
     "noSales": "No sales in the last 30 days.",
-    "countsToApprove": "Counts to approve"
+    "countsToApprove": "Counts to approve",
+    "returnsToApprove": "Customer returns to approve",
+    "purchaseReturnsToApprove": "Supplier returns to approve"
   },
   "comingSoon": {
     "title": "Coming next",
@@ -550,7 +554,9 @@
     "thanks": "Thank you! Please come again.",
     "noRate": "There is no exchange rate yet. Set today's rate first.",
     "rateStale": "Today's exchange rate is not set yet: sales use the rate of {{date}}.",
-    "setRate": "Set today's rate"
+    "setRate": "Set today's rate",
+    "customerAdded": "{{name}} added.",
+    "customerPhoneHint": "Needed to sell on credit."
   },
   "partners": {
     "customers": "Customers",
@@ -1356,7 +1362,9 @@
     "PAYMENT_DUE": "A billing invoice is waiting to be paid",
     "TRIAL_ENDING": "Your Pro trial ends within 7 days",
     "COUNTS_TO_APPROVE": "{{n}} stock counts wait for your approval",
-    "RENEWAL_SOON": "Your plan renews within 7 days"
+    "RENEWAL_SOON": "Your plan renews within 7 days",
+    "RETURNS_TO_APPROVE": "{{n}} customer returns wait for your approval",
+    "PURCHASE_RETURNS_TO_APPROVE": "{{n}} supplier returns wait for your approval"
   },
   "admin": {
     "title": "Platform admin",
@@ -1524,7 +1532,26 @@
     "keptAsCredit": "Otherwise it stays as the customer's credit, for their next invoices.",
     "refundBy": "Refund by",
     "save": "Return · {{amount}}",
-    "saved": "Return {{number}} saved. Credit note {{credit}}."
+    "saved": "Return {{number}} saved. Credit note {{credit}}.",
+    "tab": "Returns",
+    "empty": "No returns yet.",
+    "from": "From",
+    "madeBy": "Made by",
+    "askedBy": "Asked by",
+    "preparedBy": "Prepared by",
+    "approvedBy": "Approved by",
+    "rejectedBy": "Rejected by",
+    "waitingCustomer": "Nothing has moved yet. Approving puts good items back in stock, makes the credit note and gives the money back as asked.",
+    "waitingSupplier": "Nothing has moved yet. Approving takes the goods out of stock and makes the supplier credit.",
+    "refundOnApproval": "Money back when approved",
+    "creditNote": "Credit note",
+    "supplierCredit": "Supplier credit",
+    "approved": "Return {{number}} approved.",
+    "rejected": "Return {{number}} rejected. Nothing moved.",
+    "requested": "Return {{number}} sent for approval.",
+    "requestNote": "An Owner or Manager approves it. Nothing changes until then; the money is given back when it is approved.",
+    "request": "Send for approval · {{amount}}",
+    "askButton": "Ask for a return"
   },
   "credits": {
     "amount": "Amount",
@@ -1585,7 +1612,10 @@
     "left": "Left as credit",
     "refundNow": "The supplier pays it back now",
     "keptAsCredit": "Otherwise it stays as credit for this supplier's next bills.",
-    "saved": "Return {{number}} saved. Supplier credit {{credit}}."
+    "saved": "Return {{number}} saved. Supplier credit {{credit}}.",
+    "prepared": "Return {{number}} sent for approval.",
+    "prepareNote": "An Owner or Manager approves it. Nothing leaves stock until then.",
+    "prepareButton": "Prepare a return"
   },
   "orders": {
     "tabQuotations": "Quotations",
@@ -1698,7 +1728,11 @@
       "SUBSCRIPTION_CANCELLED": "Plan cancelled",
       "SUBSCRIPTION_RESUMED": "Plan kept",
       "ADDON_ADDED": "added an add-on",
-      "ADDON_REMOVED": "removed an add-on"
+      "ADDON_REMOVED": "removed an add-on",
+      "SALES_RETURN_APPROVED": "Customer return approved",
+      "SALES_RETURN_REJECTED": "Customer return rejected",
+      "PURCHASE_RETURN_APPROVED": "Supplier return approved",
+      "PURCHASE_RETURN_REJECTED": "Supplier return rejected"
     },
     "types": {
       "PRODUCT": "Products",
@@ -1717,7 +1751,9 @@
       "SETTINGS": "Settings",
       "BUSINESS": "Business profile",
       "EXCHANGE_RATE": "Exchange rate",
-      "SUBSCRIPTION": "Plan and billing"
+      "SUBSCRIPTION": "Plan and billing",
+      "SALES_RETURN": "Customer returns",
+      "PURCHASE_RETURN": "Supplier returns"
     },
     "fields": {
       "nameEn": "Name (English)",

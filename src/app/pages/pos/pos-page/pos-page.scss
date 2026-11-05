@@ -32,6 +32,18 @@
   text-align: center;
 }
 
+// The customer search and, beside it, adding a new one
+.customer-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .customer-pick-field {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 .customer-option {
   display: flex;
   flex-direction: column;

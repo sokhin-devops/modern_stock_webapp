@@ -172,6 +172,18 @@
                     <span class="count">{{ w.countsToApprove }}</span>
                   </a>
                 }
+                @if (w.returnsToApprove) {
+                  <a routerLink="/customers/transactions" [queryParams]="{ tab: 'returns' }" class="waiting-row">
+                    <i class="icon pi pi-replay"></i><span class="grow">{{ 'dashboard.returnsToApprove' | translate }}</span>
+                    <span class="count">{{ w.returnsToApprove }}</span>
+                  </a>
+                }
+                @if (w.purchaseReturnsToApprove) {
+                  <a routerLink="/suppliers/transactions" [queryParams]="{ tab: 'returns' }" class="waiting-row">
+                    <i class="icon pi pi-replay"></i><span class="grow">{{ 'dashboard.purchaseReturnsToApprove' | translate }}</span>
+                    <span class="count">{{ w.purchaseReturnsToApprove }}</span>
+                  </a>
+                }
                 @if (w.countsInProgress) {
                   <a routerLink="/inventory/stock-counts" class="waiting-row">
                     <i class="icon pi pi-list-check"></i><span class="grow">{{ 'dashboard.countsOpen' | translate }}</span>

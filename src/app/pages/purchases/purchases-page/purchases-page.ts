@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Drawer } from 'primeng/drawer';
@@ -14,6 +14,7 @@ import { NotifyService } from '../../../core/notify.service';
 import { CreditDialog } from '../../../shared/credit-dialog/credit-dialog';
 import { Credit } from '../../../shared/credit-drawer/credit';
 import { CreditDrawer } from '../../../shared/credit-drawer/credit-drawer';
+import { ReturnDoc, ReturnDrawer } from '../../../shared/return-drawer/return-drawer';
 import { LazyList } from '../../../shared/lazy-list';
 import { PaymentDialog } from '../../../shared/payment-dialog/payment-dialog';
 import { PurchaseForm } from '../purchase-form/purchase-form';
@@ -79,7 +80,7 @@ interface GoodsReceipt {
   selector: 'ms-purchases-page',
   imports: [
     TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Drawer, ButtonDirective, ButtonIcon,
-    ButtonLabel, PurchaseForm, PaymentDialog, PurchaseReturnDialog, CreditDrawer, CreditDialog, Tooltip,
+    ButtonLabel, PurchaseForm, PaymentDialog, PurchaseReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, Tooltip,
   ],
   templateUrl: './purchases-page.html',
   styleUrl: './purchases-page.scss',
@@ -89,10 +90,14 @@ export class PurchasesPage {
   private readonly business = inject(BusinessService);
   private readonly notify = inject(NotifyService);
 
-  protected readonly tab = signal<'orders' | 'receipts' | 'bills' | 'payments' | 'credits'>('orders');
+  protected readonly tab = signal<'orders' | 'receipts' | 'bills' | 'payments' | 'returns' | 'credits'>('orders');
   protected readonly canOrder = computed(() => this.business.can('purchase_order:manage'));
   protected readonly canQuick = computed(() => this.canOrder() && this.business.can('goods_receipt:create'));
   protected readonly canBills = computed(() => this.business.can('bill:manage'));
+  /** Sending goods back: posted by whoever manages bills, or prepared by a Stock keeper for them (section 5). */
+  protected readonly canReturn = computed(() => this.canBills() || this.business.can('purchase_return:prepare'));
+  /** ?tab=returns from an alert or the dashboard opens that tab. */
+  readonly tabParam = input<string | undefined>(undefined, { alias: 'tab' });
 
   private readonly onError = (e: unknown) => this.notify.error(e);
   protected readonly orders = new LazyList<PurchaseOrder>((q) => this.api.page('/purchase-orders', q), this.onError, 'createdAt,desc');
@@ -100,6 +105,8 @@ export class PurchasesPage {
   protected readonly bills = new LazyList<Row>((q) => this.api.page('/bills', q), this.onError, 'billDate,desc');
   protected readonly payments = new LazyList<Row>((q) => this.api.page('/supplier-payments', q), this.onError, 'paidAt,desc');
   protected readonly credits = new LazyList<Credit>((q) => this.api.page('/supplier-credits', q), this.onError, 'id,desc');
+  protected readonly purchaseReturns = new LazyList<ReturnDoc>((q) => this.api.page('/purchase-returns', q), this.onError, 'id,desc');
+  protected readonly returnDoc = signal<ReturnDoc | null>(null);
 
   protected readonly formMode = signal<'quick' | 'order'>('quick');
   protected readonly formOpen = signal(false);
@@ -112,6 +119,15 @@ export class PurchasesPage {
   protected readonly credit = signal<Credit | null>(null);
   protected readonly newCreditOpen = signal(false);
 
+  constructor() {
+    effect(() => {
+      const t = this.tabParam();
+      if (t === 'returns' && untracked(() => this.canReturn())) {
+        untracked(() => this.tab.set('returns'));
+      }
+    });
+  }
+
   protected openForm(mode: 'quick' | 'order'): void {
     this.formMode.set(mode);
     this.formOpen.set(true);
@@ -120,9 +136,14 @@ export class PurchasesPage {
   protected reloadAll(): void {
     this.orders.refresh();
     this.receipts.refresh();
-    this.bills.refresh();
-    this.payments.refresh();
-    this.credits.refresh();
+    if (this.canReturn()) {
+      this.purchaseReturns.refresh();
+    }
+    if (this.canBills()) {
+      this.bills.refresh();
+      this.payments.refresh();
+      this.credits.refresh();
+    }
   }
 
   protected openReceipt(row: GoodsReceipt): void {
@@ -132,7 +153,10 @@ export class PurchasesPage {
   /** After a return: the bill it lowered, the credit left over, and the receipt's lines all changed. */
   protected returned(r: PurchaseReturnSaved): void {
     this.reloadAll();
-    if (r.credit && r.credit.left > 0) {
+    if (r.status === 'WAITING_APPROVAL') {
+      this.viewingReceipt.set(null);
+      this.tab.set('returns');
+    } else if (r.credit && r.credit.left > 0) {
       this.viewingReceipt.set(null);
       this.tab.set('credits');
     }

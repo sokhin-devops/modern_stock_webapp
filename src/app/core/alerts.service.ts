@@ -6,7 +6,8 @@ import { BusinessService } from './business/business.service';
 
 export type AlertKind =
   | 'PAYMENT_DUE' | 'EXPIRED' | 'OVERDUE_BILLS' | 'TRIAL_ENDING' | 'LOW_STOCK' | 'EXPIRING_30' | 'OVERDUE_INVOICES'
-  | 'APPROVALS' | 'TO_RECEIVE' | 'COUNTS_OPEN' | 'COUNTS_TO_APPROVE' | 'RENEWAL_SOON' | 'EXPIRING_60' | 'EXPIRING_90' | 'RATE_MISSING';
+  | 'APPROVALS' | 'TO_RECEIVE' | 'COUNTS_OPEN' | 'COUNTS_TO_APPROVE' | 'RETURNS_TO_APPROVE'
+  | 'PURCHASE_RETURNS_TO_APPROVE' | 'RENEWAL_SOON' | 'EXPIRING_60' | 'EXPIRING_90' | 'RATE_MISSING';
 
 export interface Alert {
   kind: AlertKind;
@@ -28,6 +29,8 @@ export const ALERT_TARGETS: Record<AlertKind, { icon: string; link: string; quer
   TO_RECEIVE: { icon: 'pi pi-truck', link: '/inventory/transfers' },
   COUNTS_OPEN: { icon: 'pi pi-list-check', link: '/inventory/stock-counts' },
   COUNTS_TO_APPROVE: { icon: 'pi pi-check-square', link: '/inventory/stock-counts' },
+  RETURNS_TO_APPROVE: { icon: 'pi pi-replay', link: '/customers/transactions', query: { tab: 'returns' } },
+  PURCHASE_RETURNS_TO_APPROVE: { icon: 'pi pi-replay', link: '/suppliers/transactions', query: { tab: 'returns' } },
   EXPIRING_60: { icon: 'pi pi-calendar', link: '/reports', query: { r: 'expiry', days: 60 } },
   EXPIRING_90: { icon: 'pi pi-calendar', link: '/reports', query: { r: 'expiry', days: 90 } },
   RATE_MISSING: { icon: 'pi pi-money-bill', link: '/settings/rates' },

@@ -23,6 +23,7 @@ import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { LangButton } from '../../../shared/lang-button/lang-button';
 import { PayDialog, PreviewLine } from '../pay-dialog/pay-dialog';
 import { ReceiptDialog } from '../receipt-dialog/receipt-dialog';
+import { NewCustomerDialog } from '../new-customer-dialog/new-customer-dialog';
 import { ShiftDialog } from '../shift-dialog/shift-dialog';
 
 /** One line of the cart: a product in one of its units. */
@@ -47,7 +48,7 @@ interface CartLine {
   selector: 'ms-pos-page',
   imports: [
     FormsModule, RouterLink, TranslatePipe, DecimalPipe, DatePipe, AutoComplete, Select, ButtonDirective, ButtonIcon,
-    ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, ApiFilePipe,
+    ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, NewCustomerDialog, ApiFilePipe,
   ],
   host: { '(document:keydown)': 'onKey($event)' },
   templateUrl: './pos-page.html',
@@ -77,6 +78,10 @@ export class PosPage {
   protected readonly lines = signal<CartLine[]>([]);
   protected readonly customer = signal<Customer | null>(null);
   protected readonly customerResults = signal<Customer[]>([]);
+  /** A new customer from here (FR-3.17), starting from what was typed in the search. */
+  protected readonly canAddCustomer = computed(() => this.business.can('customer:create_pos') || this.business.can('customer:manage'));
+  protected readonly customerTyped = signal('');
+  protected readonly newCustomerOpen = signal(false);
 
   // Dialogs
   protected readonly payOpen = signal(false);
@@ -225,6 +230,7 @@ export class PosPage {
   }
 
   protected findCustomers(event: AutoCompleteCompleteEvent): void {
+    this.customerTyped.set(event.query);
     this.pos.customers(event.query).subscribe({ next: (page) => this.customerResults.set(page.content) });
   }
 

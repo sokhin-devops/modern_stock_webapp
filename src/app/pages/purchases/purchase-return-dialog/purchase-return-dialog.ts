@@ -10,6 +10,7 @@ import { SelectButton } from 'primeng/selectbutton';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
 import { ApiService } from '../../../core/api/api.service';
+import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 
@@ -37,7 +38,9 @@ interface Row extends ReturnableLine {
 }
 
 export interface PurchaseReturnSaved {
+  id: number;
   number: string;
+  status: 'WAITING_APPROVAL' | 'POSTED' | 'REJECTED' | 'VOID';
   total: number;
   credit: { number: string; left: number } | null;
 }
@@ -63,7 +66,10 @@ export class PurchaseReturnDialog {
 
   private readonly api = inject(ApiService);
   private readonly notify = inject(NotifyService);
+  private readonly business = inject(BusinessService);
 
+  /** Posted at once by whoever manages bills; a Stock keeper's return waits for them (section 5). */
+  protected readonly canPost = computed(() => this.business.can('bill:manage'));
   protected readonly source = signal<Returnable | null>(null);
   protected readonly rows = signal<Row[]>([]);
   protected readonly reason = signal('');
@@ -108,7 +114,7 @@ export class PurchaseReturnDialog {
     if (!lines.length) {
       return;
     }
-    const refund = this.refundNow() && this.left() > 0 ? { method: this.method(), currency: this.currency() } : null;
+    const refund = this.canPost() && this.refundNow() && this.left() > 0 ? { method: this.method(), currency: this.currency() } : null;
     this.busy.set(true);
     this.api.post<PurchaseReturnSaved>('/purchase-returns', {
       goodsReceiptId: this.receiptId(),
@@ -118,7 +124,11 @@ export class PurchaseReturnDialog {
     }).subscribe({
       next: (r) => {
         this.busy.set(false);
-        this.notify.showKey('purchaseReturns.saved', { number: r.number, credit: r.credit?.number ?? '' });
+        if (r.status === 'WAITING_APPROVAL') {
+          this.notify.showKey('purchaseReturns.prepared', { number: r.number });
+        } else {
+          this.notify.showKey('purchaseReturns.saved', { number: r.number, credit: r.credit?.number ?? '' });
+        }
         this.saved.emit(r);
         this.visible.set(false);
       },

@@ -303,6 +303,8 @@ export interface DashboardData {
     transfersToReceive: number | null;
     countsInProgress: number | null;
     countsToApprove: number | null;
+    returnsToApprove: number | null;
+    purchaseReturnsToApprove: number | null;
   } | null;
 }
 

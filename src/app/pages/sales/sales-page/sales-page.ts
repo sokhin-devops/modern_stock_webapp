@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
@@ -18,6 +18,7 @@ import { PrintDialog, PrintDocument } from '../../../shared/print-dialog/print-d
 import { CreditDialog } from '../../../shared/credit-dialog/credit-dialog';
 import { Credit } from '../../../shared/credit-drawer/credit';
 import { CreditDrawer } from '../../../shared/credit-drawer/credit-drawer';
+import { ReturnDoc, ReturnDrawer } from '../../../shared/return-drawer/return-drawer';
 import { OrderDrawer, OrderView } from '../order-drawer/order-drawer';
 import { OrderForm, OrderSaved } from '../order-form/order-form';
 import { OrderFormTarget, Quotation, SalesOrder } from '../orders/orders';
@@ -89,7 +90,7 @@ interface Row {
 @Component({
   selector: 'ms-sales-page',
   imports: [TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, PaymentDialog, PrintDialog,
-    ReturnDialog, CreditDrawer, CreditDialog, OrderForm, OrderDrawer, Tooltip],
+    ReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, OrderForm, OrderDrawer, Tooltip],
   templateUrl: './sales-page.html',
   styleUrl: './sales-page.scss',
 })
@@ -107,17 +108,24 @@ export class SalesPage {
   protected readonly canManageOrders = computed(() => this.business.can('sales_order:manage'));
   protected readonly canInvoices = computed(() => this.canSell() || this.business.can('customer:view'));
   protected readonly canCredits = computed(() => this.canVoid() || this.business.can('customer:view'));
-  protected readonly tab = signal<'quotations' | 'orders' | 'receipts' | 'invoices' | 'payments' | 'credits'>(
+  protected readonly tab = signal<'quotations' | 'orders' | 'receipts' | 'invoices' | 'payments' | 'returns' | 'credits'>(
     this.canSell() ? 'receipts' : this.canOrders() ? 'orders' : 'invoices',
   );
-  /** Taking goods back and credit notes: the same people who can void a sale (FR-3.12). */
+  /** Credit notes by hand: the same people who can void a sale (FR-3.12). */
   protected readonly canReturn = this.canVoid;
+  /** Taking goods back: posted by them, or asked for by a Cashier and approved later (section 5). */
+  protected readonly canStartReturn = computed(() => this.canVoid() || this.business.can('sales_return:request'));
+  protected readonly canReturns = computed(() => this.canStartReturn() || this.business.can('customer:view'));
+  /** ?tab=returns from an alert or the dashboard opens that tab. */
+  readonly tabParam = input<string | undefined>(undefined, { alias: 'tab' });
 
   private readonly onError = (e: unknown) => this.notify.error(e);
   protected readonly receipts = new LazyList<Receipt>((q) => this.api.page('/sales-receipts', q), this.onError, 'soldAt,desc');
   protected readonly invoices = new LazyList<Row>((q) => this.api.page('/invoices', q), this.onError, 'invoiceDate,desc');
   protected readonly payments = new LazyList<Row>((q) => this.api.page('/payments-received', q), this.onError, 'paidAt,desc');
   protected readonly credits = new LazyList<Credit>((q) => this.api.page('/credit-notes', q), this.onError, 'id,desc');
+  protected readonly salesReturns = new LazyList<ReturnDoc>((q) => this.api.page('/sales-returns', q), this.onError, 'id,desc');
+  protected readonly returnDoc = signal<ReturnDoc | null>(null);
   protected readonly quotations = new LazyList<Quotation>((q) => this.api.page('/quotations', q), this.onError, 'id,desc');
   protected readonly orders = new LazyList<SalesOrder>((q) => this.api.page('/sales-orders', q), this.onError, 'id,desc');
 
@@ -136,6 +144,15 @@ export class SalesPage {
   protected readonly returnOpen = signal(false);
   protected readonly creditNote = signal<Credit | null>(null);
   protected readonly newCreditOpen = signal(false);
+
+  constructor() {
+    effect(() => {
+      const t = this.tabParam();
+      if (t === 'returns' && untracked(() => this.canReturns())) {
+        untracked(() => this.tab.set('returns'));
+      }
+    });
+  }
 
   protected newDoc(kind: 'quotation' | 'order'): void {
     this.formTarget.set({ kind, doc: null });
@@ -178,6 +195,13 @@ export class SalesPage {
 
   /** After a return: the lists, the open invoice (what it still owes) and the credit notes change. */
   protected returned(r: ReturnSaved): void {
+    this.salesReturns.refresh();
+    if (r.status === 'WAITING_APPROVAL') {
+      this.viewing.set(null);
+      this.viewingInvoice.set(null);
+      this.tab.set('returns');
+      return;
+    }
     this.receipts.refresh();
     this.invoices.refresh();
     this.credits.refresh();
@@ -188,6 +212,17 @@ export class SalesPage {
     }
     if (r.creditNote && r.creditNote.left > 0) {
       this.tab.set('credits');
+    }
+  }
+
+  /** A request approved or rejected: an approved one is like a return made now. */
+  protected returnDecided(r: ReturnDoc): void {
+    this.salesReturns.refresh();
+    if (r.status === 'POSTED') {
+      this.receipts.refresh();
+      this.invoices.refresh();
+      this.credits.refresh();
+      this.payments.refresh();
     }
   }
 

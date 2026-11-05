@@ -16,6 +16,8 @@ export class LazyList<T> {
   readonly loading = signal(false);
   readonly first = signal(0);
   private last: TableLazyLoadEvent = { first: 0, rows: 20 };
+  /** The table asked for rows at least once (it is on screen, or was). */
+  private loaded = false;
 
   constructor(
     private readonly fetch: (query: PageQuery) => Observable<PageResponse<T>>,
@@ -25,6 +27,7 @@ export class LazyList<T> {
 
   load(event: TableLazyLoadEvent): void {
     this.last = event;
+    this.loaded = true;
     const size = event.rows ?? 20;
     const field = typeof event.sortField === 'string' ? event.sortField : null;
     this.loading.set(true);
@@ -51,8 +54,10 @@ export class LazyList<T> {
     this.load({ ...this.last, first: 0 });
   }
 
-  /** The same page again (after a save). */
+  /** The same page again (after a save); a list never shown loads when it is, so it is left alone. */
   refresh(): void {
-    this.load(this.last);
+    if (this.loaded) {
+      this.load(this.last);
+    }
   }
 }

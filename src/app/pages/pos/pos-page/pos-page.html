@@ -102,17 +102,25 @@
             <i class="pi pi-trash" pButtonIcon></i>
           </button>
         </div>
-        <p-autocomplete [ngModel]="customer()" (ngModelChange)="customer.set($event && $event.id ? $event : null)"
-                        [suggestions]="customerResults()" (completeMethod)="findCustomers($event)" optionLabel="name"
-                        [placeholder]="'pos.walkIn' | translate" [showClear]="true" [forceSelection]="true" [fluid]="true"
-                        [ariaLabel]="'pos.customerPh' | translate" appendTo="body" class="customer-pick-field">
-          <ng-template #item let-c>
-            <div class="customer-option">
-              <b>{{ c.name }}</b>
-              <small class="muted">{{ c.phone }}@if (c.balance > 0) { · ${{ c.balance | number: '1.2-2' }} }</small>
-            </div>
-          </ng-template>
-        </p-autocomplete>
+        <div class="customer-row">
+          <p-autocomplete [ngModel]="customer()" (ngModelChange)="customer.set($event && $event.id ? $event : null)"
+                          [suggestions]="customerResults()" (completeMethod)="findCustomers($event)" optionLabel="name"
+                          [placeholder]="'pos.walkIn' | translate" [showClear]="true" [forceSelection]="true" [fluid]="true"
+                          [ariaLabel]="'pos.customerPh' | translate" appendTo="body" class="customer-pick-field">
+            <ng-template #item let-c>
+              <div class="customer-option">
+                <b>{{ c.name }}</b>
+                <small class="muted">{{ c.phone }}@if (c.balance > 0) { · ${{ c.balance | number: '1.2-2' }} }</small>
+              </div>
+            </ng-template>
+          </p-autocomplete>
+          @if (canAddCustomer()) {
+            <button pButton type="button" [rounded]="true" [text]="true" (click)="newCustomerOpen.set(true)"
+                    [attr.aria-label]="'partners.newCustomer' | translate" [pTooltip]="'partners.newCustomer' | translate" tooltipPosition="left">
+              <i class="pi pi-user-plus" pButtonIcon></i>
+            </button>
+          }
+        </div>
       </div>
 
       <div class="cart-lines">
@@ -166,6 +174,7 @@
 <ms-receipt-dialog [sale]="sale()" [(visible)]="receiptOpen" [receiptFooter]="settings()?.receiptFooter ?? null"
                    [receiptHeader]="settings()?.receiptHeader ?? null" [paper]="settings()?.receiptPaper ?? 80"
                    [showVatTin]="settings()?.receiptShowVatTin ?? true" (newSale)="nextSale()" />
+<ms-new-customer-dialog [(visible)]="newCustomerOpen" [typed]="customerTyped()" (saved)="customer.set($event)" />
 @if (business.branchId() != null) {
   <ms-shift-dialog [(visible)]="shiftOpen" [shift]="shift()" [branchId]="business.branchId()!" (changed)="shift.set($event)" />
 }

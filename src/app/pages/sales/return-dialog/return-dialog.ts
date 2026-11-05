@@ -11,6 +11,7 @@ import { SelectButton } from 'primeng/selectbutton';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
 import { ApiService } from '../../../core/api/api.service';
+import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
 import { toIsoDate } from '../../../shared/dates';
 import { FieldLabel } from '../../../shared/field-label/field-label';
@@ -42,7 +43,9 @@ interface Row extends ReturnableLine {
 }
 
 export interface ReturnSaved {
+  id: number;
   number: string;
+  status: 'WAITING_APPROVAL' | 'POSTED' | 'REJECTED' | 'VOID';
   total: number;
   creditNote: { number: string; left: number; refundedAmount: number; usedAmount: number } | null;
 }
@@ -51,6 +54,7 @@ export interface ReturnSaved {
  * Take goods back from a sales receipt or an invoice (FR-3.12): how many of each line come back, in good shape (back
  * to stock) or damaged (a loss), and why. The money is the lines' share of the sale; on an invoice it lowers what is
  * still owed first, then it is refunded now or kept as the customer's credit. A walk-in customer is refunded at once.
+ * A Cashier only asks for it (section 5): it waits for someone who may void sales, and nothing moves until then.
  */
 @Component({
   selector: 'ms-return-dialog',
@@ -70,7 +74,10 @@ export class ReturnDialog {
 
   private readonly api = inject(ApiService);
   private readonly notify = inject(NotifyService);
+  private readonly business = inject(BusinessService);
 
+  /** Posted at once; otherwise sent for approval. */
+  protected readonly canPost = computed(() => this.business.can('sale:void'));
   protected readonly source = signal<Returnable | null>(null);
   protected readonly rows = signal<Row[]>([]);
   protected readonly reason = signal('');
@@ -134,7 +141,11 @@ export class ReturnDialog {
     }).subscribe({
       next: (r) => {
         this.busy.set(false);
-        this.notify.showKey('returns.saved', { number: r.number, credit: r.creditNote?.number ?? '' });
+        if (r.status === 'WAITING_APPROVAL') {
+          this.notify.showKey('returns.requested', { number: r.number });
+        } else {
+          this.notify.showKey('returns.saved', { number: r.number, credit: r.creditNote?.number ?? '' });
+        }
         this.saved.emit(r);
         this.visible.set(false);
       },

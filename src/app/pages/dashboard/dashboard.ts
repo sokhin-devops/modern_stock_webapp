@@ -97,7 +97,10 @@ export class Dashboard {
   /** Something waits for the member (approvals, transfers to receive, counts in progress). */
   protected readonly waitingCount = computed(() => {
     const w = this.data.value()?.waiting;
-    return w ? (w.approvals ?? 0) + (w.transfersToReceive ?? 0) + (w.countsInProgress ?? 0) + (w.countsToApprove ?? 0) : 0;
+    return w
+      ? (w.approvals ?? 0) + (w.transfersToReceive ?? 0) + (w.countsInProgress ?? 0) + (w.countsToApprove ?? 0)
+        + (w.returnsToApprove ?? 0) + (w.purchaseReturnsToApprove ?? 0)
+      : 0;
   });
 
   /** Plan usage for the Owner (PLAIN.md 12.3), as a share of the limit. */
