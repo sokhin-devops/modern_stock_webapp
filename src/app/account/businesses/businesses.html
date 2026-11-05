@@ -61,6 +61,28 @@
           </button>
         </div>
       }
+
+      @if (archived().length) {
+        <section class="archived">
+          <h3 class="form-section">{{ 'account.archived' | translate }}</h3>
+          <p class="muted small">{{ 'account.archivedLead' | translate }}</p>
+          <ul>
+            @for (b of archived(); track b.id) {
+              <li>
+                <i class="icon pi pi-box muted"></i>
+                <div class="grow">
+                  <b>{{ lang.name(b.nameEn, b.nameKm) }}</b>
+                  <div class="muted small">{{ 'account.types.' + b.businessType | translate }}</div>
+                </div>
+                <button pButton type="button" size="small" [outlined]="true" (click)="restore(b)" [loading]="restoring() === b.id"
+                        [disabled]="restoring() !== null">
+                  <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ 'account.restore' | translate }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
     </div>
   </div>
 </div>

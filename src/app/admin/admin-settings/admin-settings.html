@@ -1,0 +1,52 @@
+<div class="scroll">
+  <form class="settings-card ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <p class="muted lead">{{ 'admin.settings.lead' | translate }}</p>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="ps-trial" control="trialDays" error="admin.settings.range">{{ 'admin.settings.trialDays' | translate }}</label>
+        <p-inputnumber inputId="ps-trial" formControlName="trialDays" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+        <small class="field-hint">{{ 'admin.settings.trialHint' | translate }}</small>
+      </div>
+      <div class="ms-field">
+        <label msLabel for="ps-max" control="maxBusinessesPerAccount" error="admin.settings.range">{{ 'admin.settings.maxBusinesses' | translate }}</label>
+        <p-inputnumber inputId="ps-max" formControlName="maxBusinessesPerAccount" [min]="1" [max]="100" />
+        <small class="field-hint">{{ 'admin.settings.maxHint' | translate }}</small>
+      </div>
+    </div>
+    <div class="ms-form-row">
+      <div class="ms-field">
+        <label msLabel for="ps-invite" control="invitationExpiryDays" error="admin.settings.range">{{ 'admin.settings.invitationDays' | translate }}</label>
+        <p-inputnumber inputId="ps-invite" formControlName="invitationExpiryDays" [min]="1" [max]="60" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+        <small class="field-hint">{{ 'admin.settings.invitationHint' | translate }}</small>
+      </div>
+    </div>
+
+    <h3 class="form-section">{{ 'admin.settings.announcement' | translate }}</h3>
+    <p class="muted small">{{ 'admin.settings.announcementLead' | translate }}</p>
+    <div class="ms-field">
+      <label msLabel for="ps-ann-km" control="announcementKm">{{ 'admin.settings.announcementKm' | translate }}</label>
+      <textarea pTextarea id="ps-ann-km" formControlName="announcementKm" rows="2" maxlength="255" lang="km"></textarea>
+    </div>
+    <div class="ms-field">
+      <label msLabel for="ps-ann-en" control="announcementEn">{{ 'admin.settings.announcementEn' | translate }}</label>
+      <textarea pTextarea id="ps-ann-en" formControlName="announcementEn" rows="2" maxlength="255" lang="en"></textarea>
+      <small class="field-hint">{{ 'admin.settings.announcementHint' | translate }}</small>
+    </div>
+    <div class="ms-field">
+      <span msLabel id="ps-level">{{ 'admin.settings.level' | translate }}</span>
+      <p-selectbutton [options]="levels" optionValue="value" formControlName="announcementLevel" [allowEmpty]="false"
+                      ariaLabelledBy="ps-level">
+        <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+      </p-selectbutton>
+    </div>
+
+    <div class="settings-actions">
+      @if (form.controls.announcementEn.value || form.controls.announcementKm.value) {
+        <button pButton type="button" [text]="true" severity="danger" (click)="clearAnnouncement()">
+          <span pButtonLabel>{{ 'admin.settings.takeDown' | translate }}</span>
+        </button>
+      }
+      <button pButton type="submit" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+    </div>
+  </form>
+</div>

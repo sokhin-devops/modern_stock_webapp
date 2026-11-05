@@ -1,6 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -35,8 +37,13 @@ export class ProfilePage {
   private readonly lang = inject(LangService);
   private readonly translate = inject(TranslateService);
   private readonly notify = inject(NotifyService);
+  private readonly confirm = inject(ConfirmationService);
+  private readonly router = inject(Router);
 
   protected readonly busy = signal(false);
+  /** Archiving is the Owner's: the one who manages the business and its billing. */
+  protected readonly canArchive = computed(() => this.business.can('business:manage') && this.business.can('billing:manage'));
+  protected readonly archiving = signal(false);
   /** The logo is saved as soon as it is chosen or removed (not with the form). */
   protected readonly logoUrl = signal<string | null>(null);
   protected readonly logoBusy = signal(false);
@@ -82,6 +89,34 @@ export class ProfilePage {
         }
       },
       error: (e) => this.notify.error(e),
+    });
+  }
+
+  /** FR-6.11: hidden from everyone and closed, nothing deleted; restored from My businesses. */
+  protected archive(): void {
+    const name = this.form.controls.nameEn.value;
+    this.confirm.confirm({
+      header: this.translate.instant('settings.archive.title'),
+      message: this.translate.instant('settings.archive.ask', { name }),
+      acceptLabel: this.translate.instant('settings.archive.button'),
+      rejectLabel: this.translate.instant('common.cancel'),
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { text: true },
+      accept: () => {
+        this.archiving.set(true);
+        this.api.post('/business/archive').subscribe({
+          next: () => {
+            this.archiving.set(false);
+            this.notify.showKey('settings.archive.done', { name });
+            this.business.close();
+            this.business.loadMine().subscribe({ complete: () => this.router.navigate(['/businesses']) });
+          },
+          error: (e) => {
+            this.archiving.set(false);
+            this.notify.error(e);
+          },
+        });
+      },
     });
   }
 

@@ -82,7 +82,7 @@
     "newHere": "New here?",
     "createAccount": "Create an account",
     "signUpTitle": "Create account",
-    "signUpLead": "30 days of Pro, free.",
+    "signUpLead": "{{days}} days of Pro, free.",
     "fullName": "Full name",
     "email": "Email",
     "phone": "Phone",
@@ -138,7 +138,7 @@
     "nameEn": "Name (English)",
     "nameKm": "Name (Khmer)",
     "type": "Type",
-    "trialTag": "30-day Pro trial",
+    "trialTag": "{{days}}-day Pro trial",
     "proTrial": "Pro trial",
     "settingUp": "Setting up",
     "myAccount": "My account",
@@ -154,7 +154,11 @@
       "PHONE_SHOP": "Phone shop",
       "WHOLESALE": "Wholesale",
       "OTHER": "Other"
-    }
+    },
+    "archived": "Archived businesses",
+    "archivedLead": "Restore one to open it again. It counts towards your businesses limit again.",
+    "restore": "Restore",
+    "restored": "{{name}} is back"
   },
   "setup": {
     "title": "Set up {{business}}",
@@ -324,7 +328,7 @@
     "inTransitHint": "Sent, not yet received",
     "lowStock": "Low stock",
     "items": "items",
-    "expiring": "Expiring in 30 days",
+    "expiring": "Expiring in {{n}} days",
     "batches": "batches",
     "expired": "{{n}} expired",
     "lowStockList": "Low stock",
@@ -891,6 +895,24 @@
       "always": "always on",
       "khqrImage": "KHQR image",
       "khqrHint": "Your shop's KHQR from the bank app. The POS shows it for the customer to scan."
+    },
+    "expiry": {
+      "title": "Near expiry",
+      "lead": "Three windows for batches that expire soon. The first one warns on the dashboard, in alerts and in the daily Telegram summary; the expiry report shows each of them.",
+      "first": "First window",
+      "second": "Second",
+      "third": "Third",
+      "days": "days",
+      "range": "From 1 to 365 days",
+      "order": "Each window must be longer than the one before",
+      "hint": "30, 60 and 90 days unless you change them."
+    },
+    "archive": {
+      "title": "Archive this business",
+      "lead": "Archived, it leaves everyone's list and nobody can open it. Nothing is deleted: you can restore it from My businesses. Cancel a paid plan first.",
+      "button": "Archive business",
+      "ask": "Archive {{name}}? Its members lose access until you restore it. Nothing is deleted.",
+      "done": "{{name}} is archived"
     }
   },
   "docs": {
@@ -965,7 +987,8 @@
     "returnReason": "Why is it returned?",
     "deleteDraft": "Delete draft",
     "short": "{{n}} lines short",
-    "done": "Done."
+    "done": "Done.",
+    "late": "Late"
   },
   "purchase": {
     "tabOrders": "Purchase orders",
@@ -1307,7 +1330,7 @@
     "lead": "Get yesterday's sales and stock news every morning in a Telegram chat or group.",
     "daily": "Daily summary at 07:00 (sales, profit and cash of yesterday)",
     "lowStock": "Include low stock",
-    "expiry": "Include batches expiring within 30 days",
+    "expiry": "Include batches that expire soon (the first near-expiry window in Sales rules)",
     "test": "Send a test message",
     "testSent": "Test message sent. Check Telegram.",
     "noBot": "This server has no Telegram bot yet, so Telegram can't be connected.",
@@ -1362,20 +1385,21 @@
     "EXPIRED": "{{n}} expired batches are still in stock",
     "OVERDUE_BILLS": "{{n}} supplier bills are overdue",
     "LOW_STOCK": "{{n}} products are low on stock",
-    "EXPIRING_30": "{{n}} batches expire within 30 days",
     "OVERDUE_INVOICES": "{{n}} customer invoices are overdue",
     "APPROVALS": "{{n}} adjustments wait for your approval",
     "TO_RECEIVE": "{{n}} transfers to receive",
     "COUNTS_OPEN": "{{n}} stock counts are in progress",
-    "EXPIRING_60": "{{n}} batches expire within 60 days",
-    "EXPIRING_90": "{{n}} batches expire within 90 days",
     "RATE_MISSING": "Today's exchange rate is not set yet",
     "PAYMENT_DUE": "A billing invoice is waiting to be paid",
     "TRIAL_ENDING": "Your Pro trial ends within 7 days",
     "COUNTS_TO_APPROVE": "{{n}} stock counts wait for your approval",
     "RENEWAL_SOON": "Your plan renews within 7 days",
     "RETURNS_TO_APPROVE": "{{n}} customer returns wait for your approval",
-    "PURCHASE_RETURNS_TO_APPROVE": "{{n}} supplier returns wait for your approval"
+    "PURCHASE_RETURNS_TO_APPROVE": "{{n}} supplier returns wait for your approval",
+    "EXPIRING_1": "{{n}} batches expire within {{days}} days",
+    "EXPIRING_2": "{{n}} batches expire within {{days}} days",
+    "EXPIRING_3": "{{n}} batches expire within {{days}} days",
+    "TRANSFERS_LATE": "{{n}} transfers in transit for over {{days}} days"
   },
   "admin": {
     "title": "Platform admin",
@@ -1478,6 +1502,45 @@
       "markDone": "Done",
       "reopen": "Reopen",
       "none": "No messages here."
+    },
+    "tabStats": "Statistics",
+    "tabSettings": "Settings",
+    "settings": {
+      "lead": "New values apply from now on: to new trials, new businesses and new invitations.",
+      "trialDays": "Pro trial",
+      "trialHint": "Days of Pro a new business gets for free.",
+      "maxBusinesses": "Businesses per account",
+      "maxHint": "How many one person may create. Archived ones don't count.",
+      "invitationDays": "Invitation links last",
+      "invitationHint": "After this, the Owner sends a new invitation.",
+      "range": "Out of range",
+      "announcement": "Announcement",
+      "announcementLead": "A banner over every page of the app for everyone, e.g. planned maintenance. Each person can close it.",
+      "announcementKm": "In Khmer",
+      "announcementEn": "In English",
+      "announcementHint": "Leave both empty for no banner. With one language only, everyone sees that one.",
+      "level": "Look",
+      "levelInfo": "News",
+      "levelWarn": "Warning",
+      "takeDown": "Take the banner down"
+    },
+    "stats": {
+      "accounts": "Accounts",
+      "verified": "{{n}} with a verified email",
+      "newAccounts": "New accounts",
+      "last7": "In the last 7 days",
+      "active": "Active businesses",
+      "inUse": "{{n}} used in the last 7 days",
+      "revenue": "Monthly revenue",
+      "revenueSub": "Paid plans and add-ons, per month",
+      "accountsPerWeek": "New accounts per week",
+      "businessesPerWeek": "New businesses per week",
+      "accountsTip": "Week of {{week}}: {{n}} accounts",
+      "businessesTip": "Week of {{week}}: {{n}} businesses",
+      "byStatus": "Businesses by status",
+      "byPlan": "Businesses by plan",
+      "trial": "Pro trial",
+      "byPlanNote": "Archived businesses are left out."
     }
   },
   "image": {
@@ -1508,7 +1571,9 @@
     "salesOrder": "Sales order",
     "taxInvoiceEn": "Tax invoice",
     "rate": "Exchange rate",
-    "purchaseOrder": "Purchase order"
+    "purchaseOrder": "Purchase order",
+    "proforma": "Proforma invoice",
+    "proformaNotice": "Proforma invoice: a request for payment before delivery. It is not a tax invoice; the invoice comes with the delivery."
   },
   "accountPage": {
     "profile": "Profile",
@@ -1744,7 +1809,9 @@
       "SALES_RETURN_APPROVED": "Customer return approved",
       "SALES_RETURN_REJECTED": "Customer return rejected",
       "PURCHASE_RETURN_APPROVED": "Supplier return approved",
-      "PURCHASE_RETURN_REJECTED": "Supplier return rejected"
+      "PURCHASE_RETURN_REJECTED": "Supplier return rejected",
+      "BUSINESS_ARCHIVED": "Business archived",
+      "BUSINESS_RESTORED": "Business restored"
     },
     "types": {
       "PRODUCT": "Products",
@@ -1813,7 +1880,8 @@
       "khqrEnabled": "KHQR",
       "bankEnabled": "Bank",
       "cycle": "Billing",
-      "quantity": "How many"
+      "quantity": "How many",
+      "expiryDays": "Near-expiry days"
     }
   },
   "labels": {
@@ -1833,5 +1901,22 @@
     "noneMissing": "Every product already has a barcode.",
     "showPrice": "Show the price",
     "count": "Labels: {{n}} · A4 sheets: {{sheets}}"
+  },
+  "docPhoto": {
+    "receipt": "Receipt",
+    "invoice": "Supplier invoice",
+    "receiptView": "Receipt photo",
+    "receiptAdd": "Add a photo of the receipt",
+    "invoiceView": "Photo of the supplier's invoice",
+    "invoiceAdd": "Add a photo of the supplier's invoice",
+    "empty": "No photo yet. Take a picture of the paper so it stays with this record.",
+    "hint": "JPEG, PNG or WebP. Big photos are made smaller first. Only people who can see this record see the photo.",
+    "add": "Add a photo",
+    "change": "Change photo",
+    "remove": "Remove photo",
+    "removeConfirm": "Remove this photo? The record stays as it is.",
+    "saved": "Photo saved",
+    "removed": "Photo removed",
+    "openFull": "Open at full size"
   }
 }

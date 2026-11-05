@@ -65,5 +65,16 @@
         </div>
       }
     </form>
+    @if (canArchive()) {
+      <section class="settings-card archive-card">
+        <div class="grow">
+          <h3 class="form-section">{{ 'settings.archive.title' | translate }}</h3>
+          <p class="muted small">{{ 'settings.archive.lead' | translate }}</p>
+        </div>
+        <button pButton type="button" severity="danger" [outlined]="true" (click)="archive()" [loading]="archiving()" [disabled]="archiving()">
+          <span pButtonLabel>{{ 'settings.archive.button' | translate }}</span>
+        </button>
+      </section>
+    }
   </div>
 </div>

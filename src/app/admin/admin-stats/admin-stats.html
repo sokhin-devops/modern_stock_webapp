@@ -1,0 +1,62 @@
+<div class="scroll">
+  @if (stats(); as s) {
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label"><i class="icon pi pi-users"></i>{{ 'admin.stats.accounts' | translate }}</div>
+        <div class="kpi-value">{{ s.accounts | number }}</div>
+        <div class="kpi-sub">{{ 'admin.stats.verified' | translate: { n: s.verifiedAccounts } }}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><i class="icon pi pi-user-plus"></i>{{ 'admin.stats.newAccounts' | translate }}</div>
+        <div class="kpi-value">{{ s.newAccounts | number }}</div>
+        <div class="kpi-sub">{{ 'admin.stats.last7' | translate }}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><i class="icon pi pi-building"></i>{{ 'admin.stats.active' | translate }}</div>
+        <div class="kpi-value">{{ s.businessesByStatus['ACTIVE'] ?? 0 | number }}</div>
+        <div class="kpi-sub">{{ 'admin.stats.inUse' | translate: { n: s.businessesInUse } }}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><i class="icon pi pi-wallet"></i>{{ 'admin.stats.revenue' | translate }}</div>
+        <div class="kpi-value">{{ s.monthlyRevenue | currency: 'USD' }}</div>
+        <div class="kpi-sub">{{ 'admin.stats.revenueSub' | translate }}</div>
+      </div>
+    </div>
+
+    <div class="charts">
+      <section class="card">
+        <div class="card-head"><span class="card-title">{{ 'admin.stats.accountsPerWeek' | translate }}</span></div>
+        <ms-bar-chart [points]="accountPoints()" [format]="count" [height]="160" [label]="'admin.stats.accountsPerWeek' | translate" />
+      </section>
+      <section class="card">
+        <div class="card-head"><span class="card-title">{{ 'admin.stats.businessesPerWeek' | translate }}</span></div>
+        <ms-bar-chart [points]="businessPoints()" [format]="count" [height]="160" [label]="'admin.stats.businessesPerWeek' | translate" />
+      </section>
+    </div>
+
+    <div class="charts">
+      <section class="card">
+        <div class="card-head"><span class="card-title">{{ 'admin.stats.byStatus' | translate }}</span></div>
+        <ul class="counts">
+          @for (st of statuses; track st) {
+            <li><span>{{ 'admin.businessStatus.' + st | translate }}</span><span class="num strong">{{ s.businessesByStatus[st] ?? 0 | number }}</span></li>
+          }
+        </ul>
+      </section>
+      <section class="card">
+        <div class="card-head"><span class="card-title">{{ 'admin.stats.byPlan' | translate }}</span></div>
+        <ul class="counts">
+          @for (p of plans(); track p.plan) {
+            <li>
+              <span>{{ p.plan === 'TRIAL' ? ('admin.stats.trial' | translate) : p.plan }}</span>
+              <span class="num strong">{{ p.n | number }}</span>
+            </li>
+          } @empty {
+            <li class="muted">{{ 'admin.none' | translate }}</li>
+          }
+        </ul>
+        <small class="muted">{{ 'admin.stats.byPlanNote' | translate }}</small>
+      </section>
+    </div>
+  }
+</div>

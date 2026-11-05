@@ -5,6 +5,7 @@ import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
+import { ApiService } from '../../core/api/api.service';
 import { MyBusiness, MyInvitation } from '../../core/api/models';
 import { AuthService } from '../../core/auth/auth.service';
 import { BusinessService } from '../../core/business/business.service';
@@ -13,8 +14,8 @@ import { NotifyService } from '../../core/notify.service';
 import { CreateBusinessDialog } from '../create-business-dialog/create-business-dialog';
 
 /**
- * My businesses (prototype businesses.html): open one, accept an invitation, or create a new business. A super admin
- * also gets the way to the platform admin area.
+ * My businesses (prototype businesses.html): open one, accept an invitation, or create a new business. The ones I
+ * archived are listed under them, to restore (FR-6.11). A super admin also gets the way to the platform admin area.
  */
 @Component({
   selector: 'ms-businesses',
@@ -31,14 +32,34 @@ export class Businesses implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly notify = inject(NotifyService);
+  private readonly api = inject(ApiService);
 
   protected readonly loading = signal(true);
+  protected readonly archived = signal<MyBusiness[]>([]);
+  protected readonly restoring = signal<number | null>(null);
 
   ngOnInit(): void {
     this.business.loadMine().subscribe({
       next: () => this.loading.set(false),
       error: (e) => {
         this.loading.set(false);
+        this.notify.error(e);
+      },
+    });
+    this.api.get<MyBusiness[]>('/me/businesses/archived').subscribe({ next: (list) => this.archived.set(list), error: () => undefined });
+  }
+
+  protected restore(b: MyBusiness): void {
+    this.restoring.set(b.id);
+    this.api.post<MyBusiness>(`/me/businesses/${b.id}/restore`).subscribe({
+      next: () => {
+        this.restoring.set(null);
+        this.archived.update((list) => list.filter((x) => x.id !== b.id));
+        this.notify.showKey('account.restored', { name: this.lang.name(b.nameEn, b.nameKm) });
+        this.business.loadMine().subscribe();
+      },
+      error: (e) => {
+        this.restoring.set(null);
         this.notify.error(e);
       },
     });

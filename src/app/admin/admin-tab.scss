@@ -39,3 +39,10 @@
   margin: 0 0 12px;
   font-size: inherit;
 }
+
+// A tab that is a page of its own (settings, statistics) scrolls inside the panel.
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}

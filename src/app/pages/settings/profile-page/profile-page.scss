@@ -3,3 +3,24 @@
   flex: 1;
   min-height: 0;
 }
+
+// Under the profile card, on its own: archiving the business.
+.archive-card {
+  display: flex;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+
+  .grow {
+    flex: 1 1 280px;
+  }
+
+  h3 {
+    margin-top: 0;
+  }
+
+  p {
+    margin: 4px 0 0;
+  }
+}

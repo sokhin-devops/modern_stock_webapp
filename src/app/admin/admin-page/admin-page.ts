@@ -12,6 +12,8 @@ import { NotifyService } from '../../core/notify.service';
 import { AdminAccounts } from '../admin-accounts/admin-accounts';
 import { AdminMessages } from '../admin-messages/admin-messages';
 import { AdminPlans } from '../admin-plans/admin-plans';
+import { AdminSettings } from '../admin-settings/admin-settings';
+import { AdminStats } from '../admin-stats/admin-stats';
 import { AdminTransfers } from '../admin-transfers/admin-transfers';
 
 interface BusinessRow {
@@ -35,18 +37,18 @@ interface BusinessRow {
   addons: string | null;
 }
 
-type AdminTab = 'businesses' | 'accounts' | 'transfers' | 'plans' | 'messages';
+type AdminTab = 'businesses' | 'stats' | 'accounts' | 'transfers' | 'plans' | 'messages' | 'settings';
 
 /**
  * Platform admin (PLAIN.md M8, FR-8.1 to FR-8.7), for super admins: businesses with their plan (suspend, reactivate, and
- * the demo controls End trial now / Run renewal now), accounts, bank transfers to approve, plans and add-ons, and the
- * website's contact messages.
+ * the demo controls End trial now / Run renewal now), statistics (FR-8.9), accounts, bank transfers to approve, plans and
+ * add-ons, the website's contact messages, and the platform settings with the announcement banner (FR-8.8, FR-8.10).
  */
 @Component({
   selector: 'ms-admin-page',
   imports: [
     TranslatePipe, DatePipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, ButtonDirective, ButtonLabel,
-    AdminAccounts, AdminTransfers, AdminPlans, AdminMessages,
+    AdminAccounts, AdminTransfers, AdminPlans, AdminMessages, AdminStats, AdminSettings,
   ],
   templateUrl: './admin-page.html',
   styleUrl: './admin-page.scss',
