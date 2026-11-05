@@ -67,7 +67,13 @@ export class PayDialog {
     const over = this.tenderedKhr() - this.totalKhr();
     return over > 0 ? Math.floor(over / this.rielStep()) * this.rielStep() : 0;
   });
-  protected readonly shortKhr = computed(() => Math.max(0, this.totalKhr() - this.tenderedKhr()));
+  /**
+   * What is still owed. The riel total is rounded to the riel step and the dollar total is exact; either one pays in
+   * full (as the API counts it), so "=" (exactly $16.09 for ៛66,000) can always complete the sale.
+   */
+  protected readonly shortKhr = computed(() =>
+    Math.max(0, Math.min(this.totalKhr(), Math.round(this.total() * this.rate())) - this.tenderedKhr()),
+  );
   protected readonly canComplete = computed(() => {
     if (this.busy()) {
       return false;
