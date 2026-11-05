@@ -53,3 +53,8 @@
     margin-inline-start: 8px;
   }
 }
+
+// Not enough free stock for an open order (FR-3.21)
+.shortages {
+  margin: 12px 0;
+}

@@ -50,6 +50,8 @@ export interface SalesOrder {
   note: string | null;
   lines: (OrderLine & { qtyOrdered: number; qtyDelivered: number })[];
   deliveries: { deliveryId: number; deliveryNumber: string; deliveredAt: string; invoiceId: number | null; invoiceNumber: string | null; invoiceTotal: number | null }[];
+  /** Lines free stock does not cover yet: on hand less what other orders keep (FR-3.21). Base units. */
+  shortages: { productId: number; productName: string; needed: number; free: number; unitSymbol: string }[];
 }
 
 export interface Delivered {

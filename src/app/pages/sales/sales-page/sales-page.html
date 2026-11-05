@@ -327,7 +327,7 @@
         }
         <span class="spacer"></span>
         <button pButton type="button" (click)="printInvoice(i)">
-          <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.printInvoice' | translate }}</span>
+          <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ (i.type === 'DEBIT_NOTE' ? 'debit.print' : 'print.printInvoice') | translate }}</span>
         </button>
       </div>
     }

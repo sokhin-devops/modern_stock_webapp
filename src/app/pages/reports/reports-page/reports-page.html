@@ -60,12 +60,13 @@
               <label class="eoq-input">
                 <span>{{ 'reports.eoqOrderCost' | translate }}</span>
                 <p-inputnumber [ngModel]="orderCost()" (ngModelChange)="$event > 0 && orderCost.set($event)" mode="currency" currency="USD"
-                               locale="en-US" [min]="0.01" [max]="10000" size="small" [ariaLabel]="'reports.eoqOrderCost' | translate" />
+                               locale="en-US" [min]="0.01" [max]="10000" size="small" [inputStyle]="{ width: '104px' }"
+                               [ariaLabel]="'reports.eoqOrderCost' | translate" />
               </label>
               <label class="eoq-input">
                 <span>{{ 'reports.eoqHolding' | translate }}</span>
                 <p-inputnumber [ngModel]="holdingPercent()" (ngModelChange)="$event > 0 && holdingPercent.set($event)" suffix="%"
-                               [min]="1" [max]="100" size="small" [ariaLabel]="'reports.eoqHolding' | translate" />
+                               [min]="1" [max]="100" size="small" [inputStyle]="{ width: '80px' }" [ariaLabel]="'reports.eoqHolding' | translate" />
               </label>
             }
             @if (r.id === 'slow-moving') {

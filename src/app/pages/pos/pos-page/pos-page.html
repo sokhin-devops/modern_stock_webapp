@@ -32,6 +32,10 @@
     }
     <span class="spacer"></span>
     <ms-lang-button class="hide-sm" />
+    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="switchOpen.set(true)"
+            [attr.aria-label]="'pos.switchTitle' | translate" [pTooltip]="'pos.switchTitle' | translate" tooltipPosition="bottom">
+      <i class="pi pi-users" pButtonIcon></i>
+    </button>
     @if (shift()) {
       <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="shiftOpen.set(true)"
               [attr.aria-label]="'pos.closeShift' | translate">
@@ -190,3 +194,4 @@
 @if (business.branchId() != null) {
   <ms-shift-dialog [(visible)]="shiftOpen" [shift]="shift()" [branchId]="business.branchId()!" (changed)="shift.set($event)" />
 }
+<ms-switch-dialog [(visible)]="switchOpen" />

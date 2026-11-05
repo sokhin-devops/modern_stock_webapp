@@ -2014,7 +2014,8 @@
     "forInvoice": "For invoice",
     "void": "Void debit note",
     "voidAsk": "Void {{number}}? The customer will no longer owe it.",
-    "voided": "{{number}} voided"
+    "voided": "{{number}} voided",
+    "print": "Print debit note"
   },
   "requests": {
     "tab": "Requests",

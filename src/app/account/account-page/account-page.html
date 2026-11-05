@@ -84,6 +84,38 @@
           </div>
         </form>
 
+        <!-- POS PIN (FR-6.19) -->
+        <form class="settings-card ms-form" [formGroup]="pin" (ngSubmit)="savePin()" novalidate>
+          <h2 class="card-title">{{ 'accountPage.pinTitle' | translate }}</h2>
+          <p class="muted">{{ (auth.user()?.hasPin ? 'accountPage.pinLeadSet' : 'accountPage.pinLead') | translate }}</p>
+          <div class="ms-field">
+            <label msLabel for="ac-pin-pw" control="currentPassword">{{ 'accountPage.currentPassword' | translate }}</label>
+            <input pInputText id="ac-pin-pw" type="password" formControlName="currentPassword" autocomplete="current-password" />
+          </div>
+          <div class="ms-form-row">
+            <div class="ms-field">
+              <label msLabel for="ac-pin" control="pin" error="accountPage.pinRule">{{ 'accountPage.newPin' | translate }}</label>
+              <input pInputText id="ac-pin" type="password" inputmode="numeric" maxlength="6" formControlName="pin" autocomplete="off" />
+              <small class="field-hint">{{ 'accountPage.pinRule' | translate }}</small>
+            </div>
+            <div class="ms-field">
+              <label msLabel for="ac-pin2" control="confirmPin" error="accountPage.pinsDiffer"
+                     [invalid]="pin.controls.confirmPin.dirty && pin.hasError('notSame')">{{ 'accountPage.confirmPin' | translate }}</label>
+              <input pInputText id="ac-pin2" type="password" inputmode="numeric" maxlength="6" formControlName="confirmPin" autocomplete="off" />
+            </div>
+          </div>
+          <div class="settings-actions">
+            @if (auth.user()?.hasPin) {
+              <button pButton type="button" [text]="true" severity="danger" (click)="removePin()" [disabled]="busy() !== null">
+                <span pButtonLabel>{{ 'accountPage.removePin' | translate }}</span>
+              </button>
+            }
+            <button pButton type="submit" [loading]="busy() === 'pin'" [disabled]="busy() !== null">
+              <span pButtonLabel>{{ (auth.user()?.hasPin ? 'accountPage.changePin' : 'accountPage.setPin') | translate }}</span>
+            </button>
+          </div>
+        </form>
+
         <!-- Every device -->
         <section class="settings-card ms-form">
           <h2 class="card-title">{{ 'accountPage.everywhere' | translate }}</h2>
@@ -95,6 +127,25 @@
             </button>
           </div>
         </section>
+
+        <!-- Delete my account (FR-6.7) -->
+        @if (!auth.user()?.superAdmin) {
+          <section class="settings-card ms-form">
+            <h2 class="card-title">{{ 'accountPage.deleteTitle' | translate }}</h2>
+            <p class="muted">{{ 'accountPage.deleteLead' | translate }}</p>
+            <div class="ms-field">
+              <label msLabel for="ac-del-pw">{{ 'accountPage.currentPassword' | translate }}</label>
+              <input pInputText id="ac-del-pw" type="password" [ngModel]="deletePassword()" (ngModelChange)="deletePassword.set($event)"
+                     autocomplete="current-password" />
+            </div>
+            <div class="settings-actions">
+              <button pButton type="button" severity="danger" (click)="deleteAccount()" [loading]="busy() === 'delete'"
+                      [disabled]="busy() !== null || !deletePassword()">
+                <i class="pi pi-trash" pButtonIcon></i><span pButtonLabel>{{ 'accountPage.deleteButton' | translate }}</span>
+              </button>
+            </div>
+          </section>
+        }
       </div>
     </div>
   </div>

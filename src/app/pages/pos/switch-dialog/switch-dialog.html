@@ -1,0 +1,31 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [dismissableMask]="true" styleClass="ms-dialog"
+          [style]="{ width: 'min(440px, 96vw)' }" [header]="'pos.switchTitle' | translate">
+  <p class="muted lead">{{ 'pos.switchLead' | translate: { name: auth.user()?.fullName } }}</p>
+  @if (cashiers(); as list) {
+    @if (list.length) {
+      <div class="people" role="radiogroup" [attr.aria-label]="'pos.switchTitle' | translate">
+        @for (c of list; track c.userId) {
+          <button type="button" class="person" role="radio" [attr.aria-checked]="picked()?.userId === c.userId"
+                  [class.on]="picked()?.userId === c.userId" (click)="pick(c)">
+            <span class="avatar">{{ c.fullName.charAt(0) }}</span>{{ c.fullName }}
+          </button>
+        }
+      </div>
+      @if (picked(); as c) {
+        <form class="ms-field pin" (ngSubmit)="submit()">
+          <label for="sw-pin">{{ 'pos.switchPin' | translate: { name: c.fullName } }}</label>
+          <input pInputText id="sw-pin" name="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+                 [ngModel]="pin()" (ngModelChange)="pin.set($event)" />
+        </form>
+      }
+    } @else {
+      <p class="muted none">{{ 'pos.switchNone' | translate }}</p>
+    }
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !picked() || pin().length < 4">
+      <span pButtonLabel>{{ 'pos.switch' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

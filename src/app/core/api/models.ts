@@ -23,6 +23,8 @@ export interface UserResponse {
   uiDensity: 'comfortable' | 'compact';
   emailVerified: boolean;
   superAdmin: boolean;
+  /** A POS PIN is set (FR-6.19). */
+  hasPin: boolean;
 }
 
 export interface TokenResponse {
@@ -137,6 +139,8 @@ export interface StockRow {
   reorderLevel: number;
   value: number | null;
   low: boolean;
+  /** Of qtyOnHand, kept for sales orders (FR-3.21); free = qtyOnHand − reserved. */
+  reserved: number;
 }
 
 /** One branch's stock of a product in the stock by branch view (FR-4.7, FR-4.8). */
@@ -651,6 +655,8 @@ export interface Product {
   photoUrl: string | null;
   /** Reorder level of the branches you are looking at: each branch's own level, or reorderLevel, added up (FR-4.7). */
   reorderAt: number;
+  /** Of qtyOnHand, base units kept for sales orders (FR-3.21). */
+  qtyReserved: number;
 }
 
 export interface ProductRequest {

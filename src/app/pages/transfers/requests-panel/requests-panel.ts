@@ -86,8 +86,10 @@ export class RequestsPanel {
     this.list.reload();
   }
 
+  /** Asked of the branch selected in the top bar (or, on All, of my branches by another). */
   protected incoming(r: StockRequest): boolean {
-    return this.mine().has(r.fromBranchId) && !this.mine().has(r.toBranchId);
+    const selected = this.business.branchId();
+    return selected ? r.fromBranchId === selected : this.mine().has(r.fromBranchId) && !this.mine().has(r.toBranchId);
   }
 
   protected branchName(id: number, fallback: string): string {

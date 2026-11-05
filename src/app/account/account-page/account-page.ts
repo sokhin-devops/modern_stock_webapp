@@ -18,7 +18,8 @@ import { CAMBODIAN_PHONE, sameAs } from '../../shared/validators';
 
 /**
  * My account (FR-6.3): my name, username and phone; language and light/dark mode (saved to the account); the password;
- * and signing out on every device (FR-6.6). The same for every business I belong to.
+ * my POS PIN (FR-6.19); signing out on every device (FR-6.6); and deleting the account (FR-6.7). The same for every
+ * business I belong to.
  */
 @Component({
   selector: 'ms-account-page',
@@ -36,7 +37,7 @@ export class AccountPage {
   private readonly translate = inject(TranslateService);
   private readonly fb = inject(NonNullableFormBuilder);
 
-  protected readonly busy = signal<'profile' | 'password' | 'everywhere' | null>(null);
+  protected readonly busy = signal<'profile' | 'password' | 'everywhere' | 'pin' | 'delete' | null>(null);
   protected readonly languages = [
     { value: 'km', label: 'ខ្មែរ' },
     { value: 'en', label: 'English' },
@@ -61,6 +62,19 @@ export class AccountPage {
     },
     { validators: sameAs('newPassword', 'confirmPassword') },
   );
+
+  /** POS PIN (FR-6.19): 4 to 6 digits, twice, with the password. */
+  protected readonly pin = this.fb.group(
+    {
+      currentPassword: ['', Validators.required],
+      pin: ['', [Validators.required, Validators.pattern(/^\d{4,6}$/)]],
+      confirmPin: ['', Validators.required],
+    },
+    { validators: sameAs('pin', 'confirmPin') },
+  );
+
+  /** Delete my account (FR-6.7): the password, to be sure. */
+  protected readonly deletePassword = signal('');
 
   constructor() {
     const u = this.auth.user();
@@ -114,6 +128,62 @@ export class AccountPage {
         this.notify.showKey('accountPage.passwordChanged');
       },
       error: (e) => this.fail(e),
+    });
+  }
+
+  protected savePin(): void {
+    if (this.pin.invalid) {
+      revealErrors(this.pin);
+      return;
+    }
+    const v = this.pin.getRawValue();
+    this.busy.set('pin');
+    this.api.put<UserResponse>('/me/pin', { currentPassword: v.currentPassword, pin: v.pin }).subscribe({
+      next: (u) => {
+        this.busy.set(null);
+        this.pin.reset();
+        this.auth.user.set(u);
+        this.notify.showKey('accountPage.pinSaved');
+      },
+      error: (e) => this.fail(e),
+    });
+  }
+
+  protected removePin(): void {
+    this.busy.set('pin');
+    this.api.delete<UserResponse>('/me/pin').subscribe({
+      next: (u) => {
+        this.busy.set(null);
+        this.auth.user.set(u);
+        this.notify.showKey('accountPage.pinRemoved');
+      },
+      error: (e) => this.fail(e),
+    });
+  }
+
+  /** Gone for good: name, email and phone removed, every device signed out (the API refuses for a last Owner). */
+  protected deleteAccount(): void {
+    const password = this.deletePassword();
+    if (!password) {
+      return;
+    }
+    this.confirm.confirm({
+      header: this.translate.instant('accountPage.deleteTitle'),
+      message: this.translate.instant('accountPage.deleteAsk'),
+      acceptLabel: this.translate.instant('accountPage.deleteButton'),
+      rejectLabel: this.translate.instant('common.cancel'),
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { text: true },
+      accept: () => {
+        this.busy.set('delete');
+        this.api.post('/me/delete', { password }).subscribe({
+          next: () => {
+            this.notify.showKey('accountPage.deleted');
+            this.auth.forget();
+          },
+          error: (e) => this.fail(e),
+        });
+      },
     });
   }
 

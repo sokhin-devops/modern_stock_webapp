@@ -99,6 +99,22 @@ export class AuthService {
       .pipe(tap((r) => this.setSession(r)));
   }
 
+  /**
+   * Another member takes over this device with their POS PIN (FR-6.19). The new refresh cookie replaces this one;
+   * the page then starts again as that person.
+   */
+  pinSwitch(businessId: number, userId: number, pin: string): Observable<TokenResponse> {
+    return this.http
+      .post<TokenResponse>(`${API}/auth/pin-switch`, { businessId, userId, pin }, { withCredentials: true })
+      .pipe(tap((r) => this.setSession(r)));
+  }
+
+  /** After the account is deleted (FR-6.7): nothing to sign out of any more. */
+  forget(): void {
+    this.clear();
+    this.router.navigate(['/login']);
+  }
+
   logout(): void {
     this.http.post(`${API}/auth/logout`, null, { withCredentials: true }).subscribe({ error: () => undefined });
     this.clear();

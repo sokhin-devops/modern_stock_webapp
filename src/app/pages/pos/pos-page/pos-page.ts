@@ -19,6 +19,7 @@ import { NotifyService } from '../../../core/notify.service';
 import { PosService } from '../../../core/sales/pos.service';
 import { ThemeModeService } from '../../../core/theme-mode.service';
 import { AnnouncementBanner } from '../../../layout/announcement-banner/announcement-banner';
+import { SwitchDialog } from '../switch-dialog/switch-dialog';
 import { AccountMenu } from '../../../shared/account-menu/account-menu';
 import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { LangButton } from '../../../shared/lang-button/lang-button';
@@ -51,7 +52,7 @@ interface CartLine {
   imports: [
     FormsModule, RouterLink, TranslatePipe, DecimalPipe, DatePipe, AutoComplete, Select, ButtonDirective, ButtonIcon,
     ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, NewCustomerDialog, HeldDialog, ApiFilePipe,
-    AnnouncementBanner,
+    AnnouncementBanner, SwitchDialog,
   ],
   host: { '(document:keydown)': 'onKey($event)' },
   templateUrl: './pos-page.html',
@@ -101,6 +102,10 @@ export class PosPage {
   protected readonly receiptOpen = signal(false);
   protected readonly shift = signal<CashShift | null>(null);
   protected readonly shiftOpen = signal(false);
+  /** Products already warned about stock kept for sales orders, in this cart. */
+  private readonly reservedWarned = new Set<number>();
+  /** Switch cashier with a PIN (FR-6.19). */
+  protected readonly switchOpen = signal(false);
 
   protected readonly branch = this.business.branch;
   protected readonly rate = computed(() => this.business.rate()?.usdToKhr ?? 0);
@@ -215,6 +220,25 @@ export class PosPage {
       return;
     }
     this.lines.update((list) => list.map((l) => (l === line ? { ...l, qty } : l)));
+    if (delta > 0) {
+      this.warnReserved(line.product);
+    }
+  }
+
+  /**
+   * Stock kept for sales orders (FR-3.21) may still be sold here, after a warning: once per product and cart, when the
+   * cart takes more than what is free.
+   */
+  private warnReserved(product: Product): void {
+    const reserved = product.qtyReserved ?? 0;
+    if (reserved <= 0 || this.reservedWarned.has(product.id)) {
+      return;
+    }
+    const inCart = this.lines().filter((l) => l.product.id === product.id).reduce((sum, l) => sum + l.qty * l.factor, 0);
+    if (inCart > product.qtyOnHand - reserved) {
+      this.reservedWarned.add(product.id);
+      this.notify.showKey('pos.reservedWarn', { name: this.lang.name(product.nameEn, product.nameKm), n: reserved });
+    }
   }
 
   protected remove(line: CartLine): void {
@@ -222,6 +246,7 @@ export class PosPage {
   }
 
   protected clear(): void {
+    this.reservedWarned.clear();
     this.lines.set([]);
     this.customer.set(null);
   }
@@ -382,6 +407,7 @@ export class PosPage {
           qty: 1,
         },
       ]);
+      this.warnReserved(product);
     }
   }
 

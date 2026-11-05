@@ -1,0 +1,59 @@
+// A line under the title, not the big page lead
+.lead {
+  margin: 0 0 12px;
+  font-size: inherit;
+}
+
+// The people who can take over, as big buttons (a touch screen at the counter).
+.people {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &.on {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  .avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    font-weight: 500;
+  }
+}
+
+.pin {
+  margin-top: 16px;
+
+  input {
+    width: 100%;
+    font-size: 22px;
+    letter-spacing: 8px;
+    text-align: center;
+  }
+}
+
+.none {
+  margin: 0;
+}

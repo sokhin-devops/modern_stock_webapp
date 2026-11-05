@@ -24,6 +24,18 @@
     @if (v.doc.note) {
       <p class="muted">{{ v.doc.note }}</p>
     }
+    @if (order()?.shortages?.length) {
+      <!-- FR-3.21: other orders keep their stock; this one waits for more -->
+      <div class="banner banner-warn shortages">
+        <i class="icon pi pi-exclamation-triangle"></i>
+        <div class="text">
+          <b>{{ 'orders.shortTitle' | translate }}</b>
+          @for (s of order()!.shortages; track s.productId) {
+            <div>{{ 'orders.shortLine' | translate: { name: s.productName, needed: (s.needed | number: '1.0-3'), free: (s.free | number: '1.0-3'), unit: s.unitSymbol } }}</div>
+          }
+        </div>
+      </div>
+    }
 
     @if (quotation(); as q) {
       <p-table class="ms-table" [value]="q.lines" dataKey="id">

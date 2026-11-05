@@ -96,6 +96,7 @@
             <th pSortableColumn="nameEn">{{ 'products.colProduct' | translate }} <p-sortIcon field="nameEn" /></th>
             <th pSortableColumn="sku">{{ 'products.colSku' | translate }} <p-sortIcon field="sku" /></th>
             <th class="num">{{ 'stock.onHand' | translate }}</th>
+            <th class="num">{{ 'stock.reserved' | translate }}</th>
             <th class="num">{{ 'stock.reorderAt' | translate }}</th>
             @if (showValue()) {
               <th class="num">{{ 'stock.value' | translate }}</th>
@@ -113,6 +114,14 @@
             </td>
             <td class="muted">{{ r.sku }}</td>
             <td class="num" [class.danger-text]="r.low">{{ r.qtyOnHand | number: '1.0-3' }} {{ r.unitSymbol }}</td>
+            <td class="num muted">
+              @if (r.reserved > 0) {
+                {{ r.reserved | number: '1.0-3' }}
+                <div class="small">{{ 'stock.free' | translate: { n: (r.qtyOnHand - r.reserved | number: '1.0-3') } }}</div>
+              } @else {
+                —
+              }
+            </td>
             <td class="num muted">{{ r.reorderLevel | number: '1.0-3' }}</td>
             @if (showValue()) {
               <td class="num">{{ r.value | currency: 'USD' }}</td>
@@ -129,7 +138,7 @@
           </tr>
         </ng-template>
         <ng-template #emptymessage>
-          <tr><td colspan="6" class="empty-cell">{{ (q() || onlyLow() ? 'common.noResults' : 'stock.empty') | translate }}</td></tr>
+          <tr><td colspan="7" class="empty-cell">{{ (q() || onlyLow() ? 'common.noResults' : 'stock.empty') | translate }}</td></tr>
         </ng-template>
       </p-table>
     }
