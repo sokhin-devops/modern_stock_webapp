@@ -497,7 +497,9 @@
     "viewByBranch": "By branch",
     "byBranchLead": "Each branch's stock and its reorder level. A red number is at or below the level.",
     "lowSomewhere": "Low in a branch",
-    "notWatched": "not watched"
+    "notWatched": "not watched",
+    "reserved": "For orders",
+    "free": "{{n}} free"
   },
   "pos": {
     "title": "POS",
@@ -570,7 +572,13 @@
     "heldRemove": "Remove held sale",
     "heldNone": "No held sales.",
     "heldDone": "Sale held. Serve the next customer.",
-    "heldFull": "{{n}} sales are already held. Finish or remove one first."
+    "heldFull": "{{n}} sales are already held. Finish or remove one first.",
+    "switchTitle": "Switch cashier",
+    "switchLead": "{{name}} is signed in on this device. Who takes over?",
+    "switchPin": "PIN of {{name}}",
+    "switchNone": "Nobody else here has a PIN yet. Each person sets theirs in My account.",
+    "switch": "Switch",
+    "reservedWarn": "{{n}} of {{name}} are kept for sales orders. Selling them leaves those orders short."
   },
   "partners": {
     "customers": "Customers",
@@ -892,7 +900,12 @@
         "toPay": "To pay",
         "voidNote": "This invoice is void. Nothing is owed on it.",
         "demo": "Card (demo)"
-      }
+      },
+      "couponPh": "Coupon code",
+      "couponApply": "Apply",
+      "couponApplied": "Coupon {{code}} applied",
+      "couponRunning": "{{pct}}% off the next {{n}} invoices",
+      "couponOff": "{{amount}} off · {{code}}"
     },
     "receipt": {
       "title": "Receipt",
@@ -1606,6 +1619,31 @@
       "byPlan": "Businesses by plan",
       "trial": "Pro trial",
       "byPlanNote": "Archived businesses are left out."
+    },
+    "coupons": {
+      "title": "Coupons",
+      "new": "New coupon",
+      "lead": "An Owner enters the code on the Billing page; the next invoices for a full period get the discount.",
+      "code": "Code",
+      "codeHint": "Letters, digits, - and _ (kept in capitals)",
+      "off": "Discount",
+      "periods": "Invoices",
+      "used": "Used",
+      "expires": "Valid until",
+      "max": "Businesses at most",
+      "active": "Can be used",
+      "none": "No coupons yet."
+    },
+    "free": {
+      "button": "Free months",
+      "title": "Free months for {{name}}",
+      "leadFree": "On Free: they get this plan for the months given, then go back to Free unless they keep it.",
+      "leadTrial": "The trial runs longer by the months given.",
+      "leadActive": "The paid period runs longer: the next invoice comes later.",
+      "months": "Months",
+      "notePh": "Why, for their activity log",
+      "give": "Give",
+      "done": "{{n}} free months given to {{name}}"
     }
   },
   "image": {
@@ -1652,7 +1690,24 @@
     "everywhere": "Sign out everywhere",
     "everywhereLead": "Signs you out on every phone and computer, this one too. Use it if you lost a device or signed in on a shared one.",
     "everywhereButton": "Sign out on all devices",
-    "everywhereAsk": "Sign out on every device, this one too?"
+    "everywhereAsk": "Sign out on every device, this one too?",
+    "pinTitle": "POS PIN",
+    "pinLead": "A 4 to 6 digit PIN lets you take over a shared POS from another cashier without their password.",
+    "pinLeadSet": "Your PIN is set. Change it here, or remove it so nobody can switch to you at the POS.",
+    "newPin": "New PIN",
+    "confirmPin": "PIN again",
+    "pinRule": "4 to 6 digits",
+    "pinsDiffer": "The two PINs are not the same",
+    "setPin": "Set PIN",
+    "changePin": "Change PIN",
+    "removePin": "Remove PIN",
+    "pinSaved": "PIN saved",
+    "pinRemoved": "PIN removed",
+    "deleteTitle": "Delete my account",
+    "deleteLead": "Your name, email, phone and PIN are removed and you leave every business. What you did stays in their records as \"Deleted user\". You can't do this while you are the only Owner of a business.",
+    "deleteButton": "Delete my account",
+    "deleteAsk": "Delete your account for good? You will be signed out everywhere and can't sign in again.",
+    "deleted": "Your account is deleted"
   },
   "returns": {
     "button": "Return items",
@@ -1814,7 +1869,9 @@
       "DELIVERED": "Delivered",
       "CLOSED": "Closed",
       "CANCELLED": "Cancelled"
-    }
+    },
+    "shortTitle": "Not enough free stock yet. Other orders keep theirs; this one can be delivered when more arrives.",
+    "shortLine": "{{name}}: needs {{needed}} {{unit}}, {{free}} free"
   },
   "scanner": {
     "title": "Scan with the camera",
@@ -1879,7 +1936,10 @@
       "BUSINESS_RESTORED": "Business restored",
       "DEBIT_NOTE_CREATED": "Debit note made",
       "DEBIT_NOTE_VOIDED": "Debit note voided",
-      "DATA_EXPORTED": "All data exported"
+      "DATA_EXPORTED": "All data exported",
+      "CASHIER_SWITCHED": "Cashier switched with a PIN",
+      "COUPON_REDEEMED": "Coupon used",
+      "FREE_MONTHS_GIVEN": "Free months given"
     },
     "types": {
       "PRODUCT": "Products",
@@ -1950,7 +2010,10 @@
       "cycle": "Billing",
       "quantity": "How many",
       "expiryDays": "Near-expiry days",
-      "numberPrefixes": "Number prefix"
+      "numberPrefixes": "Number prefix",
+      "coupon": "Coupon",
+      "percentOff": "Discount (%)",
+      "periods": "Invoices"
     }
   },
   "labels": {

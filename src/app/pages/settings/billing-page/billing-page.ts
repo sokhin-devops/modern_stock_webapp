@@ -8,6 +8,7 @@ import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
+import { InputText } from 'primeng/inputtext';
 import { ProgressBar } from 'primeng/progressbar';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { SelectButton } from 'primeng/selectbutton';
@@ -52,7 +53,7 @@ interface KeepChoices {
   selector: 'ms-billing-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, CurrencyPipe, DecimalPipe, ProgressBar, ProgressSpinner, TableModule, Dialog, SelectButton, InputNumber,
-    Checkbox, ButtonDirective, ButtonIcon, ButtonLabel, FieldLabel, ImageField, PrintDialog,
+    Checkbox, ButtonDirective, ButtonIcon, ButtonLabel, FieldLabel, ImageField, PrintDialog, InputText,
   ],
   templateUrl: './billing-page.html',
   styleUrl: './billing-page.scss',
@@ -71,6 +72,8 @@ export class BillingPage {
   protected readonly billing = this.state.billing;
   protected readonly invoices = signal<BillingInvoice[]>([]);
   protected readonly busy = signal<string | null>(null);
+  /** A coupon code being typed (FR-10.16). */
+  protected readonly couponCode = signal('');
   protected readonly limits = LIMITS;
   protected readonly counted = COUNTED;
 
@@ -361,6 +364,17 @@ export class BillingPage {
 
   protected percent(used: number, limit: number | null): number {
     return limit ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+  }
+
+  protected redeemCoupon(): void {
+    const code = this.couponCode().trim();
+    if (!code) {
+      return;
+    }
+    this.run('/billing/coupon', { code }, (b) => {
+      this.couponCode.set('');
+      this.notify.showKey('settings.billing.couponApplied', { code: b.coupon?.code ?? code.toUpperCase() });
+    });
   }
 
   /** What an invoice is for: its own description, or the plan and kind. */

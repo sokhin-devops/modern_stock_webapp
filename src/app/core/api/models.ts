@@ -198,6 +198,8 @@ export interface Billing {
   transferAccounts: TransferAccount[];
   /** Who issues the billing invoices (printed at the top of them). */
   issuer: BillingIssuer;
+  /** The coupon running (FR-10.16): its discount on the next full-period invoices. */
+  coupon: { code: string; percentOff: number; periodsLeft: number } | null;
 }
 
 export interface BillingIssuer {
@@ -274,6 +276,9 @@ export interface BillingInvoice {
   paidAt: string | null;
   /** The payment that paid it, for the receipt. */
   paidWith: BillingPayment | null;
+  /** Taken off by a coupon (FR-10.16). */
+  discount: number;
+  couponCode: string | null;
 }
 
 export interface BillingPayment {

@@ -12,6 +12,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 import { ApiService } from '../../core/api/api.service';
 import { NotifyService } from '../../core/notify.service';
 import { FieldLabel } from '../../shared/field-label/field-label';
+import { AdminCoupons } from '../admin-coupons/admin-coupons';
 
 interface PlanRow {
   id: number;
@@ -46,7 +47,10 @@ const FEATURES = ['telegram_alerts', 'excel_export', 'tax_invoice'];
  */
 @Component({
   selector: 'ms-admin-plans',
-  imports: [FormsModule, TranslatePipe, CurrencyPipe, DecimalPipe, TableModule, Dialog, InputNumber, InputText, ToggleSwitch, ButtonDirective, ButtonLabel, FieldLabel],
+  imports: [
+    FormsModule, TranslatePipe, CurrencyPipe, DecimalPipe, TableModule, Dialog, InputNumber, InputText, ToggleSwitch, ButtonDirective, ButtonLabel, FieldLabel,
+    AdminCoupons,
+  ],
   templateUrl: './admin-plans.html',
   styleUrls: ['../admin-tab.scss', './admin-plans.scss'],
 })

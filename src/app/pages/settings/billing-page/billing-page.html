@@ -117,6 +117,21 @@
               <p class="muted">{{ 'settings.billing.freeLead' | translate }}</p>
             }
           }
+          <!-- A coupon from us (FR-10.16): its discount goes on the next full-period invoices -->
+          <div class="coupon">
+            @if (b.coupon; as c) {
+              <span class="tag tag-primary"><i class="icon pi pi-ticket"></i>{{ c.code }}</span>
+              <small class="muted">{{ 'settings.billing.couponRunning' | translate: { pct: c.percentOff, n: c.periodsLeft } }}</small>
+            } @else {
+              <input pInputText [ngModel]="couponCode()" (ngModelChange)="couponCode.set($event)" maxlength="30"
+                     [placeholder]="'settings.billing.couponPh' | translate" [attr.aria-label]="'settings.billing.couponPh' | translate"
+                     (keydown.enter)="redeemCoupon()" />
+              <button pButton type="button" [outlined]="true" size="small" (click)="redeemCoupon()"
+                      [loading]="busy() === '/billing/coupon'" [disabled]="busy() !== null || !couponCode().trim()">
+                <span pButtonLabel>{{ 'settings.billing.couponApply' | translate }}</span>
+              </button>
+            }
+          </div>
         </section>
         <section class="settings-card">
           <h3>{{ 'settings.billing.usage' | translate }}</h3>
@@ -249,7 +264,12 @@
               <td><div class="strong doc-no">{{ i.number }}</div><div class="muted small">{{ i.createdAt | date: 'dd/MM/yyyy' }}</div></td>
               <td>{{ what(i) }}</td>
               <td class="muted">{{ i.periodStart | date: 'dd/MM/yyyy' }} – {{ i.periodEnd | date: 'dd/MM/yyyy' }}</td>
-              <td class="num strong">{{ i.amount | currency: 'USD' }}</td>
+              <td class="num strong">
+                {{ i.amount | currency: 'USD' }}
+                @if (i.discount > 0) {
+                  <div class="muted small">{{ 'settings.billing.couponOff' | translate: { amount: (i.discount | currency: 'USD'), code: i.couponCode } }}</div>
+                }
+              </td>
               <td>
                 @if (i.transferPending) {
                   <span class="tag">{{ 'settings.billing.transferPendingTag' | translate }}</span>

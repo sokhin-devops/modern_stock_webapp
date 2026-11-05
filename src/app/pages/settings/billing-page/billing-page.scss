@@ -301,3 +301,20 @@ h3 {
     margin-inline-start: 4px;
   }
 }
+
+// A coupon: typed under the plan, or the one running
+.coupon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+
+  input {
+    flex: 1 1 140px;
+    min-width: 0;
+    text-transform: uppercase;
+  }
+}

@@ -82,6 +82,11 @@
                         <span pButtonLabel>{{ 'admin.runRenewal' | translate }}</span>
                       </button>
                     }
+                    @if (r.subscriptionStatus !== 'PAST_DUE' && r.status !== 'ARCHIVED') {
+                      <button pButton type="button" size="small" [text]="true" (click)="openFree(r)" [disabled]="busy() === r.id">
+                        <span pButtonLabel>{{ 'admin.free.button' | translate }}</span>
+                      </button>
+                    }
                     @if (r.status === 'ACTIVE' || r.status === 'SUSPENDED') {
                       <button pButton type="button" size="small" [text]="true" [severity]="r.status === 'ACTIVE' ? 'danger' : 'primary'"
                               (click)="suspend(r)" [disabled]="busy() === r.id">
@@ -129,3 +134,36 @@
     </div>
   </div>
 </div>
+
+<!-- Free months (FR-10.16) -->
+<p-dialog [visible]="!!freeFor()" (visibleChange)="!$event && freeFor.set(null)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [style]="{ width: 'min(440px, 96vw)' }" [header]="'admin.free.title' | translate: { name: freeFor()?.nameEn }">
+  @if (freeFor(); as r) {
+    <div class="ms-form free-form">
+      <p class="muted">{{ (onFree(r) ? 'admin.free.leadFree' : r.subscriptionStatus === 'TRIALING' ? 'admin.free.leadTrial' : 'admin.free.leadActive') | translate }}</p>
+      <div class="ms-field">
+        <label for="fm-months">{{ 'admin.free.months' | translate }}</label>
+        <p-inputnumber inputId="fm-months" [ngModel]="freeMonths()" (ngModelChange)="freeMonths.set($event || 1)" [min]="1" [max]="24"
+                       [showButtons]="true" [fluid]="true" />
+      </div>
+      @if (onFree(r)) {
+        <div class="ms-field">
+          <span id="fm-plan">{{ 'admin.plan' | translate }}</span>
+          <p-selectbutton [options]="freePlans" optionLabel="label" optionValue="value" [ngModel]="freePlan()" (ngModelChange)="freePlan.set($event)"
+                          [allowEmpty]="false" ariaLabelledBy="fm-plan" />
+        </div>
+      }
+      <div class="ms-field">
+        <label for="fm-note">{{ 'common.note' | translate }}</label>
+        <input pInputText id="fm-note" [ngModel]="freeNote()" (ngModelChange)="freeNote.set($event)" maxlength="120"
+               [placeholder]="'admin.free.notePh' | translate" />
+      </div>
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="freeFor.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="giveFree()" [loading]="busy() === freeFor()?.id" [disabled]="busy() !== null">
+      <span pButtonLabel>{{ 'admin.free.give' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

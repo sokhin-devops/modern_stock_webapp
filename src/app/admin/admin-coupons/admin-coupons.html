@@ -1,0 +1,81 @@
+<div class="coupons-head">
+  <h3 class="section-title">{{ 'admin.coupons.title' | translate }}</h3>
+  <button pButton type="button" [outlined]="true" size="small" (click)="add()">
+    <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'admin.coupons.new' | translate }}</span>
+  </button>
+</div>
+<p class="muted lead">{{ 'admin.coupons.lead' | translate }}</p>
+<section class="card table-card">
+  <p-table class="ms-table" [value]="coupons()" dataKey="id" [rowHover]="true">
+    <ng-template #header>
+      <tr>
+        <th>{{ 'admin.coupons.code' | translate }}</th>
+        <th class="num">{{ 'admin.coupons.off' | translate }}</th>
+        <th class="num">{{ 'admin.coupons.periods' | translate }}</th>
+        <th class="num">{{ 'admin.coupons.used' | translate }}</th>
+        <th>{{ 'admin.coupons.expires' | translate }}</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-c>
+      <tr class="clickable" tabindex="0" (click)="edit(c)" (keydown.enter)="edit(c)">
+        <td>
+          <span class="strong doc-no">{{ c.code }}</span>@if (!c.active) { <span class="tag">{{ 'admin.plans.off' | translate }}</span> }
+          @if (c.note) { <div class="muted small">{{ c.note }}</div> }
+        </td>
+        <td class="num">{{ c.percentOff }}%</td>
+        <td class="num">{{ c.periods }}</td>
+        <td class="num">{{ c.redemptions }}{{ c.maxRedemptions ? ' / ' + c.maxRedemptions : '' }}</td>
+        <td class="muted">{{ c.expiresOn ? (c.expiresOn | date: 'dd/MM/yyyy') : '—' }}</td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage><tr><td colspan="5" class="empty-cell">{{ 'admin.coupons.none' | translate }}</td></tr></ng-template>
+  </p-table>
+</section>
+
+<p-dialog [visible]="!!editing()" (visibleChange)="!$event && editing.set(null)" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+          [style]="{ width: 'min(480px, 96vw)' }" [header]="(editing()?.id ? editing()!.code : ('admin.coupons.new' | translate))">
+  @if (editing(); as c) {
+    <div class="ms-form dialog-form">
+      <div class="ms-field">
+        <label msLabel for="cp-code" required>{{ 'admin.coupons.code' | translate }}</label>
+        <input pInputText id="cp-code" [ngModel]="c.code" (ngModelChange)="set('code', $event)" maxlength="30" class="code" />
+        <small class="field-hint">{{ 'admin.coupons.codeHint' | translate }}</small>
+      </div>
+      <div class="ms-form-row">
+        <div class="ms-field">
+          <label msLabel for="cp-off">{{ 'admin.coupons.off' | translate }}</label>
+          <p-inputnumber inputId="cp-off" [ngModel]="c.percentOff" (ngModelChange)="set('percentOff', $event)" suffix="%" [min]="1" [max]="100" [fluid]="true" />
+        </div>
+        <div class="ms-field">
+          <label msLabel for="cp-periods">{{ 'admin.coupons.periods' | translate }}</label>
+          <p-inputnumber inputId="cp-periods" [ngModel]="c.periods" (ngModelChange)="set('periods', $event)" [min]="1" [max]="24" [fluid]="true" />
+        </div>
+      </div>
+      <div class="ms-form-row">
+        <div class="ms-field">
+          <label msLabel for="cp-max" optional>{{ 'admin.coupons.max' | translate }}</label>
+          <p-inputnumber inputId="cp-max" [ngModel]="c.maxRedemptions" (ngModelChange)="set('maxRedemptions', $event)" [min]="1" [fluid]="true" />
+        </div>
+        <div class="ms-field">
+          <label msLabel for="cp-expires" optional>{{ 'admin.coupons.expires' | translate }}</label>
+          <p-datepicker inputId="cp-expires" [ngModel]="expires()" (ngModelChange)="expires.set($event)" dateFormat="dd/mm/yy"
+                        [showClear]="true" appendTo="body" [fluid]="true" />
+        </div>
+      </div>
+      <div class="ms-field">
+        <label msLabel for="cp-note" optional>{{ 'common.note' | translate }}</label>
+        <input pInputText id="cp-note" [ngModel]="c.note" (ngModelChange)="set('note', $event)" maxlength="255" />
+      </div>
+      <div class="ms-check">
+        <p-toggleswitch inputId="cp-active" [ngModel]="c.active" (ngModelChange)="set('active', $event)" />
+        <label for="cp-active">{{ 'admin.coupons.active' | translate }}</label>
+      </div>
+    </div>
+  }
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="editing.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+    <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !editing()?.code?.trim()">
+      <span pButtonLabel>{{ 'common.save' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

@@ -2,7 +2,12 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
+import { FormsModule } from '@angular/forms';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
+import { Dialog } from 'primeng/dialog';
+import { InputNumber } from 'primeng/inputnumber';
+import { InputText } from 'primeng/inputtext';
+import { SelectButton } from 'primeng/selectbutton';
 import { TableModule } from 'primeng/table';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 
@@ -47,7 +52,8 @@ type AdminTab = 'businesses' | 'stats' | 'accounts' | 'transfers' | 'plans' | 'm
 @Component({
   selector: 'ms-admin-page',
   imports: [
-    TranslatePipe, DatePipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, ButtonDirective, ButtonLabel,
+    TranslatePipe, DatePipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, ButtonDirective, ButtonLabel, FormsModule, Dialog,
+    InputNumber, InputText, SelectButton,
     AdminAccounts, AdminTransfers, AdminPlans, AdminMessages, AdminStats, AdminSettings,
   ],
   templateUrl: './admin-page.html',
@@ -63,6 +69,15 @@ export class AdminPage {
   protected readonly rows = signal<BusinessRow[]>([]);
   protected readonly loading = signal(true);
   protected readonly busy = signal<number | null>(null);
+  /** Free months (FR-10.16): the business, how many, which plan for a business on Free, and a note for its log. */
+  protected readonly freeFor = signal<BusinessRow | null>(null);
+  protected readonly freeMonths = signal(1);
+  protected readonly freePlan = signal('PRO');
+  protected readonly freeNote = signal('');
+  protected readonly freePlans = [
+    { value: 'BASIC', label: 'Basic' },
+    { value: 'PRO', label: 'Pro' },
+  ];
 
   constructor() {
     this.load();
@@ -80,6 +95,39 @@ export class AdminPage {
   protected suspend(row: BusinessRow): void {
     this.control(row, row.status === 'SUSPENDED' ? 'reactivate' : 'suspend',
       row.status === 'SUSPENDED' ? 'admin.reactivateBusinessAsk' : 'admin.suspendBusinessAsk');
+  }
+
+  /** On Free: the plan to give; a trial or a paid period just runs longer. */
+  protected onFree(row: BusinessRow): boolean {
+    return row.subscriptionStatus !== 'TRIALING' && row.subscriptionStatus !== 'ACTIVE' && row.subscriptionStatus !== 'PAST_DUE';
+  }
+
+  protected openFree(row: BusinessRow): void {
+    this.freeMonths.set(1);
+    this.freePlan.set('PRO');
+    this.freeNote.set('');
+    this.freeFor.set(row);
+  }
+
+  protected giveFree(): void {
+    const row = this.freeFor();
+    if (!row) {
+      return;
+    }
+    this.busy.set(row.id);
+    const body = { months: this.freeMonths(), planCode: this.onFree(row) ? this.freePlan() : null, note: this.freeNote().trim() || null };
+    this.api.post(`/admin/businesses/${row.id}/free-months`, body).subscribe({
+      next: () => {
+        this.busy.set(null);
+        this.freeFor.set(null);
+        this.notify.showKey('admin.free.done', { name: row.nameEn, n: body.months });
+        this.load();
+      },
+      error: (e) => {
+        this.busy.set(null);
+        this.notify.error(e);
+      },
+    });
   }
 
   /** Demo control (FR-10.15): sends today's billing reminders now. */
