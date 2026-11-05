@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, model, output, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
@@ -22,7 +22,7 @@ import { filledLines, warehouseOptions } from '../../../shared/options';
  */
 @Component({
   selector: 'ms-transfer-form',
-  imports: [FormsModule, TranslatePipe, Drawer, InputText, Select, SelectButton, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
+  imports: [FormsModule, TranslatePipe, Dialog, InputText, Select, SelectButton, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
   templateUrl: './transfer-form.html',
   styleUrl: './transfer-form.scss',
 })

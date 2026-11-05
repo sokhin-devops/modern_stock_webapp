@@ -25,7 +25,7 @@ import { StockDetail } from '../stock-detail/stock-detail';
 
 /**
  * Stock (prototype stock.html, PLAIN.md 11.2): on hand per product for the branch in the top bar, with search, a
- * category filter and "low stock only". A product opens its stock per warehouse and its stock card in a drawer.
+ * category filter and "low stock only". A product opens its stock per warehouse and its stock card in a dialog.
  * "By branch" puts every branch side by side with its own reorder level (FR-4.7, FR-4.8).
  */
 @Component({

@@ -9,7 +9,7 @@ import { InputText } from 'primeng/inputtext';
 
 import { ApiService } from '../../core/api/api.service';
 import { NotifyService } from '../../core/notify.service';
-import { Credit, CREDIT_KINDS, CreditKind } from '../credit-drawer/credit';
+import { Credit, CREDIT_KINDS, CreditKind } from '../credit-details/credit';
 import { FieldLabel } from '../field-label/field-label';
 
 interface Party {

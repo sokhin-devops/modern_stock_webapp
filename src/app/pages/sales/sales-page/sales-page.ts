@@ -3,7 +3,7 @@ import { Component, computed, effect, inject, input, signal, untracked } from '@
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 import { Tooltip } from 'primeng/tooltip';
@@ -17,10 +17,10 @@ import { PaymentDialog } from '../../../shared/payment-dialog/payment-dialog';
 import { PrintDialog, PrintDocument } from '../../../shared/print-dialog/print-dialog';
 import { CreditDialog } from '../../../shared/credit-dialog/credit-dialog';
 import { DebitDialog, DebitStart, SavedDebit } from '../debit-dialog/debit-dialog';
-import { Credit } from '../../../shared/credit-drawer/credit';
-import { CreditDrawer } from '../../../shared/credit-drawer/credit-drawer';
-import { ReturnDoc, ReturnDrawer } from '../../../shared/return-drawer/return-drawer';
-import { OrderDrawer, OrderView } from '../order-drawer/order-drawer';
+import { Credit } from '../../../shared/credit-details/credit';
+import { CreditDetails } from '../../../shared/credit-details/credit-details';
+import { ReturnDoc, ReturnDetails } from '../../../shared/return-details/return-details';
+import { OrderDetails, OrderView } from '../order-details/order-details';
 import { OrderForm, OrderSaved } from '../order-form/order-form';
 import { OrderFormTarget, Quotation, SalesOrder } from '../orders/orders';
 import { ReturnDialog, ReturnSaved } from '../return-dialog/return-dialog';
@@ -94,8 +94,8 @@ interface Row {
  */
 @Component({
   selector: 'ms-sales-page',
-  imports: [TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, PaymentDialog, PrintDialog,
-    ReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, OrderForm, OrderDrawer, Tooltip, DebitDialog],
+  imports: [TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Dialog, ButtonDirective, ButtonIcon, ButtonLabel, PaymentDialog, PrintDialog,
+    ReturnDialog, ReturnDetails, CreditDetails, CreditDialog, OrderForm, OrderDetails, Tooltip, DebitDialog],
   templateUrl: './sales-page.html',
   styleUrl: './sales-page.scss',
 })

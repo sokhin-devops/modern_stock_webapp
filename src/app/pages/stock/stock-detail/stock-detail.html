@@ -1,5 +1,5 @@
-<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-form-drawer"
-          [header]="row() ? lang.name(row()!.nameEn, row()!.nameKm) : ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [dismissableMask]="true"
+          [header]="row() ? lang.name(row()!.nameEn, row()!.nameKm) : ''" [closeAriaLabel]="'common.close' | translate">
   <!-- Rebuilt for each product, so the stock card loads that product's movements -->
   @for (r of current(); track r.productId) {
     <div class="summary">
@@ -89,4 +89,4 @@
       </p-tabpanels>
     </p-tabs>
   }
-</p-drawer>
+</p-dialog>

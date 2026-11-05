@@ -1,4 +1,4 @@
-<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-form-drawer" [ariaCloseLabel]="'common.close' | translate"
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-form-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
           [header]="(branch() ? 'settings.branches.edit' : 'settings.branches.new') | translate">
   <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="branch-form">
     <div class="ms-form-row">
@@ -61,7 +61,7 @@
   }
 
   <ng-template #footer>
-    <div class="drawer-actions">
+    <div class="dialog-actions">
       @if (canManage() && branch() && !branch()!.main && branch()!.active) {
         <button pButton type="button" [text]="true" severity="danger" (click)="deactivate()">
           <span pButtonLabel>{{ 'settings.branches.deactivate' | translate }}</span>
@@ -74,4 +74,4 @@
       }
     </div>
   </ng-template>
-</p-drawer>
+</p-dialog>

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 
@@ -34,7 +34,7 @@ interface Adjustment {
  */
 @Component({
   selector: 'ms-adjustments-page',
-  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, AdjustmentForm],
+  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Dialog, ButtonDirective, ButtonIcon, ButtonLabel, AdjustmentForm],
   templateUrl: './adjustments-page.html',
   styleUrl: './adjustments-page.scss',
 })

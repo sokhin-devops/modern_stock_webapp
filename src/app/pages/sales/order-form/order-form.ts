@@ -6,7 +6,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -53,7 +53,7 @@ export type OrderSaved =
 @Component({
   selector: 'ms-order-form',
   imports: [
-    FormsModule, TranslatePipe, CurrencyPipe, Drawer, AutoComplete, InputNumber, InputText, Select, SelectButton, DatePicker,
+    FormsModule, TranslatePipe, CurrencyPipe, Dialog, AutoComplete, InputNumber, InputText, Select, SelectButton, DatePicker,
     ButtonDirective, ButtonIcon, ButtonLabel, LinesEditor, FieldLabel,
   ],
   templateUrl: './order-form.html',

@@ -90,8 +90,8 @@
   </ng-template>
 </p-dialog>
 
-<p-drawer [visible]="!!count()" (visibleChange)="!$event && count.set(null)" position="right" styleClass="ms-doc-drawer"
-          [header]="count()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [visible]="!!count()" (visibleChange)="!$event && count.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="count()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (count(); as c) {
     <div class="doc-facts">
       <div><small>{{ 'common.warehouse' | translate }}</small><b>{{ c.warehouseName }}@if (c.warehouseId == null) { · {{ 'counts.allWarehousesShort' | translate }} }</b></div>
@@ -207,7 +207,7 @@
   <ng-template #footer>
     @if (count(); as c) {
       @if (c.status === 'DRAFT' && canCount()) {
-        <div class="drawer-actions">
+        <div class="dialog-actions">
           <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.deleteDraft' | translate }}</span></button>
           <span class="spacer"></span>
           <button pButton type="button" [outlined]="true" (click)="save()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.save' | translate }}</span></button>
@@ -218,7 +218,7 @@
           }
         </div>
       } @else if (c.status === 'SUBMITTED' && canApprove()) {
-        <div class="drawer-actions">
+        <div class="dialog-actions">
           <button pButton type="button" [text]="true" (click)="reopen()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.reopen' | translate }}</span></button>
           <span class="spacer"></span>
           <button pButton type="button" (click)="post()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.post' | translate }}</span></button>
@@ -226,6 +226,6 @@
       }
     }
   </ng-template>
-</p-drawer>
+</p-dialog>
 
 <ms-camera-scanner [(visible)]="cameraOpen" [message]="scanned()?.text ?? null" (scan)="scan($event)" />

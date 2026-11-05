@@ -32,6 +32,10 @@
         <i class="icon pi pi-money-bill"></i>$1 = ៛{{ rate.usdToKhr | number: '1.0-0' }}
       </a>
     }
+    <a pButton class="help-btn" [rounded]="true" [text]="true" severity="secondary" [href]="helpHref()" target="_blank" rel="noopener"
+       [attr.aria-label]="'shell.help' | translate" [pTooltip]="'shell.help' | translate" tooltipPosition="bottom">
+      <i class="pi pi-question-circle" pButtonIcon></i>
+    </a>
     <button pButton type="button" class="bell" [rounded]="true" [text]="true" severity="secondary" (click)="openAlerts($event, notifications)"
             [attr.aria-label]="('shell.notifications' | translate) + (alerts.total() ? ' (' + alerts.total() + ')' : '')"
             aria-haspopup="dialog" [pTooltip]="'shell.notifications' | translate" tooltipPosition="bottom">

@@ -1,5 +1,5 @@
-<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-form-drawer"
-          [header]="(product() ? 'products.edit' : 'products.new') | translate" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false"
+          [header]="(product() ? 'products.edit' : 'products.new') | translate" [closeAriaLabel]="'common.close' | translate">
   <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="product-form">
     <ms-image-field [url]="dropPhoto() ? null : (product()?.photoUrl | apiFile)" [label]="'products.photo' | translate" icon="pi pi-box"
                     [disabled]="!canManage()" (pick)="photo.set($event); dropPhoto.set(false)" (remove)="photo.set(null); dropPhoto.set(true)" />
@@ -100,7 +100,7 @@
   </form>
 
   <ng-template #footer>
-    <div class="drawer-actions">
+    <div class="dialog-actions">
       @if (canManage() && product()?.active) {
         <button pButton type="button" [text]="true" severity="danger" (click)="deactivate()">
           <span pButtonLabel>{{ 'products.deactivate' | translate }}</span>
@@ -115,4 +115,4 @@
       }
     </div>
   </ng-template>
-</p-drawer>
+</p-dialog>

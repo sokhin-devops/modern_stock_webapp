@@ -158,7 +158,8 @@
     "archived": "Archived businesses",
     "archivedLead": "Restore one to open it again. It counts towards your businesses limit again.",
     "restore": "Restore",
-    "restored": "{{name}} is back"
+    "restored": "{{name}} is back",
+    "help": "Help Center"
   },
   "setup": {
     "title": "Set up {{business}}",
@@ -284,7 +285,8 @@
     "trialEnding": "Your Pro trial ends in {{days}} days. Choose a plan to keep going after it.",
     "choosePlan": "Choose a plan",
     "branchReadOnly": "This branch is read-only on your plan: you can look at everything, but not add new work.",
-    "readOnly": "read-only"
+    "readOnly": "read-only",
+    "help": "Help for this page"
   },
   "nav": {
     "dashboard": "Dashboard",

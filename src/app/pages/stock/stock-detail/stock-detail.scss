@@ -2,7 +2,7 @@
   display: contents;
 }
 
-// The three numbers at the top of the drawer.
+// The three numbers at the top of the dialog.
 .summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

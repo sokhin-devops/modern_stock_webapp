@@ -15,7 +15,7 @@
   <small class="field-hint">{{ 'docPhoto.hint' | translate }}</small>
 
   <ng-template #footer>
-    <div class="drawer-actions">
+    <div class="dialog-actions">
       @if (image()) {
         <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()">
           <i class="pi pi-trash" pButtonIcon></i><span pButtonLabel>{{ 'docPhoto.remove' | translate }}</span>

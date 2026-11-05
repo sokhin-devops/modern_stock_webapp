@@ -386,9 +386,9 @@
   }
 }
 
-// Forms in a drawer beside a list (product, customer...): wide enough for two fields per row.
-.p-drawer.ms-form-drawer {
-  width: min(600px, 100vw);
+// Forms in a dialog over a list (product, customer...): wide enough for two fields per row.
+.p-dialog.ms-form-dialog {
+  width: min(640px, calc(100vw - 32px));
 }
 
 .p-dialog.ms-dialog {
@@ -533,9 +533,9 @@
   }
 }
 
-// Buttons at the foot of a form drawer: a delete-type action on the left, Cancel and Save on the right.
+// Buttons at the foot of a form or document dialog: a delete-type action on the left, Cancel and Save on the right.
 // On a phone, buttons that don't fit move to a second line whole, instead of squeezing their labels.
-.drawer-actions {
+.dialog-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -567,9 +567,21 @@
   padding-top: 8px;
 }
 
-// Documents with product lines (adjustment, transfer, purchase) need a wider drawer.
-.p-drawer.ms-doc-drawer {
-  width: min(1000px, 100vw);
+// Documents with product lines (adjustment, transfer, purchase) need a wider dialog.
+.p-dialog.ms-doc-dialog {
+  width: min(1040px, calc(100vw - 32px));
+}
+
+// Phones: forms and documents take the whole screen, with the header and the buttons always in view.
+@media (max-width: 640px) {
+  .p-dialog.ms-form-dialog,
+  .p-dialog.ms-doc-dialog {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+  }
 }
 
 // A document's header facts (number, date, warehouse...) as small label/value pairs.

@@ -32,7 +32,7 @@ type ProductTab = 'products' | 'categories' | 'units';
 
 /**
  * Products (prototype products.html, PLAIN.md 11.1): the product list with search and a category filter, page by page
- * from the API, and the categories and units in their own tabs. A product opens in a drawer beside the list.
+ * from the API, and the categories and units in their own tabs. A product opens in a dialog over the list.
  */
 @Component({
   selector: 'ms-products-page',

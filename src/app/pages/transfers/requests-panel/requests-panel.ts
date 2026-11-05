@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
@@ -47,7 +47,7 @@ interface StockRequest {
 @Component({
   selector: 'ms-requests-panel',
   imports: [
-    FormsModule, TranslatePipe, DatePipe, DecimalPipe, TableModule, Select, Drawer, InputText, ButtonDirective, ButtonIcon, ButtonLabel,
+    FormsModule, TranslatePipe, DatePipe, DecimalPipe, TableModule, Select, Dialog, InputText, ButtonDirective, ButtonIcon, ButtonLabel,
     RequestForm,
   ],
   templateUrl: './requests-panel.html',

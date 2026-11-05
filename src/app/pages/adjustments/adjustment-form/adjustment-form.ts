@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, model, output, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
@@ -25,7 +25,7 @@ const REASONS = ['DAMAGED', 'EXPIRED', 'LOST', 'OWN_USE', 'FOUND', 'CORRECTION',
  */
 @Component({
   selector: 'ms-adjustment-form',
-  imports: [FormsModule, TranslatePipe, Drawer, InputText, Select, SelectButton, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
+  imports: [FormsModule, TranslatePipe, Dialog, InputText, Select, SelectButton, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
   templateUrl: './adjustment-form.html',
   styleUrl: './adjustment-form.scss',
 })

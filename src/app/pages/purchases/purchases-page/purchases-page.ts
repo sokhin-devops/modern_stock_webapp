@@ -2,7 +2,7 @@ import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 import { Tooltip } from 'primeng/tooltip';
@@ -14,10 +14,10 @@ import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
 import { CreditDialog } from '../../../shared/credit-dialog/credit-dialog';
 import { DocPhotoDialog } from '../../../shared/doc-photo-dialog/doc-photo-dialog';
-import { Credit } from '../../../shared/credit-drawer/credit';
-import { CreditDrawer } from '../../../shared/credit-drawer/credit-drawer';
+import { Credit } from '../../../shared/credit-details/credit';
+import { CreditDetails } from '../../../shared/credit-details/credit-details';
 import { PrintDialog, PrintDocument } from '../../../shared/print-dialog/print-dialog';
-import { ReturnDoc, ReturnDrawer } from '../../../shared/return-drawer/return-drawer';
+import { ReturnDoc, ReturnDetails } from '../../../shared/return-details/return-details';
 import { LazyList } from '../../../shared/lazy-list';
 import { PaymentDialog } from '../../../shared/payment-dialog/payment-dialog';
 import { PurchaseForm } from '../purchase-form/purchase-form';
@@ -83,8 +83,8 @@ interface GoodsReceipt {
 @Component({
   selector: 'ms-purchases-page',
   imports: [
-    TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Drawer, ButtonDirective, ButtonIcon,
-    ButtonLabel, PurchaseForm, PaymentDialog, PurchaseReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, Tooltip, PrintDialog,
+    TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Dialog, ButtonDirective, ButtonIcon,
+    ButtonLabel, PurchaseForm, PaymentDialog, PurchaseReturnDialog, ReturnDetails, CreditDetails, CreditDialog, Tooltip, PrintDialog,
     DocPhotoDialog,
   ],
   templateUrl: './purchases-page.html',

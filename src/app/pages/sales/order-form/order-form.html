@@ -1,4 +1,4 @@
-<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-doc-drawer" [ariaCloseLabel]="'common.close' | translate"
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
           [header]="('orders.' + (editing() ? 'edit' : 'new') + (kind() === 'quotation' ? 'Quotation' : 'Order')) | translate">
   <div class="ms-form">
     <p class="muted small">{{ (kind() === 'quotation' ? 'orders.quotationLead' : 'orders.orderLead') | translate }}</p>
@@ -81,7 +81,7 @@
     }
   </div>
   <ng-template #footer>
-    <div class="drawer-actions">
+    <div class="dialog-actions">
       <span class="spacer"></span>
       <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
       @if (kind() === 'order' && !editing() && canDeliver()) {
@@ -94,4 +94,4 @@
       </button>
     </div>
   </ng-template>
-</p-drawer>
+</p-dialog>

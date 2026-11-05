@@ -3,7 +3,7 @@ import { Component, computed, inject, model, output, signal } from '@angular/cor
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { Observable } from 'rxjs';
 
@@ -29,12 +29,12 @@ interface Customer {
  * customer pays before delivery: it asks for the money and is not a tax invoice.
  */
 @Component({
-  selector: 'ms-order-drawer',
-  imports: [TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Drawer, TableModule, ButtonDirective, ButtonIcon, ButtonLabel, PrintDialog, DeliverDialog],
-  templateUrl: './order-drawer.html',
-  styleUrl: './order-drawer.scss',
+  selector: 'ms-order-details',
+  imports: [TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Dialog, TableModule, ButtonDirective, ButtonIcon, ButtonLabel, PrintDialog, DeliverDialog],
+  templateUrl: './order-details.html',
+  styleUrl: './order-details.scss',
 })
-export class OrderDrawer {
+export class OrderDetails {
   readonly view = model<OrderView | null>(null);
   readonly edit = output<OrderFormTarget>();
   readonly changed = output<void>();

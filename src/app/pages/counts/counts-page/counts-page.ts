@@ -6,7 +6,6 @@ import { ConfirmationService } from 'primeng/api';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
-import { Drawer } from 'primeng/drawer';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputNumber } from 'primeng/inputnumber';
@@ -84,7 +83,7 @@ interface StockCount {
 @Component({
   selector: 'ms-counts-page',
   imports: [
-    FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Dialog, Drawer, IconField, InputIcon,
+    FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Dialog, IconField, InputIcon,
     InputNumber, InputText, ProgressBar, Select, SelectButton, ToggleSwitch, AutoComplete, ButtonDirective, ButtonIcon,
     ButtonLabel, FieldLabel, CameraScanner,
   ],

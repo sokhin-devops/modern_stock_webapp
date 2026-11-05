@@ -192,8 +192,8 @@
 <ms-purchase-form [mode]="formMode()" [(visible)]="formOpen" (saved)="reloadAll()" />
 <ms-payment-dialog kind="supplier" [(visible)]="payOpen" (saved)="reloadAll()" />
 
-<p-drawer [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" position="right" styleClass="ms-doc-drawer"
-          [header]="viewing()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewing()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (viewing(); as o) {
     <div class="doc-facts">
       <div><small>{{ 'purchase.supplier' | translate }}</small><b>{{ o.supplierName }}</b></div>
@@ -222,7 +222,7 @@
   }
   <ng-template #footer>
     @if (viewing(); as o) {
-      <div class="drawer-actions">
+      <div class="dialog-actions">
         @if (canOrder()) {
           @if (o.status === 'DRAFT' || o.status === 'ORDERED') {
             <button pButton type="button" [text]="true" severity="danger" (click)="act(o, 'cancel')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.cancel' | translate }}</span></button>
@@ -248,10 +248,10 @@
       </div>
     }
   </ng-template>
-</p-drawer>
+</p-dialog>
 
-<p-drawer [visible]="!!viewingReceipt()" (visibleChange)="!$event && viewingReceipt.set(null)" position="right" styleClass="ms-doc-drawer"
-          [header]="viewingReceipt()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [visible]="!!viewingReceipt()" (visibleChange)="!$event && viewingReceipt.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewingReceipt()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (viewingReceipt(); as g) {
     <div class="doc-facts">
       <div><small>{{ 'purchase.supplier' | translate }}</small><b>{{ g.supplierName }}</b></div>
@@ -288,7 +288,7 @@
   <ng-template #footer>
     @if (viewingReceipt(); as g) {
       @if (canReturn() && g.status === 'POSTED') {
-        <div class="drawer-actions">
+        <div class="dialog-actions">
           <span class="spacer"></span>
           <button pButton type="button" [outlined]="true" (click)="returnOpen.set(true)">
             <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ (canBills() ? 'purchaseReturns.button' : 'purchaseReturns.prepareButton') | translate }}</span>
@@ -297,11 +297,11 @@
       }
     }
   </ng-template>
-</p-drawer>
+</p-dialog>
 
 <ms-purchase-return-dialog [receiptId]="viewingReceipt()?.id ?? null" [(visible)]="returnOpen" (saved)="returned($event)" />
-<ms-return-drawer kind="supplier" [(doc)]="returnDoc" (changed)="reloadAll()" />
-<ms-credit-drawer kind="supplier" [(credit)]="credit" (changed)="reloadAll()" />
+<ms-return-details kind="supplier" [(doc)]="returnDoc" (changed)="reloadAll()" />
+<ms-credit-details kind="supplier" [(credit)]="credit" (changed)="reloadAll()" />
 <ms-credit-dialog kind="supplier" [(visible)]="newCreditOpen" (saved)="credits.refresh(); credit.set($event)" />
 <ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />
 

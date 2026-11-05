@@ -4,7 +4,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Tooltip } from 'primeng/tooltip';
 
@@ -23,7 +23,7 @@ import { CAMBODIAN_PHONE } from '../../../shared/validators';
  */
 @Component({
   selector: 'ms-branch-form',
-  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, Drawer, InputText, Checkbox, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel],
+  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, Dialog, InputText, Checkbox, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, FieldLabel],
   templateUrl: './branch-form.html',
   styleUrl: './branch-form.scss',
 })
