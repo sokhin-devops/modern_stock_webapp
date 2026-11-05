@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Drawer } from 'primeng/drawer';
 import { TableModule } from 'primeng/table';
@@ -9,11 +9,13 @@ import { Tooltip } from 'primeng/tooltip';
 import { Observable } from 'rxjs';
 
 import { ApiService } from '../../../core/api/api.service';
+import { Supplier } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
 import { CreditDialog } from '../../../shared/credit-dialog/credit-dialog';
 import { Credit } from '../../../shared/credit-drawer/credit';
 import { CreditDrawer } from '../../../shared/credit-drawer/credit-drawer';
+import { PrintDialog, PrintDocument } from '../../../shared/print-dialog/print-dialog';
 import { ReturnDoc, ReturnDrawer } from '../../../shared/return-drawer/return-drawer';
 import { LazyList } from '../../../shared/lazy-list';
 import { PaymentDialog } from '../../../shared/payment-dialog/payment-dialog';
@@ -33,6 +35,7 @@ interface PoLine {
 interface PurchaseOrder {
   id: number;
   number: string;
+  supplierId: number;
   supplierName: string;
   receiveWarehouseId: number;
   receiveWarehouseName: string;
@@ -80,7 +83,7 @@ interface GoodsReceipt {
   selector: 'ms-purchases-page',
   imports: [
     TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Tabs, TabList, Tab, TabPanels, TabPanel, Drawer, ButtonDirective, ButtonIcon,
-    ButtonLabel, PurchaseForm, PaymentDialog, PurchaseReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, Tooltip,
+    ButtonLabel, PurchaseForm, PaymentDialog, PurchaseReturnDialog, ReturnDrawer, CreditDrawer, CreditDialog, Tooltip, PrintDialog,
   ],
   templateUrl: './purchases-page.html',
   styleUrl: './purchases-page.scss',
@@ -89,6 +92,7 @@ export class PurchasesPage {
   private readonly api = inject(ApiService);
   private readonly business = inject(BusinessService);
   private readonly notify = inject(NotifyService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly tab = signal<'orders' | 'receipts' | 'bills' | 'payments' | 'returns' | 'credits'>('orders');
   protected readonly canOrder = computed(() => this.business.can('purchase_order:manage'));
@@ -118,6 +122,9 @@ export class PurchasesPage {
   protected readonly returnOpen = signal(false);
   protected readonly credit = signal<Credit | null>(null);
   protected readonly newCreditOpen = signal(false);
+  /** A purchase order printed on A4 to send to the supplier (FR-2.13). */
+  protected readonly printDoc = signal<PrintDocument | null>(null);
+  protected readonly printOpen = signal(false);
 
   constructor() {
     effect(() => {
@@ -162,6 +169,35 @@ export class PurchasesPage {
     }
   }
 
+  protected printOrder(o: PurchaseOrder): void {
+    const t = (key: string): string => this.translate.instant(key);
+    const show = (partyLines: string[]) => {
+      this.printDoc.set({
+        title: t('print.purchaseOrder'),
+        number: o.number,
+        date: o.orderDate,
+        facts: [
+          ...(o.expectedDate ? [{ label: t('purchase.expected'), value: day(o.expectedDate) }] : []),
+          { label: t('print.deliverTo'), value: o.receiveWarehouseName },
+        ],
+        partyLabel: t('purchase.supplier'),
+        partyName: o.supplierName,
+        partyLines,
+        withPrices: true,
+        lines: o.lines.map((l) => ({ name: l.productName, qty: l.qtyOrdered, unit: l.unitSymbol, price: l.unitCost, total: l.lineTotal })),
+        totals: [{ label: t('common.total'), value: `$${o.total.toFixed(2)}`, strong: true }],
+        signatures: false,
+        note: o.note,
+      });
+      this.printOpen.set(true);
+    };
+    this.api.get<Supplier>(`/suppliers/${o.supplierId}`).subscribe({
+      next: (s) => show([s.contactPerson, s.phone, s.address, s.vatTin ? `${t('print.vatTin')}: ${s.vatTin}` : null]
+        .filter((x): x is string => !!x)),
+      error: () => show([]),
+    });
+  }
+
   /** Order, cancel, close, or receive everything still to come (into the order's warehouse, at the order's cost). */
   protected act(po: PurchaseOrder, action: 'order' | 'cancel' | 'close' | 'receive'): void {
     const call: Observable<unknown> =
@@ -187,4 +223,10 @@ export class PurchasesPage {
       },
     });
   }
+}
+
+/** 2026-11-30 → 30/11/2026, as printed. */
+function day(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  return `${d}/${m}/${y}`;
 }

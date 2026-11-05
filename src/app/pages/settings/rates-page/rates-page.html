@@ -7,7 +7,7 @@
   </div>
   <div class="page-body list-page">
     <div class="rate-top">
-      <div class="settings-card current">
+      <div class="settings-card rate-now">
         <small class="muted">{{ 'settings.rates.current' | translate }}</small>
         <b class="num">$1 = ៛{{ (business.rate()?.usdToKhr ?? 0) | number: '1.0-0' }}</b>
         @if (business.rate()?.stale) {

@@ -1,0 +1,24 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [dismissableMask]="true" styleClass="ms-dialog"
+          [style]="{ width: 'min(520px, 96vw)' }" [header]="'pos.heldTitle' | translate">
+  <p class="muted lead">{{ 'pos.heldLead' | translate }}</p>
+  <ul class="held">
+    @for (h of sales(); track h.id) {
+      <li>
+        <div class="grow">
+          <div class="strong">{{ h.customer?.name ?? ('pos.walkIn' | translate) }} · {{ amount(h) | currency: 'USD' }}</div>
+          <div class="muted small items">{{ items(h) }}</div>
+          <div class="muted small">{{ h.heldAt | date: 'HH:mm' }}</div>
+        </div>
+        <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove.emit(h)"
+                [attr.aria-label]="'pos.heldRemove' | translate">
+          <i class="pi pi-times" pButtonIcon></i>
+        </button>
+        <button pButton type="button" size="small" (click)="resume.emit(h)">
+          <i class="pi pi-play" pButtonIcon></i><span pButtonLabel>{{ 'pos.resume' | translate }}</span>
+        </button>
+      </li>
+    } @empty {
+      <li class="muted">{{ 'pos.heldNone' | translate }}</li>
+    }
+  </ul>
+</p-dialog>

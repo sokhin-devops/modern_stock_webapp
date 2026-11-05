@@ -368,7 +368,14 @@
               </div>
             }
           </div>
-          <p class="muted small rule">{{ 'reports.reorderRule' | translate: { cover: ro.coverDays, days: ro.salesDays } }}</p>
+          <div class="reorder-head">
+            <p class="muted small rule">{{ 'reports.reorderRule' | translate: { cover: ro.coverDays, days: ro.salesDays } }}</p>
+            @if (canOrder() && ro.rows.length) {
+              <button pButton type="button" [outlined]="true" size="small" class="no-print" (click)="createOrder(ro)" [loading]="orderBusy()">
+                <i class="pi pi-file-plus" pButtonIcon></i><span pButtonLabel>{{ 'reports.makeOrder' | translate }}</span>
+              </button>
+            }
+          </div>
           <section class="card table-card">
             <p-table class="ms-table" [value]="ro.rows" [paginator]="!full() && ro.rows.length > 50" [rows]="50" dataKey="productId">
               <ng-template #header>
@@ -497,7 +504,7 @@
               </ng-template>
               <ng-template #body let-row>
                 <tr>
-                  <td><div class="strong">{{ row.number }}</div><div class="muted small">{{ row.postedOn | date: 'dd/MM/yyyy' }} · {{ row.warehouse }}</div></td>
+                  <td><div class="strong doc-no">{{ row.number }}</div><div class="muted small">{{ row.postedOn | date: 'dd/MM/yyyy' }} · {{ row.warehouse }}</div></td>
                   <td>{{ lang.name(row.name, row.nameKm) }}</td>
                   <td class="num muted">{{ row.systemQty | number: '1.0-3' }}</td>
                   <td class="num">{{ row.countedQty | number: '1.0-3' }}</td>
@@ -849,7 +856,7 @@
                 <tr>
                   <td>{{ row.date | date: 'dd/MM/yyyy' }}</td>
                   <td>{{ 'reports.docType.' + row.type | translate }}</td>
-                  <td class="strong">{{ row.number }}</td>
+                  <td class="strong doc-no">{{ row.number }}</td>
                   <td class="num">{{ row.debit ? (row.debit | currency: 'USD') : '' }}</td>
                   <td class="num">{{ row.credit ? (row.credit | currency: 'USD') : '' }}</td>
                   <td class="num strong">{{ row.balance | currency: 'USD' }}</td>
@@ -867,3 +874,5 @@
     </section>
   </div>
 </div>
+
+<ms-purchase-form mode="order" [start]="orderLines()" [(visible)]="orderOpen" (saved)="orderSaved()" />

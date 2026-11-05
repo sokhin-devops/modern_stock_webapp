@@ -12,11 +12,11 @@ import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
 import { TableModule } from 'primeng/table';
 import { Tooltip } from 'primeng/tooltip';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 import { ApiService, Filters } from '../../../core/api/api.service';
 import {
-  AbcReport, CountReport, CustomerDebtReport, ExpiryReport, LossReport, OnHandReport, ProfitReport, PurchaseReport, PurchasesBy,
+  AbcReport, CountReport, CustomerDebtReport, ExpiryReport, LossReport, OnHandReport, Product, ProfitReport, PurchaseReport, PurchasesBy,
   ReorderReport, SalesBy, SalesReport, ShiftReport, SlowReport, Statement, SupplierDebtReport, VatReport,
 } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
@@ -25,8 +25,10 @@ import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { BarChart, BarPoint } from '../../../shared/bar-chart/bar-chart';
 import { toIsoDate } from '../../../shared/dates';
+import { DocLine } from '../../../shared/lines-editor/lines-editor';
 import { PackQtyPipe } from '../../../shared/pack-qty.pipe';
 import { ReportMeta, exportReport, printReport } from '../../../shared/report-export';
+import { PurchaseForm } from '../../purchases/purchase-form/purchase-form';
 
 export type ReportId =
   | 'sales' | 'gross-profit' | 'profit' | 'customer-debt' | 'supplier-debt'
@@ -103,7 +105,7 @@ const USD_SHORT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 
   selector: 'ms-reports-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, DatePicker, ProgressBar, Select, SelectButton, TableModule,
-    BarChart, PackQtyPipe, AutoComplete, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip,
+    BarChart, PackQtyPipe, AutoComplete, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, PurchaseForm,
   ],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
@@ -237,6 +239,11 @@ export class ReportsPage {
   protected readonly supplierDebt = computed(() => this.of<SupplierDebtReport>('supplier-debt'));
   protected readonly onHand = computed(() => this.of<OnHandReport>('stock-on-hand'));
   protected readonly reorder = computed(() => this.of<ReorderReport>('reorder'));
+  /** A purchase order from the reorder suggestions (FR-2.12): the suggested quantity at the last cost. */
+  protected readonly canOrder = computed(() => this.business.can('purchase_order:manage'));
+  protected readonly orderLines = signal<DocLine[] | null>(null);
+  protected readonly orderOpen = signal(false);
+  protected readonly orderBusy = signal(false);
   protected readonly expiry = computed(() => this.of<ExpiryReport>('expiry'));
   protected readonly counts = computed(() => this.of<CountReport>('count-differences'));
   protected readonly abc = computed(() => this.of<AbcReport>('abc'));
@@ -368,6 +375,31 @@ export class ReportsPage {
       return row.key;
     }
     return row.label ? this.lang.name(row.label, row.labelKm) : this.translate.instant('reports.none.' + by);
+  }
+
+  protected createOrder(report: ReorderReport): void {
+    const rows = report.rows.filter((r) => r.suggestedQty > 0);
+    if (!rows.length) {
+      return;
+    }
+    this.orderBusy.set(true);
+    forkJoin(rows.map((r) => this.api.get<Product>(`/products/${r.productId}`))).subscribe({
+      next: (products) => {
+        this.orderBusy.set(false);
+        this.orderLines.set(products.map((product, i) => ({
+          product, unitId: null, qty: rows[i].suggestedQty, unitCost: rows[i].lastCost ?? product.avgCost ?? null, batchNo: '', expiryDate: null,
+        })));
+        this.orderOpen.set(true);
+      },
+      error: (e) => {
+        this.orderBusy.set(false);
+        this.notify.error(e);
+      },
+    });
+  }
+
+  protected orderSaved(): void {
+    this.router.navigate(['/suppliers/transactions']);
   }
 }
 

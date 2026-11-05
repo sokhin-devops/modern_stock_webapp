@@ -60,6 +60,8 @@ export class LinesEditor {
 
   private readonly catalog = inject(CatalogService);
   protected readonly lang = inject(LangService);
+  /** A picked product shows its name in the member's language. */
+  protected readonly productName = (p: Product): string => this.lang.name(p.nameEn, p.nameKm);
   protected readonly results = signal<Product[]>([]);
 
   protected readonly total = computed(() =>

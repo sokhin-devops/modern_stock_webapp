@@ -246,7 +246,7 @@
           </ng-template>
           <ng-template #body let-i>
             <tr>
-              <td><div class="strong">{{ i.number }}</div><div class="muted small">{{ i.createdAt | date: 'dd/MM/yyyy' }}</div></td>
+              <td><div class="strong doc-no">{{ i.number }}</div><div class="muted small">{{ i.createdAt | date: 'dd/MM/yyyy' }}</div></td>
               <td>{{ what(i) }}</td>
               <td class="muted">{{ i.periodStart | date: 'dd/MM/yyyy' }} – {{ i.periodEnd | date: 'dd/MM/yyyy' }}</td>
               <td class="num strong">{{ i.amount | currency: 'USD' }}</td>

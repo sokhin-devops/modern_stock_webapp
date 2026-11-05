@@ -1,7 +1,7 @@
 <p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog print-preview" [header]="doc()?.title ?? ''"
           [dismissableMask]="true" [style]="{ width: 'min(820px, 96vw)' }">
   @if (doc(); as d) {
-    <div class="print-doc">
+    <div #paper class="print-doc">
       <header class="letterhead">
         @if (d.issuer; as issuer) {
           <div class="shop">

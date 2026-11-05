@@ -36,7 +36,7 @@
       </ng-template>
       <ng-template #body let-t>
         <tr class="clickable" tabindex="0" (click)="viewing.set(t)" (keydown.enter)="viewing.set(t)">
-          <td class="strong">{{ t.number }}</td>
+          <td class="strong doc-no">{{ t.number }}</td>
           <td>{{ 'transfer.' + t.kind | translate }}</td>
           <td>{{ t.fromName }}</td>
           <td>{{ t.toName }}</td>

@@ -96,6 +96,7 @@ export class CountsPage {
   private readonly business = inject(BusinessService);
   private readonly catalog = inject(CatalogService);
   protected readonly lang = inject(LangService);
+  protected readonly productName = (p: Product): string => this.lang.name(p.nameEn, p.nameKm);
   private readonly notify = inject(NotifyService);
   private readonly confirm = inject(ConfirmationService);
   private readonly translate = inject(TranslateService);

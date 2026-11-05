@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
@@ -31,6 +31,8 @@ import { filledLines, receivingWarehouse, warehouseOptions } from '../../../shar
 })
 export class PurchaseForm {
   readonly mode = input<'quick' | 'order'>('quick');
+  /** Lines to start with, e.g. the reorder suggestions (FR-2.12); an empty line follows them. */
+  readonly start = input<DocLine[] | null>(null);
   readonly visible = model(false);
   readonly saved = output<void>();
 
@@ -66,7 +68,7 @@ export class PurchaseForm {
         this.invoiceNo.set('');
         this.expected.set(null);
         this.note.set('');
-        this.lines.set([emptyLine()]);
+        this.lines.set([...(untracked(() => this.start()) ?? []), emptyLine()]);
         this.payNow.set(true);
         this.method.set('CASH');
       }

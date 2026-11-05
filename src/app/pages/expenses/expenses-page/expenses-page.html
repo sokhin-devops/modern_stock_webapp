@@ -38,7 +38,7 @@
       </ng-template>
       <ng-template #body let-e>
         <tr [class.voided]="e.status === 'VOID'">
-          <td class="strong">{{ e.number }}</td>
+          <td class="strong doc-no">{{ e.number }}</td>
           <td>{{ e.expenseDate | date: 'dd/MM/yyyy' }}</td>
           <td>{{ e.categoryName }}@if (e.note) { <small class="muted"> · {{ e.note }}</small> }</td>
           <td>{{ 'docs.methods.' + e.method | translate }}</td>

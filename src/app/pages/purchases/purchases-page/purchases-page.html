@@ -214,23 +214,30 @@
   }
   <ng-template #footer>
     @if (viewing(); as o) {
-      @if (canOrder()) {
-        <div class="drawer-actions">
+      <div class="drawer-actions">
+        @if (canOrder()) {
           @if (o.status === 'DRAFT' || o.status === 'ORDERED') {
             <button pButton type="button" [text]="true" severity="danger" (click)="act(o, 'cancel')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.cancel' | translate }}</span></button>
           }
           @if (o.status === 'PARTIALLY_RECEIVED') {
             <button pButton type="button" [text]="true" (click)="act(o, 'close')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.close' | translate }}</span></button>
           }
-          <span class="spacer"></span>
+        }
+        <span class="spacer"></span>
+        @if (o.status !== 'CANCELLED') {
+          <button pButton type="button" [outlined]="true" (click)="printOrder(o)">
+            <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
+          </button>
+        }
+        @if (canOrder()) {
           @if (o.status === 'DRAFT') {
             <button pButton type="button" [outlined]="true" (click)="act(o, 'order')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.order' | translate }}</span></button>
           }
           @if (o.status === 'DRAFT' || o.status === 'ORDERED' || o.status === 'PARTIALLY_RECEIVED') {
             <button pButton type="button" (click)="act(o, 'receive')" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.receiveAll' | translate }}</span></button>
           }
-        </div>
-      }
+        }
+      </div>
     }
   </ng-template>
 </p-drawer>
@@ -288,3 +295,4 @@
 <ms-return-drawer kind="supplier" [(doc)]="returnDoc" (changed)="reloadAll()" />
 <ms-credit-drawer kind="supplier" [(credit)]="credit" (changed)="reloadAll()" />
 <ms-credit-dialog kind="supplier" [(visible)]="newCreditOpen" (saved)="credits.refresh(); credit.set($event)" />
+<ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />

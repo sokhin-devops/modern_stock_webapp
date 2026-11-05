@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, input, model, output } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, model, output, viewChild } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -7,6 +7,7 @@ import { Dialog } from 'primeng/dialog';
 import { CheckoutResponse } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { ApiFilePipe } from '../../../shared/api-file.pipe';
+import { printCopy } from '../../../shared/print-copy';
 
 /**
  * The finished sale as an 80 or 58 mm receipt (prototype receipt, PLAIN.md 11.4): shop, number and time, lines, totals in
@@ -35,9 +36,13 @@ export class ReceiptDialog {
   protected readonly vatTin = computed(() => (this.showVatTin() ? (this.business.profile()?.vatTin ?? null) : null));
   protected readonly branch = computed(() => this.business.branch());
   protected readonly now = new Date();
+  private readonly paperEl = viewChild<ElementRef<HTMLElement>>('paper');
 
   protected print(): void {
-    window.print();
+    const el = this.paperEl()?.nativeElement;
+    if (el) {
+      printCopy(el);
+    }
   }
 
   protected next(): void {

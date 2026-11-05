@@ -7,6 +7,7 @@
 // The chat box: what is connected, the links while connecting, or the Connect button.
 .chat {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
@@ -15,6 +16,11 @@
 
   p {
     margin: 0;
+  }
+
+  // On a phone the button goes under the text instead of squeezing it
+  > .grow {
+    flex: 1 1 180px;
   }
 
   > .icon {
@@ -44,6 +50,7 @@
 
 .wait-line {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }

@@ -109,6 +109,19 @@
   gap: 8px;
 }
 
+// The rule behind the suggestions, and turning them into a purchase order
+.reorder-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+
+  .rule {
+    flex: 1 1 280px;
+  }
+}
+
 .rule {
   margin: -4px 0 0;
 }

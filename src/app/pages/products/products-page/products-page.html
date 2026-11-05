@@ -2,6 +2,11 @@
   <div class="page-head">
     <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'products.title' | translate }}</span></nav>
     <div class="page-actions">
+      @if (tab() === 'products') {
+        <button pButton type="button" [outlined]="true" (click)="labelsOpen.set(true)">
+          <i class="pi pi-barcode" pButtonIcon></i><span pButtonLabel>{{ 'labels.button' | translate }}</span>
+        </button>
+      }
       @if (canManage()) {
         @switch (tab()) {
           @case ('products') {
@@ -187,3 +192,4 @@
 <ms-unit-dialog [unit]="editingUnit()" [(visible)]="unitOpen" />
 <ms-branch-prices-dialog [product]="pricing()" [(visible)]="pricesOpen" />
 <ms-reorder-levels-dialog [product]="pricing()" [(visible)]="reorderOpen" (saved)="reload()" />
+<ms-labels-dialog [(visible)]="labelsOpen" />

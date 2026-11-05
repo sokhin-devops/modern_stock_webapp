@@ -59,7 +59,8 @@
     "reference": "Reference",
     "continue": "Continue",
     "price": "Price",
-    "discount": "Discount"
+    "discount": "Discount",
+    "active": "Active"
   },
   "errors": {
     "network": "Can't reach the server. Check your internet connection and try again.",
@@ -556,7 +557,16 @@
     "rateStale": "Today's exchange rate is not set yet: sales use the rate of {{date}}.",
     "setRate": "Set today's rate",
     "customerAdded": "{{name}} added.",
-    "customerPhoneHint": "Needed to sell on credit."
+    "customerPhoneHint": "Needed to sell on credit.",
+    "hold": "Hold sale",
+    "heldCount": "Held · {{n}}",
+    "heldTitle": "Held sales",
+    "heldLead": "Sales put aside on this device. Resume one to finish it; the cart on screen is held in its place.",
+    "resume": "Resume",
+    "heldRemove": "Remove held sale",
+    "heldNone": "No held sales.",
+    "heldDone": "Sale held. Serve the next customer.",
+    "heldFull": "{{n}} sales are already held. Finish or remove one first."
   },
   "partners": {
     "customers": "Customers",
@@ -1290,7 +1300,8 @@
     "document": "Document",
     "debit": "Owed more",
     "credit": "Owed less",
-    "noMovements": "Nothing in this period."
+    "noMovements": "Nothing in this period.",
+    "makeOrder": "Create purchase order"
   },
   "telegram": {
     "lead": "Get yesterday's sales and stock news every morning in a Telegram chat or group.",
@@ -1496,7 +1507,8 @@
     "quotation": "Quotation",
     "salesOrder": "Sales order",
     "taxInvoiceEn": "Tax invoice",
-    "rate": "Exchange rate"
+    "rate": "Exchange rate",
+    "purchaseOrder": "Purchase order"
   },
   "accountPage": {
     "profile": "Profile",
@@ -1803,5 +1815,23 @@
       "cycle": "Billing",
       "quantity": "How many"
     }
+  },
+  "labels": {
+    "button": "Print labels",
+    "title": "Barcode labels",
+    "lead": "Labels for A4 sticker sheets of 24 (3 × 8, 70 × 37 mm). In the print window, choose no margins.",
+    "add": "Add a product",
+    "addMissing": "Products without a barcode",
+    "noBarcode": "no barcode",
+    "copies": "Labels",
+    "remove": "Remove",
+    "empty": "Add the products to print labels for.",
+    "missing": "{{n}} of them have no barcode yet.",
+    "askManager": "Ask the Owner or Manager to give them barcodes.",
+    "giveBarcodes": "Give them barcodes",
+    "given": "{{n}} products got an in-store barcode.",
+    "noneMissing": "Every product already has a barcode.",
+    "showPrice": "Show the price",
+    "count": "Labels: {{n}} · A4 sheets: {{sheets}}"
   }
 }

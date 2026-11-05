@@ -18,7 +18,8 @@
       @if (shift(); as s) {
         <span class="tag hide-sm"><span class="dot"></span>{{ 'pos.shiftSince' | translate: { time: (s.openedAt | date: 'HH:mm') } }}</span>
       } @else if (business.branchId() != null) {
-        <button pButton type="button" size="small" [outlined]="true" (click)="shiftOpen.set(true)">
+        <button pButton type="button" size="small" [outlined]="true" (click)="shiftOpen.set(true)" class="shift-btn"
+                [attr.aria-label]="'pos.openShift' | translate">
           <i class="pi pi-clock" pButtonIcon></i><span pButtonLabel>{{ 'pos.openShift' | translate }}</span>
         </button>
       }
@@ -97,6 +98,15 @@
         <div class="row">
           <b>{{ 'pos.cart' | translate }}</b><span class="pill">{{ count() | number: '1.0-3' }}</span>
           <span class="spacer"></span>
+          @if (held().length) {
+            <button pButton type="button" size="small" [text]="true" (click)="heldOpen.set(true)">
+              <i class="pi pi-inbox" pButtonIcon></i><span pButtonLabel>{{ 'pos.heldCount' | translate: { n: held().length } }}</span>
+            </button>
+          }
+          <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="holdSale()" [disabled]="!lines().length"
+                  [attr.aria-label]="'pos.hold' | translate" [pTooltip]="'pos.hold' | translate" tooltipPosition="bottom">
+            <i class="pi pi-pause" pButtonIcon></i>
+          </button>
           <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="clear()" [disabled]="!lines().length"
                   [attr.aria-label]="'pos.clear' | translate">
             <i class="pi pi-trash" pButtonIcon></i>
@@ -174,6 +184,7 @@
 <ms-receipt-dialog [sale]="sale()" [(visible)]="receiptOpen" [receiptFooter]="settings()?.receiptFooter ?? null"
                    [receiptHeader]="settings()?.receiptHeader ?? null" [paper]="settings()?.receiptPaper ?? 80"
                    [showVatTin]="settings()?.receiptShowVatTin ?? true" (newSale)="nextSale()" />
+<ms-held-dialog [(visible)]="heldOpen" [sales]="held()" (resume)="resumeHeld($event)" (remove)="removeHeld($event)" />
 <ms-new-customer-dialog [(visible)]="newCustomerOpen" [typed]="customerTyped()" (saved)="customer.set($event)" />
 @if (business.branchId() != null) {
   <ms-shift-dialog [(visible)]="shiftOpen" [shift]="shift()" [branchId]="business.branchId()!" (changed)="shift.set($event)" />

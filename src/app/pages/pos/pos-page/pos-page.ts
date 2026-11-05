@@ -23,6 +23,7 @@ import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { LangButton } from '../../../shared/lang-button/lang-button';
 import { PayDialog, PreviewLine } from '../pay-dialog/pay-dialog';
 import { ReceiptDialog } from '../receipt-dialog/receipt-dialog';
+import { HeldDialog, HeldSale } from '../held-dialog/held-dialog';
 import { NewCustomerDialog } from '../new-customer-dialog/new-customer-dialog';
 import { ShiftDialog } from '../shift-dialog/shift-dialog';
 
@@ -48,7 +49,7 @@ interface CartLine {
   selector: 'ms-pos-page',
   imports: [
     FormsModule, RouterLink, TranslatePipe, DecimalPipe, DatePipe, AutoComplete, Select, ButtonDirective, ButtonIcon,
-    ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, NewCustomerDialog, ApiFilePipe,
+    ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, NewCustomerDialog, HeldDialog, ApiFilePipe,
   ],
   host: { '(document:keydown)': 'onKey($event)' },
   templateUrl: './pos-page.html',
@@ -82,6 +83,14 @@ export class PosPage {
   protected readonly canAddCustomer = computed(() => this.business.can('customer:create_pos') || this.business.can('customer:manage'));
   protected readonly customerTyped = signal('');
   protected readonly newCustomerOpen = signal(false);
+  /** Sales put aside to serve the next customer (FR-3.20), kept on this device per business and branch. */
+  protected readonly held = signal<HeldSale[]>([]);
+  protected readonly heldOpen = signal(false);
+  private readonly heldKey = computed(() => {
+    const businessId = this.business.current()?.id;
+    const branchId = this.business.branchId();
+    return businessId != null && branchId != null ? `ms.pos.held.${businessId}.${branchId}` : null;
+  });
 
   // Dialogs
   protected readonly payOpen = signal(false);
@@ -143,6 +152,11 @@ export class PosPage {
         takeUntilDestroyed(inject(DestroyRef)),
       )
       .subscribe({ next: (page) => this.products.set(page.content), error: (e) => this.notify.error(e) });
+    // Held sales belong to the business and branch on screen.
+    effect(() => {
+      const key = this.heldKey();
+      untracked(() => this.held.set(readHeld(key)));
+    });
     // Products (stock per branch) and my shift follow the branch.
     effect(() => {
       const branchId = this.business.branchId();
@@ -208,6 +222,55 @@ export class PosPage {
   protected clear(): void {
     this.lines.set([]);
     this.customer.set(null);
+  }
+
+  /** Puts the cart aside (with its customer) and starts an empty one for the next customer. */
+  protected holdSale(): void {
+    if (!this.lines().length) {
+      return;
+    }
+    if (this.held().length >= HELD_MAX) {
+      this.notify.showKey('pos.heldFull', { n: HELD_MAX });
+      return;
+    }
+    this.saveHeld([this.asHeld(), ...this.held()]);
+    this.clear();
+    this.notify.showKey('pos.heldDone');
+    this.focusScan();
+  }
+
+  /** Back to a held sale; the cart on screen, if any, is held in its place so nothing is lost. */
+  protected resumeHeld(sale: HeldSale): void {
+    const rest = this.held().filter((h) => h.id !== sale.id);
+    this.saveHeld(this.lines().length ? [this.asHeld(), ...rest] : rest);
+    this.lines.set(sale.lines as CartLine[]);
+    this.customer.set(sale.customer);
+    this.heldOpen.set(false);
+    this.focusScan();
+  }
+
+  protected removeHeld(sale: HeldSale): void {
+    this.saveHeld(this.held().filter((h) => h.id !== sale.id));
+    if (!this.held().length) {
+      this.heldOpen.set(false);
+    }
+  }
+
+  private asHeld(): HeldSale {
+    return { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, heldAt: new Date().toISOString(),
+      customer: this.customer(), lines: this.lines() };
+  }
+
+  private saveHeld(list: HeldSale[]): void {
+    this.held.set(list);
+    const key = this.heldKey();
+    if (key) {
+      try {
+        localStorage.setItem(key, JSON.stringify(list));
+      } catch {
+        // Private windows may refuse storage: the held sales then last until the page is closed.
+      }
+    }
   }
 
   /** The units a line can be sold in: the stock unit and the product's bigger units. */
@@ -330,6 +393,21 @@ export class PosPage {
 
   private focusScan(): void {
     this.scanInput()?.nativeElement.focus();
+  }
+}
+
+/** Held sales per device: enough for a busy counter, small enough to keep track of. */
+const HELD_MAX = 10;
+
+function readHeld(key: string | null): HeldSale[] {
+  if (!key) {
+    return [];
+  }
+  try {
+    const list = JSON.parse(localStorage.getItem(key) ?? '[]');
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
   }
 }
 

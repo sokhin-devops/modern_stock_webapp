@@ -57,19 +57,36 @@
   }
 }
 
+// Phones: the product on its own row with the remove button beside it, then the other fields two by two. The column
+// heads are hidden, so each empty field shows what it is as a placeholder.
 @media (max-width: 768px) {
   .line,
   .with-cost .line,
   .with-price .line,
   .with-cost.with-batch .line {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
   }
 
   .line > :first-child {
     grid-column: 1 / -1;
+    margin-inline-end: 44px;
+  }
+
+  .line > button:last-child {
+    position: absolute;
+    top: 0;
+    inset-inline-end: 0;
   }
 
   .head {
     display: none;
+  }
+
+  .foot {
+    padding-inline-end: 0;
+    border-bottom: 0;
   }
 }

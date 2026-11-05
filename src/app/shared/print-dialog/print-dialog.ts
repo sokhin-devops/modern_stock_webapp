@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, input, model } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, model, viewChild } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -7,6 +7,7 @@ import { Dialog } from 'primeng/dialog';
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
 import { ApiFilePipe } from '../api-file.pipe';
+import { printCopy } from '../print-copy';
 
 /** A document to print on A4: an invoice, a delivery note... Texts come translated, amounts formatted. */
 export interface PrintDocument {
@@ -54,7 +55,12 @@ export class PrintDialog {
     return this.business.branches().find((b) => b.id === id) ?? this.business.branches().find((b) => b.main) ?? null;
   });
 
+  private readonly paperEl = viewChild<ElementRef<HTMLElement>>('paper');
+
   protected print(): void {
-    window.print();
+    const el = this.paperEl()?.nativeElement;
+    if (el) {
+      printCopy(el);
+    }
   }
 }

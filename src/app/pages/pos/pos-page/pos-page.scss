@@ -6,6 +6,28 @@
   min-width: 160px;
 }
 
+// Phones: the header keeps back, POS, branch, shift and account on one row (logo and business name step aside)
+@media (max-width: 768px) {
+  .pos-head {
+    gap: 4px;
+    padding: 0 8px;
+
+    .logo,
+    .pos-title .small {
+      display: none;
+    }
+  }
+
+  .branch-select {
+    min-width: 0;
+    max-width: 136px;
+  }
+
+  .shift-btn .p-button-label {
+    display: none;
+  }
+}
+
 // The cart's "Pay" button takes the larger share, like the prototype.
 .cart-actions {
   .pay-btn {

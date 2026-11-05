@@ -1,0 +1,84 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog print-preview" [style]="{ width: 'min(900px, 96vw)' }"
+          [header]="'labels.title' | translate">
+  <div class="ms-form">
+    <p class="muted">{{ 'labels.lead' | translate }}</p>
+    <div class="pick">
+      <p-autocomplete #picker [ngModel]="null" (ngModelChange)="add($event)" [suggestions]="found()" (completeMethod)="find($event)"
+                      [optionLabel]="productName" [placeholder]="'labels.add' | translate" [fluid]="true" appendTo="body"
+                      [ariaLabel]="'labels.add' | translate" class="grow">
+        <ng-template #item let-p>
+          <div class="option"><b>{{ lang.name(p.nameEn, p.nameKm) }}</b><small class="muted">{{ p.sku }} · {{ p.barcode ?? ('labels.noBarcode' | translate) }}</small></div>
+        </ng-template>
+      </p-autocomplete>
+      <button pButton type="button" [outlined]="true" (click)="addMissing()">
+        <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'labels.addMissing' | translate }}</span>
+      </button>
+    </div>
+
+    @if (rows().length) {
+      <ul class="rows">
+        @for (r of rows(); track r.product.id; let i = $index) {
+          <li>
+            <div class="grow">
+              <div class="strong">{{ lang.name(r.product.nameEn, r.product.nameKm) }}</div>
+              <small class="muted">{{ r.product.sku }} · {{ r.product.barcode ?? ('labels.noBarcode' | translate) }}</small>
+            </div>
+            <p-inputnumber [ngModel]="r.copies" (ngModelChange)="setCopies(i, $event)" [min]="0" [max]="240" [showButtons]="true"
+                           buttonLayout="horizontal" inputStyleClass="copies" [ariaLabel]="'labels.copies' | translate" />
+            <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove(i)"
+                    [attr.aria-label]="'labels.remove' | translate">
+              <i class="pi pi-times" pButtonIcon></i>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted empty">{{ 'labels.empty' | translate }}</p>
+    }
+
+    @if (missing().length) {
+      <div class="form-note missing">
+        <i class="icon pi pi-info-circle"></i>
+        <span class="grow">{{ 'labels.missing' | translate: { n: missing().length } }}
+          @if (!canManage()) { {{ 'labels.askManager' | translate }} }</span>
+        @if (canManage()) {
+          <button pButton type="button" size="small" (click)="giveBarcodes()" [loading]="busy()" [disabled]="busy()">
+            <i class="pi pi-barcode" pButtonIcon></i><span pButtonLabel>{{ 'labels.giveBarcodes' | translate }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    <div class="ms-check">
+      <p-toggleswitch inputId="lb-price" [ngModel]="showPrice()" (ngModelChange)="showPrice.set($event)" />
+      <label for="lb-price">{{ 'labels.showPrice' | translate }}</label>
+    </div>
+
+    @if (labels().length) {
+      <p class="muted small">{{ 'labels.count' | translate: { n: labels().length, sheets: sheets().length } }}</p>
+      <div class="sheets">
+        <div #paper class="print-labels">
+          @for (sheet of sheets(); track $index) {
+            <div class="sheet">
+              @for (p of sheet; track $index) {
+                <div class="sticker">
+                  <div class="name">{{ lang.name(p.nameEn, p.nameKm) }}</div>
+                  @if (showPrice() && p.sellPrice != null) {
+                    <div class="price">{{ p.sellPrice | currency: 'USD' }}</div>
+                  }
+                  <ms-barcode-svg [code]="p.barcode!" />
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+  <ng-template #footer>
+    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+    <button pButton type="button" (click)="print()" [disabled]="!labels().length">
+      <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

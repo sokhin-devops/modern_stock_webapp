@@ -429,6 +429,17 @@
 }
 
 // Printing from the receipt dialog prints the receipt only.
+// The copy of a dialog's receipt, document or labels made for the printer (shared/print-copy.ts): never on screen.
+.print-copy {
+  display: none;
+}
+
+// Barcode label sheets (FR-1.9) fill the A4 page to the edge, as sticker paper does.
+@page labels {
+  size: A4;
+  margin: 0;
+}
+
 @media print {
   body * {
     visibility: hidden;
@@ -437,16 +448,29 @@
   .print-receipt,
   .print-receipt *,
   .print-doc,
-  .print-doc * {
+  .print-doc *,
+  .print-labels,
+  .print-labels * {
     visibility: visible;
   }
 
   .print-receipt,
-  .print-doc {
+  .print-doc,
+  .print-labels {
     position: absolute;
     top: 0;
     left: 0;
     box-shadow: none;
+  }
+
+  // Printing from a dialog: the copy at the top of the page goes on paper, the dialog's own stays out
+  .print-copy {
+    display: block;
+  }
+
+  body:has(> .print-copy) .p-dialog :is(.print-receipt, .print-doc, .print-labels),
+  body:has(> .print-copy) .p-dialog :is(.print-receipt, .print-doc, .print-labels) * {
+    visibility: hidden;
   }
 
   // A4 documents (invoice, delivery note) use the whole page width.

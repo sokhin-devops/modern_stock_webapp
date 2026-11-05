@@ -22,7 +22,7 @@
       </ng-template>
       <ng-template #body let-c>
         <tr class="clickable" tabindex="0" (click)="open(c)" (keydown.enter)="open(c)">
-          <td class="strong">{{ c.number }}</td>
+          <td class="strong doc-no">{{ c.number }}</td>
           <td>{{ (c.postedAt ?? c.submittedAt ?? c.createdAt) | date: 'dd/MM/yyyy' }}</td>
           <td class="muted">{{ c.warehouseName }}@if (c.warehouseId == null) { · {{ 'counts.allWarehousesShort' | translate }} }</td>
           <td class="muted">
@@ -68,7 +68,7 @@
       <div class="ms-field">
         <label msLabel for="ct-products">{{ 'counts.products' | translate }}</label>
         <p-autocomplete inputId="ct-products" [ngModel]="chosen()" (ngModelChange)="chosen.set($event ?? [])" [multiple]="true"
-                        [suggestions]="found()" (completeMethod)="findProducts($event)" optionLabel="nameEn" [forceSelection]="true"
+                        [suggestions]="found()" (completeMethod)="findProducts($event)" [optionLabel]="productName" [forceSelection]="true"
                         [fluid]="true" [placeholder]="'common.searchProduct' | translate" appendTo="body">
           <ng-template #selecteditem let-p>{{ lang.name(p.nameEn, p.nameKm) }}</ng-template>
           <ng-template #item let-p>

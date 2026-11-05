@@ -20,7 +20,7 @@
   @for (line of lines(); track $index; let i = $index) {
     <div class="line">
       <p-autocomplete [ngModel]="line.product" (ngModelChange)="pick(i, $event)" [suggestions]="results()" (completeMethod)="find($event)"
-                      [optionLabel]="'nameEn'" [placeholder]="'common.searchProduct' | translate" [forceSelection]="true" [fluid]="true"
+                      [optionLabel]="productName" [placeholder]="'common.searchProduct' | translate" [forceSelection]="true" [fluid]="true"
                       [disabled]="disabled()" appendTo="body" [ariaLabel]="'common.product' | translate">
         <ng-template #selecteditem let-p>{{ label(p) }}</ng-template>
         <ng-template #item let-p>
@@ -29,24 +29,28 @@
       </p-autocomplete>
       <p-select [options]="unitOptions(line.product)" optionLabel="label" optionValue="value" [ngModel]="line.unitId"
                 (ngModelChange)="update(i, { unitId: $event })" [disabled]="disabled() || !line.product" [fluid]="true" appendTo="body"
-                [ariaLabel]="'pos.unit' | translate" />
+                [ariaLabel]="'pos.unit' | translate" [placeholder]="'pos.unit' | translate" />
       <p-inputnumber [ngModel]="line.qty" (ngModelChange)="update(i, { qty: $event })" [maxFractionDigits]="3" locale="en-US"
-                     [min]="allowNegative() ? undefined : 0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.qty' | translate" />
+                     [min]="allowNegative() ? undefined : 0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.qty' | translate"
+                     [placeholder]="'common.qty' | translate" />
       @if (showPrice()) {
         <span class="num muted">{{ prices()[i] == null ? '' : '$' + (prices()[i]! | number: '1.2-2') }}</span>
         <p-inputnumber [ngModel]="line.discount ?? null" (ngModelChange)="update(i, { discount: $event })" mode="currency" currency="USD"
-                       locale="en-US" [min]="0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.discount' | translate" />
+                       locale="en-US" [min]="0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.discount' | translate"
+                       [placeholder]="'common.discount' | translate" />
         <span class="num strong">{{ amount(i, line) == null ? '' : '$' + (amount(i, line)! | number: '1.2-2') }}</span>
       }
       @if (showCost()) {
         <p-inputnumber [ngModel]="line.unitCost" (ngModelChange)="update(i, { unitCost: $event })" mode="currency" currency="USD" locale="en-US"
-                       [maxFractionDigits]="4" [min]="0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.unitCost' | translate" />
+                       [maxFractionDigits]="4" [min]="0" [disabled]="disabled() || !line.product" [fluid]="true" [ariaLabel]="'common.unitCost' | translate"
+                       [placeholder]="'common.unitCost' | translate" />
       }
       @if (showBatch()) {
         <input pInputText [ngModel]="line.batchNo" (ngModelChange)="update(i, { batchNo: $event })" [disabled]="disabled() || !line.product?.trackExpiry"
-               [attr.aria-label]="'stock.batch' | translate" />
+               [attr.aria-label]="'stock.batch' | translate" [placeholder]="'stock.batch' | translate" />
         <p-datepicker [ngModel]="line.expiryDate" (ngModelChange)="update(i, { expiryDate: $event })" dateFormat="dd/mm/yy" appendTo="body"
-                      [disabled]="disabled() || !line.product?.trackExpiry" [fluid]="true" [ariaLabel]="'stock.expiry' | translate" />
+                      [disabled]="disabled() || !line.product?.trackExpiry" [fluid]="true" [ariaLabel]="'stock.expiry' | translate"
+                      [placeholder]="'stock.expiry' | translate" />
       }
       <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove(i)" [disabled]="disabled()"
               [attr.aria-label]="'pos.remove' | translate" [pTooltip]="'pos.remove' | translate" tooltipPosition="top">

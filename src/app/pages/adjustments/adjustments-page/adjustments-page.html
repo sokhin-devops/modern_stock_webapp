@@ -35,7 +35,7 @@
       </ng-template>
       <ng-template #body let-a>
         <tr class="clickable" tabindex="0" (click)="viewing.set(a)" (keydown.enter)="viewing.set(a)">
-          <td class="strong">{{ a.number }}</td>
+          <td class="strong doc-no">{{ a.number }}</td>
           <td>{{ (a.postedAt ?? a.createdAt) | date: 'dd/MM/yyyy' }}</td>
           <td>{{ 'adjust.reasons.' + a.reason | translate }}</td>
           <td class="muted">{{ a.warehouseName }}</td>
