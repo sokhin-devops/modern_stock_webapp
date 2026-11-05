@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon } from 'primeng/button';
 
@@ -14,7 +14,8 @@ import { PlatformService } from '../../core/platform.service';
   imports: [TranslatePipe, ButtonDirective, ButtonIcon],
   template: `
     @if (platform.announcement(); as a) {
-      <div class="banner" [class.banner-warn]="a.level === 'WARN'" [class.banner-primary]="a.level !== 'WARN'" role="status">
+      <div class="banner" [class.banner-warn]="a.level === 'WARN'" [class.banner-primary]="a.level !== 'WARN'" [class.inset]="inset()"
+           role="status">
         <i class="icon pi" [class.pi-exclamation-triangle]="a.level === 'WARN'" [class.pi-megaphone]="a.level !== 'WARN'"></i>
         <div class="text">{{ lang.lang() === 'km' ? a.km : a.en }}</div>
         <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" size="small" (click)="platform.dismiss()"
@@ -35,9 +36,16 @@ import { PlatformService } from '../../core/platform.service';
       margin: 0 0 12px;
       padding-block: 4px;
     }
+
+    // Full-screen pages (the POS): away from the screen edges, above the header.
+    .banner.inset {
+      margin: 8px 16px 0;
+    }
   `,
 })
 export class AnnouncementBanner {
+  /** On a page without the app frame (the POS). */
+  readonly inset = input(false);
   protected readonly platform = inject(PlatformService);
   protected readonly lang = inject(LangService);
 

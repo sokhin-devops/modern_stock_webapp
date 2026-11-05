@@ -74,6 +74,10 @@
           <p-toggleswitch inputId="tg-expiry" [ngModel]="s.expiryAlerts" (ngModelChange)="set('expiryAlerts', $event)" [disabled]="!s.dailySummary" />
           <label for="tg-expiry">{{ 'telegram.expiry' | translate }}</label>
         </div>
+        <div class="ms-check indent">
+          <p-toggleswitch inputId="tg-debts" [ngModel]="s.debtLines" (ngModelChange)="set('debtLines', $event)" [disabled]="!s.dailySummary" />
+          <label for="tg-debts">{{ 'telegram.debts' | translate }}</label>
+        </div>
 
         <h3 class="form-section">{{ 'telegram.instantTitle' | translate }}</h3>
         <p class="muted small">{{ 'telegram.instantLead' | translate }}</p>
@@ -88,6 +92,10 @@
         <div class="ms-check">
           <p-toggleswitch inputId="tg-void" [ngModel]="s.voidAlerts" (ngModelChange)="set('voidAlerts', $event)" />
           <label for="tg-void">{{ 'telegram.saleVoid' | translate }}</label>
+        </div>
+        <div class="ms-check">
+          <p-toggleswitch inputId="tg-approvals" [ngModel]="s.approvalAlerts" (ngModelChange)="set('approvalAlerts', $event)" />
+          <label for="tg-approvals">{{ 'telegram.approvals' | translate }}</label>
         </div>
 
         <div class="settings-actions">

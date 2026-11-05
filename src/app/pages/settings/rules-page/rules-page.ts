@@ -18,6 +18,21 @@ import { FieldLabel } from '../../../shared/field-label/field-label';
 import { ImageField } from '../../../shared/image-field/image-field';
 import { revealErrors } from '../../../shared/forms';
 
+/** Document types by area, for their number prefixes (FR-7.11); the codes are the API's DocType. */
+const NUMBER_GROUPS = [
+  { key: 'sales', types: ['QO', 'SO', 'DO', 'INV', 'TAX', 'RCT', 'RCV', 'SR', 'CN', 'DN'] },
+  { key: 'purchases', types: ['PO', 'GRN', 'BILL', 'PAY', 'PRT', 'SC', 'EXP'] },
+  { key: 'stock', types: ['ADJ', 'TRF', 'CNT'] },
+];
+/** 1 to 6 letters or digits, starting with a letter (saved in capitals). */
+const PREFIX = /^[A-Za-z][A-Za-z0-9]{0,5}$/;
+
+/** Each kind of document keeps its own prefix. */
+function distinct(group: AbstractControl): ValidationErrors | null {
+  const values = Object.values(group.getRawValue() as Record<string, string>).map((v) => v.trim().toUpperCase());
+  return new Set(values).size < values.length ? { twice: true } : null;
+}
+
 /** The near-expiry windows must grow: 30 < 60 < 90. */
 function growing(group: AbstractControl): ValidationErrors | null {
   const { expiry1, expiry2, expiry3 } = group.getRawValue() as { expiry1: number; expiry2: number; expiry3: number };
@@ -50,7 +65,11 @@ export class RulesPage {
     { value: 500, label: '៛500' },
     { value: 1000, label: '៛1,000' },
   ];
-  protected readonly form = inject(NonNullableFormBuilder).group({
+  private readonly fb = inject(NonNullableFormBuilder);
+  protected readonly numberGroups = NUMBER_GROUPS;
+  /** This month, as it shows in a number: INV-202611-0001. */
+  private readonly period = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  protected readonly form = this.fb.group({
     vatEnabled: [false],
     vatRate: [10, [Validators.required, Validators.min(0), Validators.max(100)]],
     rielRounding: [100],
@@ -66,6 +85,13 @@ export class RulesPage {
     expiry1: [30, [Validators.required, Validators.min(1), Validators.max(365)]],
     expiry2: [60, [Validators.required, Validators.min(1), Validators.max(365)]],
     expiry3: [90, [Validators.required, Validators.min(1), Validators.max(365)]],
+    // Document number prefixes (FR-7.11), the type's code by default
+    numberPrefixes: this.fb.record(
+      Object.fromEntries(
+        NUMBER_GROUPS.flatMap((g) => g.types).map((t) => [t, this.fb.control(t, [Validators.required, Validators.pattern(PREFIX)])]),
+      ),
+      { validators: distinct },
+    ),
   }, { validators: growing });
   protected readonly papers = [
     { value: 80, label: '80 mm' },
@@ -111,18 +137,25 @@ export class RulesPage {
     });
   }
 
+  /** How the next number of this type will look. */
+  protected example(type: string): string {
+    const prefix = this.form.controls.numberPrefixes.controls[type]?.value?.trim().toUpperCase();
+    return `${prefix && PREFIX.test(prefix) ? prefix : type}-${this.period}-0001`;
+  }
+
   protected submit(): void {
     if (this.form.invalid) {
       revealErrors(this.form);
       return;
     }
-    const { expiry1, expiry2, expiry3, ...v } = this.form.getRawValue();
+    const { expiry1, expiry2, expiry3, numberPrefixes, ...v } = this.form.getRawValue();
     this.busy.set(true);
     const body = {
       ...v,
       receiptFooter: v.receiptFooter.trim() || null,
       receiptHeader: v.receiptHeader.trim() || null,
       expiryDays: [expiry1, expiry2, expiry3],
+      numberPrefixes: Object.fromEntries(Object.entries(numberPrefixes).map(([t, p]) => [t, p.trim().toUpperCase()])),
     };
     this.api.put<BusinessSettings>('/business/settings', body).subscribe({
       next: () => {

@@ -22,6 +22,42 @@
     <p-selectbutton [options]="methods()" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
       <ng-template #item let-o>{{ o.label | translate }}</ng-template>
     </p-selectbutton>
+    @if (openDocs().length > 1) {
+      <!-- FR-3.22: one payment for several invoices or bills, the oldest first or the ones picked here -->
+      <div class="ms-field">
+        <span msLabel id="pay-mode">{{ (isCustomer() ? 'payments.whichInvoices' : 'payments.whichBills') | translate }}</span>
+        <p-selectbutton [options]="modes" optionValue="value" [ngModel]="mode()" (ngModelChange)="setMode($event)" [allowEmpty]="false"
+                        ariaLabelledBy="pay-mode">
+          <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+        </p-selectbutton>
+      </div>
+      @if (mode() === 'choose') {
+        <ul class="docs">
+          @for (d of openDocs(); track d.id) {
+            <li [class.on]="isChosen(d)">
+              <p-checkbox [binary]="true" [inputId]="'pay-doc-' + d.id" [ngModel]="isChosen(d)" (ngModelChange)="toggle(d, $event)" />
+              <label class="grow" [for]="'pay-doc-' + d.id">
+                <span class="strong doc-no">{{ d.number }}</span>
+                <small class="muted" [class.danger-text]="d.overdue">
+                  {{ 'payments.due' | translate: { date: (d.dueDate | date: 'dd/MM/yyyy') } }} ·
+                  {{ 'payments.open' | translate: { amount: (d.balance | currency: 'USD') } }}
+                </small>
+              </label>
+              @if (isChosen(d)) {
+                <p-inputnumber [ngModel]="chosenAmount(d)" (ngModelChange)="setChosenAmount(d, $event)" mode="currency" currency="USD"
+                               locale="en-US" [min]="0" [max]="d.balance" inputStyleClass="doc-amount" [ariaLabel]="'common.amount' | translate" />
+              }
+            </li>
+          }
+        </ul>
+        <div class="chosen-total" [class.danger-text]="overChosen()">
+          {{ 'payments.chosenTotal' | translate: { amount: (chosenTotal() | currency: 'USD') } }}
+          @if (overChosen()) {
+            · {{ 'payments.overChosen' | translate }}
+          }
+        </div>
+      }
+    }
     @if (method() !== 'CASH') {
       <div class="ms-field">
         <label msLabel for="pay-ref">{{ 'common.reference' | translate }}</label>
@@ -35,7 +71,7 @@
   </div>
   <ng-template #footer>
     <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
-    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !party() || !amount()">
+    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !canSave()">
       <span pButtonLabel>{{ 'common.save' | translate }}</span>
     </button>
   </ng-template>

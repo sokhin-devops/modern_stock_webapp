@@ -2,6 +2,19 @@
   display: block;
 }
 
+// A row on top for the announcement (FR-8.10); empty, it takes no room.
+.pos {
+  grid-template-rows: auto 64px minmax(0, 1fr);
+
+  > .pos-head {
+    grid-row: 2;
+  }
+
+  > .pos-main {
+    grid-row: 3;
+  }
+}
+
 .branch-select {
   min-width: 160px;
 }

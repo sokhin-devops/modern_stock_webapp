@@ -707,6 +707,8 @@ export interface BusinessSettings {
   bankEnabled: boolean;
   /** Near-expiry windows in days (FR-7.10), each longer than the one before; the first one warns. */
   expiryDays: number[];
+  /** Document number prefix per type (FR-7.11), e.g. INV → HD; the type's code by default. */
+  numberPrefixes: Record<string, string>;
   /** The shop's KHQR image under the API, shown at the POS. Read only. */
   khqrImageUrl: string | null;
 }

@@ -19,6 +19,10 @@ interface TelegramSettings {
   outOfStockAlerts: boolean;
   shiftShortAlerts: boolean;
   voidAlerts: boolean;
+  /** An adjustment, count or return waits for approval (FR-5.8). */
+  approvalAlerts: boolean;
+  /** In the daily summary: overdue customer invoices, supplier bills overdue or due soon (FR-5.8). */
+  debtLines: boolean;
   botConfigured: boolean;
   planIncludes: boolean;
 }
@@ -59,7 +63,10 @@ export class TelegramPage {
     inject(DestroyRef).onDestroy(() => this.stopWaiting());
   }
 
-  protected set<K extends 'dailySummary' | 'lowStockAlerts' | 'expiryAlerts' | 'outOfStockAlerts' | 'shiftShortAlerts' | 'voidAlerts'>(
+  protected set<
+    K extends
+      | 'dailySummary' | 'lowStockAlerts' | 'expiryAlerts' | 'debtLines' | 'outOfStockAlerts' | 'shiftShortAlerts' | 'voidAlerts' | 'approvalAlerts',
+  >(
     key: K,
     value: boolean,
   ): void {

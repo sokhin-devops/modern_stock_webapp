@@ -39,6 +39,30 @@
           <p-toggleswitch formControlName="receiptShowVatTin" inputId="st-tin" />
           <label for="st-tin">{{ 'settings.receipt.showTin' | translate }}</label>
         </div>
+
+        <h3 class="form-section">{{ 'settings.numbers.title' | translate }}</h3>
+        <p class="muted small">{{ 'settings.numbers.lead' | translate }}</p>
+        <div class="numbers" formGroupName="numberPrefixes">
+          @for (g of numberGroups; track g.key) {
+            <section class="numbers-group">
+              <h4>{{ 'settings.numbers.' + g.key | translate }}</h4>
+              @for (t of g.types; track t) {
+                <div class="number-row">
+                  <label [for]="'st-no-' + t">
+                    {{ 'settings.numbers.types.' + t | translate }}
+                    <small class="muted">{{ example(t) }}</small>
+                  </label>
+                  <input pInputText [id]="'st-no-' + t" [formControlName]="t" maxlength="6" autocapitalize="characters" spellcheck="false"
+                         class="prefix" />
+                </div>
+              }
+            </section>
+          }
+        </div>
+        @if (form.controls.numberPrefixes.hasError('twice')) {
+          <small class="danger-text">{{ 'settings.numbers.twice' | translate }}</small>
+        }
+        <small class="field-hint">{{ 'settings.numbers.hint' | translate }}</small>
       } @else {
         <p class="muted">{{ 'settings.rules.lead' | translate }}</p>
         <div class="ms-field">

@@ -18,6 +18,7 @@ import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { PosService } from '../../../core/sales/pos.service';
 import { ThemeModeService } from '../../../core/theme-mode.service';
+import { AnnouncementBanner } from '../../../layout/announcement-banner/announcement-banner';
 import { AccountMenu } from '../../../shared/account-menu/account-menu';
 import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { LangButton } from '../../../shared/lang-button/lang-button';
@@ -50,6 +51,7 @@ interface CartLine {
   imports: [
     FormsModule, RouterLink, TranslatePipe, DecimalPipe, DatePipe, AutoComplete, Select, ButtonDirective, ButtonIcon,
     ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, NewCustomerDialog, HeldDialog, ApiFilePipe,
+    AnnouncementBanner,
   ],
   host: { '(document:keydown)': 'onKey($event)' },
   templateUrl: './pos-page.html',

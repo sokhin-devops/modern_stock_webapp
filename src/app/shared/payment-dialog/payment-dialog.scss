@@ -21,3 +21,46 @@
     font-weight: 500;
   }
 }
+
+// The open invoices or bills to pick, each with how much of it this payment pays.
+.docs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+
+    &.on {
+      border-color: var(--primary);
+    }
+  }
+
+  .grow {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  :deep(.doc-amount) {
+    width: 110px;
+    text-align: right;
+  }
+}
+
+.chosen-total {
+  font-size: 13px;
+  text-align: right;
+}
