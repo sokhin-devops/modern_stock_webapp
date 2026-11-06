@@ -3,7 +3,7 @@ import { Component, computed, effect, inject, input, model, output, signal, untr
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
@@ -28,15 +28,15 @@ interface OpenDoc {
  * open invoice (bill) of the same customer (supplier), or settle it in money.
  */
 @Component({
-  selector: 'ms-credit-drawer',
+  selector: 'ms-credit-details',
   imports: [
-    FormsModule, TranslatePipe, CurrencyPipe, DatePipe, Drawer, Select, SelectButton, InputNumber, ButtonDirective, ButtonIcon,
+    FormsModule, TranslatePipe, CurrencyPipe, DatePipe, Dialog, Select, SelectButton, InputNumber, ButtonDirective, ButtonIcon,
     ButtonLabel, FieldLabel,
   ],
-  templateUrl: './credit-drawer.html',
-  styleUrl: './credit-drawer.scss',
+  templateUrl: './credit-details.html',
+  styleUrl: './credit-details.scss',
 })
-export class CreditDrawer {
+export class CreditDetails {
   readonly kind = input.required<CreditKind>();
   readonly credit = model<Credit | null>(null);
   readonly changed = output<Credit>();

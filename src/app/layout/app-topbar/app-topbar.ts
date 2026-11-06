@@ -1,6 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, output } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MenuItem } from 'primeng/api';
 import { ButtonDirective, ButtonIcon } from 'primeng/button';
@@ -8,10 +9,12 @@ import { Menu } from 'primeng/menu';
 import { Popover } from 'primeng/popover';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
+import { filter, map } from 'rxjs';
 
 import { ALERT_TARGETS, AlertsService, alertQuery } from '../../core/alerts.service';
 import { MyBusiness } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
+import { helpUrl } from '../../core/help';
 import { LangService } from '../../core/lang.service';
 import { ScreenService } from '../../core/screen.service';
 import { ThemeModeService } from '../../core/theme-mode.service';
@@ -43,6 +46,12 @@ export class AppTopbar {
   private readonly screen = inject(ScreenService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+
+  private readonly url = toSignal(this.router.events.pipe(filter((e) => e instanceof NavigationEnd), map(() => this.router.url)), {
+    initialValue: this.router.url,
+  });
+  /** The website's guide for the page on screen, in the app's language. */
+  protected readonly helpHref = computed(() => helpUrl(this.url(), this.lang.lang()));
 
   protected readonly businessName = computed(() => {
     const b = this.business.current();

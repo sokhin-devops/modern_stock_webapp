@@ -2,7 +2,7 @@ import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, input, model, output, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 
 import { ApiService } from '../../core/api/api.service';
@@ -47,12 +47,12 @@ export interface ReturnDoc {
  * Stock keeper's prepared return, PLAIN.md section 5) is approved or rejected here by whoever may post returns.
  */
 @Component({
-  selector: 'ms-return-drawer',
-  imports: [TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Drawer, TableModule, ButtonDirective, ButtonLabel],
-  templateUrl: './return-drawer.html',
-  styleUrl: './return-drawer.scss',
+  selector: 'ms-return-details',
+  imports: [TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Dialog, TableModule, ButtonDirective, ButtonLabel],
+  templateUrl: './return-details.html',
+  styleUrl: './return-details.scss',
 })
-export class ReturnDrawer {
+export class ReturnDetails {
   readonly kind = input.required<'customer' | 'supplier'>();
   readonly doc = model<ReturnDoc | null>(null);
   readonly changed = output<ReturnDoc>();

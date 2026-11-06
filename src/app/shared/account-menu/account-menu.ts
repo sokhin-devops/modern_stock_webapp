@@ -6,6 +6,7 @@ import { Menu } from 'primeng/menu';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth/auth.service';
+import { helpUrl } from '../../core/help';
 import { LangService } from '../../core/lang.service';
 import { ThemeModeService } from '../../core/theme-mode.service';
 
@@ -37,6 +38,8 @@ export class AccountMenu {
       ...(this.auth.user()?.superAdmin
         ? [{ label: t('admin.title'), icon: 'pi pi-shield', command: () => this.router.navigate(['/admin']) }]
         : []),
+      // the Help Center opens on the guide for the page on screen (the POS has no top bar with its own help button)
+      { label: t('account.help'), icon: 'pi pi-question-circle', command: () => window.open(helpUrl(this.router.url, lang), '_blank', 'noopener') },
       { label: t('account.website'), icon: 'pi pi-globe', url: `${environment.websiteUrl}/${lang}`, target: '_blank' },
       { separator: true },
       {

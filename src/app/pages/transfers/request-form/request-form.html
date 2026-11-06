@@ -1,5 +1,6 @@
-<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-doc-drawer" [header]="'requests.new' | translate"
-          [ariaCloseLabel]="'common.close' | translate">
+<!-- In the Requests tab: shown from <body>, or the tab panel would frame it (off-centre, cut off on phones) -->
+<p-dialog [(visible)]="visible" appendTo="body" [blockScroll]="true" styleClass="ms-doc-dialog" [header]="'requests.new' | translate" [modal]="true" [draggable]="false" [resizable]="false"
+          [closeAriaLabel]="'common.close' | translate">
   <div class="ms-form">
     <p class="muted">{{ 'requests.lead' | translate }}</p>
     <div class="ms-form-row">
@@ -28,7 +29,7 @@
     </div>
   </div>
   <ng-template #footer>
-    <div class="drawer-actions">
+    <div class="dialog-actions">
       <span class="spacer"></span>
       <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
       <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !fromBranchId()">
@@ -36,4 +37,4 @@
       </button>
     </div>
   </ng-template>
-</p-drawer>
+</p-dialog>

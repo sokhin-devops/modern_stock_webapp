@@ -40,8 +40,9 @@
 
 <ms-request-form [(visible)]="formOpen" (saved)="created($event)" />
 
-<p-drawer [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" position="right" styleClass="ms-doc-drawer"
-          [header]="viewing()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<!-- In the Requests tab: shown from <body>, or the tab panel would frame it (off-centre, cut off on phones) -->
+<p-dialog [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" appendTo="body" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewing()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (viewing(); as r) {
     <div class="doc-facts">
       <div><small>{{ 'requests.askBranch' | translate }}</small><b>{{ branchName(r.fromBranchId, r.fromBranchName) }}</b></div>
@@ -86,7 +87,7 @@
   }
   <ng-template #footer>
     @if (viewing(); as r) {
-      <div class="drawer-actions">
+      <div class="dialog-actions">
         @if (r.canCancel) {
           <button pButton type="button" [text]="true" severity="danger" (click)="cancel(r)" [disabled]="busy()">
             <span pButtonLabel>{{ 'requests.cancel' | translate }}</span>
@@ -107,4 +108,4 @@
       </div>
     }
   </ng-template>
-</p-drawer>
+</p-dialog>

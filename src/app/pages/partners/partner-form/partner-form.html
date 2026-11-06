@@ -1,4 +1,4 @@
-<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-form-drawer" [ariaCloseLabel]="'common.close' | translate"
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-form-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
           [header]="(partner() ? (isCustomer() ? 'partners.editCustomer' : 'partners.editSupplier') : (isCustomer() ? 'partners.newCustomer' : 'partners.newSupplier')) | translate">
   <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="partner-form">
     <div class="ms-field">
@@ -69,7 +69,7 @@
   </form>
 
   <ng-template #footer>
-    <div class="drawer-actions">
+    <div class="dialog-actions">
       @if (canManage() && partner()?.active) {
         <button pButton type="button" [text]="true" severity="danger" (click)="deactivate()">
           <span pButtonLabel>{{ 'partners.deactivate' | translate }}</span>
@@ -84,4 +84,4 @@
       }
     </div>
   </ng-template>
-</p-drawer>
+</p-dialog>

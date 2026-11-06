@@ -1,5 +1,5 @@
-<p-drawer [visible]="!!view()" (visibleChange)="!$event && view.set(null)" position="right" styleClass="ms-doc-drawer"
-          [header]="view()?.doc?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [visible]="!!view()" (visibleChange)="!$event && view.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="view()?.doc?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (view(); as v) {
     <div class="doc-facts">
       <div><small>{{ 'sales.customer' | translate }}</small><b>{{ v.doc.customerName }}</b></div>
@@ -100,7 +100,7 @@
   }
   <ng-template #footer>
     @if (view(); as v) {
-      <div class="drawer-actions">
+      <div class="dialog-actions">
         @if (quotation(); as q) {
           @if (canManage() && q.status === 'DRAFT') {
             <button pButton type="button" [text]="true" severity="danger" (click)="remove(q)" [disabled]="busy()"><span pButtonLabel>{{ 'common.delete' | translate }}</span></button>
@@ -158,7 +158,7 @@
       </div>
     }
   </ng-template>
-</p-drawer>
+</p-dialog>
 
 <ms-deliver-dialog [order]="order()" [(visible)]="deliverOpen" (delivered)="delivered($event)" />
 <ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />

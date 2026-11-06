@@ -1,0 +1,71 @@
+# Web app pipeline (doc/plain/DevSecOps.md section 7).
+# Every push and pull request: secret scan, code scan, dependency audit, build.
+# Pushes to dev and main also deploy to Cloudflare: dev → dev-app.sokhin.site, main → app.sokhin.site.
+name: Web app
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SEMGREP: semgrep/semgrep:1.183.0@sha256:2e45517a85e13a9cca14a2a00df6bb48affd66b8ebfae1b0991cd57578362fb0
+  TARGET: ${{ github.ref_name == 'dev' && 'dev' || 'production' }}
+  DEPLOY: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'dev') }}
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks reads the whole history
+          persist-credentials: false
+
+      - name: Secret scan (gitleaks)
+        run: |
+          v=8.30.1
+          url=https://github.com/gitleaks/gitleaks/releases/download/v$v
+          curl -sSfLO "$url/gitleaks_${v}_linux_x64.tar.gz"
+          curl -sSfLO "$url/gitleaks_${v}_checksums.txt"
+          sha256sum --check --ignore-missing "gitleaks_${v}_checksums.txt"
+          tar -xzf "gitleaks_${v}_linux_x64.tar.gz" gitleaks
+          ./gitleaks git --redact --no-banner .
+
+      - name: Code scan (Semgrep)
+        run: docker run --rm -v "$PWD:/src" "$SEMGREP" semgrep scan --config p/typescript --config p/owasp-top-ten --error --metrics off
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Dependency audit (high and critical, except the accepted ones)
+        run: node .github/scripts/audit.mjs
+
+      - name: Build (${{ env.TARGET }})
+        run: npm run build -- --configuration "$TARGET"
+
+      - name: Deploy to Cloudflare
+        if: env.DEPLOY == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::No CLOUDFLARE_API_TOKEN secret yet: the app was built and scanned, nothing was deployed"
+            exit 0
+          fi
+          if [ "$TARGET" = dev ]; then npx wrangler deploy --env dev; else npx wrangler deploy; fi

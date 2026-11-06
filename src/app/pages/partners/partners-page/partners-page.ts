@@ -18,7 +18,7 @@ import { Partner, PartnerForm, PartnerKind } from '../partner-form/partner-form'
 
 /**
  * Customers or suppliers (prototype customers.html / suppliers.html, PLAIN.md 11.7): search by name or phone, the
- * balance each one owes or is owed, and a drawer to add or edit. The route path says which of the two it is.
+ * balance each one owes or is owed, and a dialog to add or edit. The route path says which of the two it is.
  */
 @Component({
   selector: 'ms-partners-page',

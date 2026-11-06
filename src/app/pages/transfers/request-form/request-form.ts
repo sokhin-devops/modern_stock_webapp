@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 
@@ -22,7 +22,7 @@ import { filledLines } from '../../../shared/options';
  */
 @Component({
   selector: 'ms-request-form',
-  imports: [FormsModule, TranslatePipe, Drawer, InputText, Select, DatePicker, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
+  imports: [FormsModule, TranslatePipe, Dialog, InputText, Select, DatePicker, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
   templateUrl: './request-form.html',
 })
 export class RequestForm {

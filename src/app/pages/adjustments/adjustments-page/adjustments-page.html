@@ -52,8 +52,8 @@
 
 <ms-adjustment-form [(visible)]="formOpen" (saved)="list.reload()" />
 
-<p-drawer [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" position="right" styleClass="ms-doc-drawer"
-          [header]="viewing()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewing()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (viewing(); as a) {
     <div class="doc-facts">
       <div><small>{{ 'adjust.kind' | translate }}</small><b>{{ 'adjust.' + a.kind | translate }}</b></div>
@@ -85,7 +85,7 @@
   }
   <ng-template #footer>
     @if (viewing()?.status === 'WAITING_APPROVAL' && canApprove()) {
-      <div class="drawer-actions">
+      <div class="dialog-actions">
         <span class="spacer"></span>
         <button pButton type="button" [text]="true" severity="danger" (click)="decide(viewing()!, 'reject')" [disabled]="busy()">
           <span pButtonLabel>{{ 'common.reject' | translate }}</span>
@@ -96,11 +96,11 @@
       </div>
     }
     @if (viewing()?.status === 'POSTED' && canVoid() && viewing()?.reason !== 'LOST_IN_TRANSIT') {
-      <div class="drawer-actions">
+      <div class="dialog-actions">
         <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(viewing()!)" [loading]="busy()" [disabled]="busy()">
           <span pButtonLabel>{{ 'adjust.void' | translate }}</span>
         </button>
       </div>
     }
   </ng-template>
-</p-drawer>
+</p-dialog>

@@ -1,0 +1,30 @@
+# Weekly update pull requests into dev (doc/plain/DevSecOps.md section 7). Security fixes come as soon as they're out;
+# other new versions wait 7 days (cooldown), since a hijacked release is usually caught within days.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    ignore:
+      # PrimeNG stays on 19.1.4 (MIT); the later 19.x releases are the licensed -lts line
+      - dependency-name: primeng
+      - dependency-name: "@primeng/themes"
+      # Angular stays on 19 to match PrimeNG 19, with the TypeScript and zone.js it supports
+      - dependency-name: "@angular/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: zone.js
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7

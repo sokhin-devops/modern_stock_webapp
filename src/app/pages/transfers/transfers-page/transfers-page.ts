@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
@@ -44,7 +44,7 @@ const LATE_DAYS = 3;
 
 @Component({
   selector: 'ms-transfers-page',
-  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Drawer, ButtonDirective, ButtonIcon, ButtonLabel, TransferForm,
+  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Dialog, ButtonDirective, ButtonIcon, ButtonLabel, TransferForm,
     Tabs, TabList, Tab, TabPanels, TabPanel, RequestsPanel],
   templateUrl: './transfers-page.html',
   styleUrl: './transfers-page.scss',

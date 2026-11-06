@@ -4,7 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
@@ -25,7 +25,7 @@ import { filledLines, receivingWarehouse, warehouseOptions } from '../../../shar
  */
 @Component({
   selector: 'ms-purchase-form',
-  imports: [FormsModule, TranslatePipe, Drawer, AutoComplete, InputText, Select, SelectButton, DatePicker, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
+  imports: [FormsModule, TranslatePipe, Dialog, AutoComplete, InputText, Select, SelectButton, DatePicker, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
   templateUrl: './purchase-form.html',
   styleUrl: './purchase-form.scss',
 })

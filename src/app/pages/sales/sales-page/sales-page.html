@@ -223,8 +223,8 @@
 
 <ms-payment-dialog kind="customer" [(visible)]="payOpen" (saved)="reloadAll()" />
 
-<p-drawer [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" position="right" styleClass="ms-form-drawer"
-          [header]="viewing()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewing()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (viewing(); as r) {
     <div class="doc-facts">
       <div><small>{{ 'sales.soldAt' | translate }}</small><b>{{ r.soldAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
@@ -245,7 +245,7 @@
   }
   <ng-template #footer>
     @if (viewing()?.status === 'POSTED' && canStartReturn()) {
-      <div class="drawer-actions">
+      <div class="dialog-actions">
         <button pButton type="button" [outlined]="true" (click)="startReturn(viewing()!.id, null)">
           <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ (canVoid() ? 'returns.button' : 'returns.askButton') | translate }}</span>
         </button>
@@ -256,11 +256,11 @@
       </div>
     }
   </ng-template>
-</p-drawer>
+</p-dialog>
 
 <!-- An invoice: its lines and money, and its prints -->
-<p-drawer [visible]="!!viewingInvoice()" (visibleChange)="!$event && viewingInvoice.set(null)" position="right" styleClass="ms-form-drawer"
-          [header]="viewingInvoice()?.number ?? ''" [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [visible]="!!viewingInvoice()" (visibleChange)="!$event && viewingInvoice.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewingInvoice()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   @if (viewingInvoice(); as i) {
     <div class="doc-facts">
       <div><small>{{ 'sales.customer' | translate }}</small><b>{{ i.customerName }}</b></div>
@@ -304,7 +304,7 @@
   }
   <ng-template #footer>
     @if (viewingInvoice(); as i) {
-      <div class="drawer-actions">
+      <div class="dialog-actions">
         @if (i.type === 'DEBIT_NOTE' && canVoid() && i.status === 'UNPAID' && !i.paidAmount) {
           <button pButton type="button" [text]="true" severity="danger" (click)="voidDebit(i)">
             <span pButtonLabel>{{ 'debit.void' | translate }}</span>
@@ -332,16 +332,16 @@
       </div>
     }
   </ng-template>
-</p-drawer>
+</p-dialog>
 
 <ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />
 
 <ms-return-dialog [receiptId]="returnFrom()?.receiptId ?? null" [invoiceId]="returnFrom()?.invoiceId ?? null" [(visible)]="returnOpen"
                   (saved)="returned($event)" />
-<ms-return-drawer kind="customer" [(doc)]="returnDoc" (changed)="returnDecided($event)" />
-<ms-credit-drawer kind="customer" [(credit)]="creditNote" (changed)="creditChanged()" />
+<ms-return-details kind="customer" [(doc)]="returnDoc" (changed)="returnDecided($event)" />
+<ms-credit-details kind="customer" [(credit)]="creditNote" (changed)="creditChanged()" />
 <ms-debit-dialog [(visible)]="debitOpen" [start]="debitStart()" (saved)="debitSaved($event)" />
 <ms-credit-dialog kind="customer" [(visible)]="newCreditOpen" (saved)="credits.refresh(); creditNote.set($event)" />
 
 <ms-order-form [target]="formTarget()" [(visible)]="formOpen" (saved)="docSaved($event)" />
-<ms-order-drawer [(view)]="orderView" (edit)="editDoc($event)" (changed)="ordersChanged()" />
+<ms-order-details [(view)]="orderView" (edit)="editDoc($event)" (changed)="ordersChanged()" />

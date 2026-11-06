@@ -4,7 +4,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { SelectButton } from 'primeng/selectbutton';
@@ -28,7 +28,7 @@ export type Partner = Customer | Supplier;
 @Component({
   selector: 'ms-partner-form',
   imports: [
-    ReactiveFormsModule, TranslatePipe, Drawer, InputText, InputNumber, DatePicker, SelectButton, ButtonDirective,
+    ReactiveFormsModule, TranslatePipe, Dialog, InputText, InputNumber, DatePicker, SelectButton, ButtonDirective,
     ButtonLabel, FieldLabel,
   ],
   templateUrl: './partner-form.html',

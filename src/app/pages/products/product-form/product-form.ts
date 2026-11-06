@@ -3,7 +3,7 @@ import { FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators } fr
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
-import { Drawer } from 'primeng/drawer';
+import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -22,14 +22,14 @@ import { revealErrors } from '../../../shared/forms';
 import { ImageField } from '../../../shared/image-field/image-field';
 
 /**
- * Add or edit a product (prototype drw-product) in a drawer beside the list: names, codes, category, stock unit,
+ * Add or edit a product (prototype drw-product) in a dialog over the list: names, codes, category, stock unit,
  * price, reorder level, expiry tracking, and bigger units such as a box of 24. Members without "manage products"
- * see the same drawer read-only.
+ * see the same dialog read-only.
  */
 @Component({
   selector: 'ms-product-form',
   imports: [
-    ReactiveFormsModule, TranslatePipe, Drawer, InputText, InputNumber, Select, ToggleSwitch, ButtonDirective,
+    ReactiveFormsModule, TranslatePipe, Dialog, InputText, InputNumber, Select, ToggleSwitch, ButtonDirective,
     ButtonIcon, ButtonLabel, Tooltip, FieldLabel, ImageField, ApiFilePipe,
   ],
   templateUrl: './product-form.html',
@@ -79,7 +79,7 @@ export class ProductForm {
   });
 
   constructor() {
-    // Fill the form each time the drawer opens.
+    // Fill the form each time the dialog opens.
     effect(() => {
       if (this.visible()) {
         this.reset(this.product());

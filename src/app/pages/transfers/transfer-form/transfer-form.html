@@ -1,5 +1,5 @@
-<p-drawer [(visible)]="visible" position="right" [blockScroll]="true" styleClass="ms-doc-drawer" [header]="'transfer.new' | translate"
-          [ariaCloseLabel]="'common.close' | translate">
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog" [header]="'transfer.new' | translate" [modal]="true" [draggable]="false" [resizable]="false"
+          [closeAriaLabel]="'common.close' | translate">
   <div class="ms-form">
     <p-selectbutton [options]="kinds" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" [allowEmpty]="false">
       <ng-template #item let-o>{{ o.label | translate }}</ng-template>
@@ -39,7 +39,7 @@
     </div>
   </div>
   <ng-template #footer>
-    <div class="drawer-actions">
+    <div class="dialog-actions">
       <span class="spacer"></span>
       <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
       <button pButton type="button" [outlined]="true" (click)="submit(false)" [disabled]="busy()"><span pButtonLabel>{{ 'docs.status.DRAFT' | translate }}</span></button>
@@ -48,4 +48,4 @@
       </button>
     </div>
   </ng-template>
-</p-drawer>
+</p-dialog>
