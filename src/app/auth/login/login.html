@@ -25,6 +25,15 @@
     @if (error()) {
       <p class="form-error" role="alert"><i class="icon pi pi-exclamation-circle"></i>{{ error() }}</p>
     }
+    @if (unverified()) {
+      <div class="form-note resend" role="status">
+        <span><i class="icon pi pi-envelope"></i>{{ 'auth.notVerifiedHelp' | translate }}</span>
+        <button pButton type="button" [outlined]="true" size="small" [loading]="resending()" [disabled]="resending()"
+                (click)="resendVerification()">
+          <span pButtonLabel>{{ 'auth.resend' | translate }}</span>
+        </button>
+      </div>
+    }
 
     <div class="auth-actions">
       <a routerLink="/forgot-password">{{ 'auth.forgot' | translate }}</a>

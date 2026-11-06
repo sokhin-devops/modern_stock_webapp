@@ -8,7 +8,7 @@ import { switchMap } from 'rxjs';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { BusinessService } from '../../core/business/business.service';
-import { NotifyService } from '../../core/notify.service';
+import { NotifyService, errorCode } from '../../core/notify.service';
 import { AuthFrame } from '../../shared/auth-frame/auth-frame';
 import { FieldLabel } from '../../shared/field-label/field-label';
 import { revealErrors } from '../../shared/forms';
@@ -39,6 +39,9 @@ export class Login {
   protected readonly showPassword = signal(false);
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
+  /** The account exists but its email isn't verified: offer a new link (only when they signed in with the email). */
+  protected readonly unverified = signal<string | null>(null);
+  protected readonly resending = signal(false);
   protected readonly form = inject(NonNullableFormBuilder).group({
     login: ['', Validators.required],
     password: ['', Validators.required],
@@ -52,6 +55,7 @@ export class Login {
     const { login, password } = this.form.getRawValue();
     this.busy.set(true);
     this.error.set(null);
+    this.unverified.set(null);
     this.auth.login(login.trim(), password).pipe(switchMap(() => this.business.loadMine())).subscribe({
       next: () => {
         const returnUrl = this.returnUrl();
@@ -70,6 +74,26 @@ export class Login {
       error: (e) => {
         this.busy.set(false);
         this.error.set(this.notify.message(e));
+        const email = login.trim();
+        this.unverified.set(errorCode(e) === 'EMAIL_NOT_VERIFIED' && email.includes('@') ? email : null);
+      },
+    });
+  }
+
+  protected resendVerification(): void {
+    const email = this.unverified();
+    if (!email) {
+      return;
+    }
+    this.resending.set(true);
+    this.auth.resendVerification(email).subscribe({
+      next: () => {
+        this.resending.set(false);
+        this.notify.showKey('auth.resent');
+      },
+      error: (e) => {
+        this.resending.set(false);
+        this.notify.error(e);
       },
     });
   }

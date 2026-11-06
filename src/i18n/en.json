@@ -96,6 +96,8 @@
     "sentTo": "We sent a link to {{email}}. Open it to verify your email, then sign in.",
     "resend": "Send the link again",
     "resent": "Link sent again.",
+    "notVerifiedHelp": "Your email is not verified yet. Lost the link or it expired? We can send a new one.",
+    "newLinkLead": "Enter the email you signed up with, and we will send you a new link.",
     "devLink": "Development: open the link directly",
     "verifyTitle": "Verify your email",
     "verifying": "Checking your link...",
