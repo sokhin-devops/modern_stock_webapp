@@ -396,6 +396,25 @@ export class ReportsPage {
     return row.label ? this.lang.name(row.label, row.labelKm) : this.translate.instant('reports.none.' + by);
   }
 
+  /** Reorder points are recalculated every morning; after an import or a big change, now (product:manage). */
+  protected readonly canRecalc = computed(() => this.business.can('product:manage'));
+  protected readonly recalcBusy = signal(false);
+
+  protected recalculate(): void {
+    this.recalcBusy.set(true);
+    this.api.post<{ products: number }>('/stock/reorder-points/recalculate').subscribe({
+      next: (r) => {
+        this.recalcBusy.set(false);
+        this.notify.showKey('reports.recalculated', { n: r.products });
+        this.data.reload();
+      },
+      error: (e) => {
+        this.recalcBusy.set(false);
+        this.notify.error(e);
+      },
+    });
+  }
+
   protected createOrder(report: ReorderReport): void {
     const rows = report.rows.filter((r) => r.suggestedQty > 0);
     if (!rows.length) {

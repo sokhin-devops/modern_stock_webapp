@@ -31,6 +31,10 @@
               <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
               <ng-template #item let-o>{{ o.label | translate }}</ng-template>
             </p-select>
+            <span class="spacer"></span>
+            <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+              <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+            </button>
           </div>
           <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
                    [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
@@ -135,6 +139,7 @@
           </button>
         }
         <span class="spacer"></span>
+        <ms-attach-button type="transfers" [docId]="t.id" [number]="t.number" />
         @if (t.status === 'DRAFT' && canManage()) {
           <button pButton type="button" (click)="act(t, t.kind === 'MOVE' ? 'move' : 'send')" [loading]="busy()" [disabled]="busy()">
             <span pButtonLabel>{{ (t.kind === 'MOVE' ? 'transfer.moveNow' : 'transfer.sendNow') | translate }}</span>

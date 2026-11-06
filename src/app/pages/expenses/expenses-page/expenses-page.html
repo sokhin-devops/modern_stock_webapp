@@ -21,6 +21,9 @@
                 [placeholder]="'docs.all' | translate" [ariaLabel]="'expenses.category' | translate" class="filter" appendTo="body" />
       <span class="spacer"></span>
       <span class="total">{{ 'expenses.total' | translate }}: <b>{{ pageTotal() | currency: 'USD' }}</b></span>
+      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+        <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+      </button>
     </div>
     <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
              [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
@@ -99,7 +102,6 @@
     </div>
   </div>
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="formOpen.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !fCategory() || !fAmount()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>

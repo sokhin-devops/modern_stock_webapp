@@ -37,7 +37,6 @@
     @if (readOnly()) {
       <button pButton type="button" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
     } @else {
-      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
       <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !nameEn().trim()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
     }
   </ng-template>

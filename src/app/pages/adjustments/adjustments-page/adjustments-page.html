@@ -19,6 +19,10 @@
         <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
         <ng-template #item let-o>{{ o.label | translate }}</ng-template>
       </p-select>
+      <span class="spacer"></span>
+      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+        <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+      </button>
     </div>
     <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
              [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
@@ -87,6 +91,7 @@
     @if (viewing()?.status === 'WAITING_APPROVAL' && canApprove()) {
       <div class="dialog-actions">
         <span class="spacer"></span>
+        <ms-attach-button type="adjustments" [docId]="viewing()!.id" [number]="viewing()!.number" />
         <button pButton type="button" [text]="true" severity="danger" (click)="decide(viewing()!, 'reject')" [disabled]="busy()">
           <span pButtonLabel>{{ 'common.reject' | translate }}</span>
         </button>
@@ -95,12 +100,18 @@
         </button>
       </div>
     }
-    @if (viewing()?.status === 'POSTED' && canVoid() && viewing()?.reason !== 'LOST_IN_TRANSIT') {
-      <div class="dialog-actions">
-        <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(viewing()!)" [loading]="busy()" [disabled]="busy()">
-          <span pButtonLabel>{{ 'adjust.void' | translate }}</span>
-        </button>
-      </div>
+    @if (viewing(); as a) {
+      @if (a.status !== 'WAITING_APPROVAL' || !canApprove()) {
+        <div class="dialog-actions">
+          @if (a.status === 'POSTED' && canVoid() && a.reason !== 'LOST_IN_TRANSIT') {
+            <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(a)" [loading]="busy()" [disabled]="busy()">
+              <span pButtonLabel>{{ 'adjust.void' | translate }}</span>
+            </button>
+          }
+          <span class="spacer"></span>
+          <ms-attach-button type="adjustments" [docId]="a.id" [number]="a.number" />
+        </div>
+      }
     }
   </ng-template>
 </p-dialog>

@@ -41,7 +41,6 @@
     </div>
   </div>
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="open.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="save()" [disabled]="!nameEn().trim()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>

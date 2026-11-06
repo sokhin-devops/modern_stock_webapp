@@ -2,11 +2,11 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
-import { ButtonDirective, ButtonIcon } from 'primeng/button';
+import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
@@ -22,6 +22,8 @@ import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { ReorderLevelsDialog, ReorderTarget } from '../../products/reorder-levels-dialog/reorder-levels-dialog';
 import { StockDetail } from '../stock-detail/stock-detail';
+import { warehouseOptions } from '../../../shared/options';
+import { exportList } from '../../../shared/list-export';
 
 /**
  * Stock (prototype stock.html, PLAIN.md 11.2): on hand per product for the branch in the top bar, with search, a
@@ -32,7 +34,7 @@ import { StockDetail } from '../stock-detail/stock-detail';
   selector: 'ms-stock-page',
   imports: [
     FormsModule, TranslatePipe, CurrencyPipe, DecimalPipe, TableModule, IconField, InputIcon, InputText, Select,
-    ToggleButton, SelectButton, ButtonDirective, ButtonIcon, Tooltip, StockDetail, ReorderLevelsDialog,
+    ToggleButton, SelectButton, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, StockDetail, ReorderLevelsDialog,
   ],
   templateUrl: './stock-page.html',
   styleUrl: './stock-page.scss',
@@ -43,6 +45,7 @@ export class StockPage {
   private readonly catalog = inject(CatalogService);
   private readonly stock = inject(StockService);
   private readonly notify = inject(NotifyService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly rows = signal<StockRow[]>([]);
   protected readonly total = signal(0);
@@ -50,6 +53,12 @@ export class StockPage {
   protected readonly first = signal(0);
   protected readonly q = signal('');
   protected readonly categoryId = signal<number | null>(null);
+  /** One warehouse's stock (PLAIN.md 12.2), or every warehouse of the branch picked in the top bar. */
+  protected readonly warehouseId = signal<number | null>(null);
+  protected readonly warehouseChoices = computed(() =>
+    warehouseOptions(this.business.pickableBranches(), this.lang, this.business.branchId()),
+  );
+  protected readonly exporting = signal(false);
   /** Low stock comes as one list from the API, so the table pages it itself. */
   protected readonly onlyLow = signal(false);
   private last: TableLazyLoadEvent = { first: 0, rows: 20 };
@@ -126,6 +135,7 @@ export class StockPage {
         sort: sortField ? `${sortField},${event.sortOrder === -1 ? 'desc' : 'asc'}` : undefined,
         q: this.q(),
         categoryId: this.categoryId(),
+        warehouseId: this.warehouseId(),
       })
       .subscribe({
         next: (page) => {
@@ -139,6 +149,36 @@ export class StockPage {
 
   protected onSearch(value: string): void {
     this.search.next(value);
+  }
+
+  protected setWarehouse(id: number | null): void {
+    this.warehouseId.set(id);
+    this.reload();
+  }
+
+  /** Every product of the list (search, category, warehouse) as an Excel file. */
+  protected async exportAll(): Promise<void> {
+    const t = (key: string) => this.translate.instant(key);
+    this.exporting.set(true);
+    try {
+      await exportList<StockRow>(
+        (page, size) => this.stock.levels({ page, size, sort: 'nameEn,asc', q: this.q(), categoryId: this.categoryId(), warehouseId: this.warehouseId() }),
+        [
+          { header: 'SKU', value: (r) => r.sku },
+          { header: t('products.colProduct'), value: (r) => this.lang.name(r.nameEn, r.nameKm) },
+          { header: t('stock.onHand'), value: (r) => r.qtyOnHand },
+          { header: t('stock.unit'), value: (r) => r.unitSymbol },
+          { header: t('stock.reserved'), value: (r) => r.reserved || null },
+          { header: t('stock.reorderAt'), value: (r) => r.reorderLevel },
+          ...(this.showValue() ? [{ header: t('stock.value'), value: (r: StockRow) => r.value, format: '#,##0.00' }] : []),
+        ],
+        'stock',
+      );
+    } catch (e) {
+      this.notify.error(e);
+    } finally {
+      this.exporting.set(false);
+    }
   }
 
   protected setCategory(id: number | null): void {

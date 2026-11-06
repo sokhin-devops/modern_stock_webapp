@@ -34,6 +34,8 @@ export class PurchaseForm {
   /** Lines to start with, e.g. the reorder suggestions (FR-2.12); an empty line follows them. */
   readonly start = input<DocLine[] | null>(null);
   readonly visible = model(false);
+  /** Opened from a supplier page: that supplier, already picked. */
+  readonly presetSupplier = input<Supplier | null>(null);
   readonly saved = output<void>();
 
   private readonly api = inject(ApiService);
@@ -63,7 +65,7 @@ export class PurchaseForm {
   constructor() {
     effect(() => {
       if (this.visible()) {
-        this.supplier.set(null);
+        this.supplier.set(untracked(() => this.presetSupplier()));
         this.warehouseId.set(receivingWarehouse(this.business.branches(), this.business.branchId()));
         this.invoiceNo.set('');
         this.expected.set(null);

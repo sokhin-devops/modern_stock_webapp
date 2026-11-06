@@ -11,6 +11,27 @@
     }
   </div>
   <div class="page-body list-page">
+    <div class="toolbar">
+      <p-iconfield class="list-search">
+        <p-inputicon class="pi pi-search" />
+        <input pInputText type="search" [placeholder]="'counts.listSearchPh' | translate" [attr.aria-label]="'common.search' | translate"
+               (input)="onListSearch($any($event.target).value)" />
+      </p-iconfield>
+      <p-select [options]="statusOptions" optionLabel="label" optionValue="value" [ngModel]="fStatus()"
+                (ngModelChange)="setListFilter('status', $event)" [showClear]="true" [placeholder]="'shifts.anyStatus' | translate"
+                [ariaLabel]="'common.status' | translate" class="status-filter" appendTo="body">
+        <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
+        <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+      </p-select>
+      <p-datepicker [ngModel]="fFrom()" (ngModelChange)="setListFilter('from', $event)" dateFormat="dd/mm/yy" [showIcon]="true"
+                    [showClear]="true" appendTo="body" [placeholder]="'common.from' | translate" [ariaLabel]="'common.from' | translate" class="date-filter" />
+      <p-datepicker [ngModel]="fTo()" (ngModelChange)="setListFilter('to', $event)" dateFormat="dd/mm/yy" [showIcon]="true"
+                    [showClear]="true" appendTo="body" [placeholder]="'common.to' | translate" [ariaLabel]="'common.to' | translate" class="date-filter" />
+      <span class="spacer"></span>
+      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+        <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+      </button>
+    </div>
     <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
              [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
       <ng-template #header>
@@ -85,7 +106,6 @@
     <small class="field-hint">{{ 'counts.blindHint' | translate }}</small>
   </div>
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="startOpen.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="start()" [loading]="busy()" [disabled]="busy() || !canStart()"><span pButtonLabel>{{ 'counts.start' | translate }}</span></button>
   </ng-template>
 </p-dialog>
@@ -210,6 +230,7 @@
         <div class="dialog-actions">
           <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.deleteDraft' | translate }}</span></button>
           <span class="spacer"></span>
+          <ms-attach-button type="stock-counts" [docId]="c.id" [number]="c.number" />
           <button pButton type="button" [outlined]="true" (click)="save()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.save' | translate }}</span></button>
           @if (canApprove() && !c.blind) {
             <button pButton type="button" (click)="post()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.post' | translate }}</span></button>
@@ -221,7 +242,16 @@
         <div class="dialog-actions">
           <button pButton type="button" [text]="true" (click)="reopen()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.reopen' | translate }}</span></button>
           <span class="spacer"></span>
+          <ms-attach-button type="stock-counts" [docId]="c.id" [number]="c.number" />
           <button pButton type="button" (click)="post()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'counts.post' | translate }}</span></button>
+        </div>
+      } @else if (c.status === 'POSTED' || c.status === 'VOID' || c.status === 'SUBMITTED') {
+        <div class="dialog-actions">
+          @if (c.status === 'POSTED' && canApprove()) {
+            <button pButton type="button" [text]="true" severity="danger" (click)="voidCount()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'voids.button' | translate }}</span></button>
+          }
+          <span class="spacer"></span>
+          <ms-attach-button type="stock-counts" [docId]="c.id" [number]="c.number" />
         </div>
       }
     }

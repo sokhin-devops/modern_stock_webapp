@@ -16,8 +16,11 @@ const API = environment.apiUrl;
 export class StockService {
   private readonly http = inject(HttpClient);
 
-  levels(query: PageQuery & { q?: string; categoryId?: number | null }): Observable<PageResponse<StockRow>> {
+  levels(query: PageQuery & { q?: string; categoryId?: number | null; warehouseId?: number | null }): Observable<PageResponse<StockRow>> {
     let params = pageParams(query);
+    if (query.warehouseId) {
+      params = params.set('warehouseId', query.warehouseId);
+    }
     if (query.q) {
       params = params.set('q', query.q);
     }

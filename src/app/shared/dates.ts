@@ -19,3 +19,10 @@ export function fromIsoDate(value: string | null | undefined): Date | null {
 export function today(): string {
   return toIsoDate(new Date())!;
 }
+
+/** The same time of day, days later (or earlier, when negative). */
+export function addDays(d: Date, days: number): Date {
+  const r = new Date(d);
+  r.setDate(r.getDate() + days);
+  return r;
+}

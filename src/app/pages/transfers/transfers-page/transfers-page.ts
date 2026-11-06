@@ -16,6 +16,8 @@ import { NotifyService } from '../../../core/notify.service';
 import { LazyList } from '../../../shared/lazy-list';
 import { RequestsPanel } from '../requests-panel/requests-panel';
 import { TransferForm } from '../transfer-form/transfer-form';
+import { AttachButton } from '../../../shared/attach-button/attach-button';
+import { exportList } from '../../../shared/list-export';
 
 interface Transfer {
   id: number;
@@ -44,7 +46,7 @@ const LATE_DAYS = 3;
 
 @Component({
   selector: 'ms-transfers-page',
-  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Dialog, ButtonDirective, ButtonIcon, ButtonLabel, TransferForm,
+  imports: [AttachButton, FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Dialog, ButtonDirective, ButtonIcon, ButtonLabel, TransferForm,
     Tabs, TabList, Tab, TabPanels, TabPanel, RequestsPanel],
   templateUrl: './transfers-page.html',
   styleUrl: './transfers-page.scss',
@@ -73,6 +75,32 @@ export class TransfersPage {
     (e) => this.notify.error(e),
     'createdAt,desc',
   );
+
+  protected readonly exporting = signal(false);
+
+  /** Every row of the list (its filters too) as an Excel file (PLAIN.md 12.2: Export on the right of every list). */
+  protected async exportAll(): Promise<void> {
+    const t = (key: string) => this.translate.instant(key);
+    this.exporting.set(true);
+    try {
+      await exportList<Transfer>(
+        (page, size) => this.api.page<Transfer>('/transfers', { page, size }, { status: this.status() }),
+        [
+          { header: t('common.number'), value: (x) => x.number },
+          { header: t('common.from'), value: (x) => x.fromName },
+          { header: t('common.to'), value: (x) => x.toName },
+          { header: t('common.date'), value: (x) => x.sentAt?.slice(0, 10) },
+          { header: t('stock.value'), value: (x) => x.value, format: '#,##0.00' },
+          { header: t('common.status'), value: (x) => t('docs.status.' + x.status) },
+        ],
+        'transfers',
+      );
+    } catch (e) {
+      this.notify.error(e);
+    } finally {
+      this.exporting.set(false);
+    }
+  }
   protected readonly formOpen = signal(false);
   protected readonly viewing = signal<Transfer | null>(null);
   protected readonly busy = signal(false);

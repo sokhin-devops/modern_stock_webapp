@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -11,7 +11,7 @@ import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
 import { filter, map } from 'rxjs';
 
-import { ALERT_TARGETS, AlertsService, alertQuery } from '../../core/alerts.service';
+import { ALERT_TARGETS, AlertsService, AppNotification, NOTIFICATION_ICONS, alertQuery } from '../../core/alerts.service';
 import { MyBusiness } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
 import { helpUrl } from '../../core/help';
@@ -27,7 +27,7 @@ import { LangButton } from '../../shared/lang-button/lang-button';
  */
 @Component({
   selector: 'ms-app-topbar',
-  imports: [
+  imports: [DatePipe, 
     RouterLink, TranslatePipe, DecimalPipe, ButtonDirective, ButtonIcon, Menu, Popover, Ripple, Tooltip, LangButton,
     AccountMenu,
   ],
@@ -42,6 +42,7 @@ export class AppTopbar {
   protected readonly theme = inject(ThemeModeService);
   protected readonly alerts = inject(AlertsService);
   protected readonly targets = ALERT_TARGETS;
+  protected readonly notificationIcons = NOTIFICATION_ICONS;
   protected readonly queryOf = alertQuery;
   private readonly screen = inject(ScreenService);
   private readonly translate = inject(TranslateService);
@@ -92,6 +93,27 @@ export class AppTopbar {
 
   /** Branch selector (the chip): all branches, then each branch. */
   protected readonly branchItems = computed<MenuItem[]>(() => [{ label: this.t('shell.branch'), items: this.branchEntries() }]);
+
+  /** A notification opens the page that deals with it, and is read. */
+  protected openNotification(n: AppNotification, popover: Popover): void {
+    this.alerts.readNotification(n);
+    popover.hide();
+    if (n.link) {
+      void this.router.navigateByUrl(n.link);
+    }
+  }
+
+  /** Its text in the member's language: Khmer names where the notification carries them. */
+  protected notificationParams(n: AppNotification): Record<string, unknown> {
+    const km = this.lang.lang() === 'km';
+    const p = { ...n.params };
+    for (const key of ['product', 'warehouse', 'from']) {
+      if (km && p[key + 'Km']) {
+        p[key] = p[key + 'Km'];
+      }
+    }
+    return p;
+  }
 
   /** Opens the alerts with fresh numbers. */
   protected openAlerts(event: Event, popover: Popover): void {

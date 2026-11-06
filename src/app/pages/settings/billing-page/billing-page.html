@@ -405,7 +405,6 @@
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="adding.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="buyAddon()" [loading]="busy() === '/billing/addons'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'settings.billing.addonAdd' | translate }}</span></button>
   </ng-template>
 </p-dialog>
@@ -443,7 +442,6 @@
     }
   }
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="keep.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="saveKeep()" [loading]="busy() === '/billing/keep'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>

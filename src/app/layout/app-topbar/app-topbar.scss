@@ -132,3 +132,65 @@ p-popover {
     display: block;
   }
 }
+
+// Alerts marked read stay listed until fixed, quieter; new ones carry a dot and count in the badge.
+.notif-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mark-read {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+.alert-row.read {
+  color: var(--muted);
+}
+
+.unread-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.notif-section {
+  display: block;
+  margin: 12px 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+// A notification row is a button (it marks itself read, then opens its page); it looks like an alert row.
+.notif-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notif-time {
+  display: block;
+  font-size: 11px;
+}
+
+.notifications {
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+}

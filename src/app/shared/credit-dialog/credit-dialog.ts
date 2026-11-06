@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
@@ -27,6 +27,8 @@ interface Party {
 export class CreditDialog {
   readonly kind = input.required<CreditKind>();
   readonly visible = model(false);
+  /** Opened from a customer or supplier page: that party, already picked. */
+  readonly preset = input<{ id: number; name: string } | null>(null);
   readonly saved = output<Credit>();
 
   private readonly api = inject(ApiService);
@@ -42,7 +44,8 @@ export class CreditDialog {
   constructor() {
     effect(() => {
       if (this.visible()) {
-        this.party.set(null);
+        const preset = untracked(() => this.preset());
+        this.party.set(preset ? { id: preset.id, name: preset.name, phone: null } : null);
         this.amount.set(null);
         this.reason.set('');
       }

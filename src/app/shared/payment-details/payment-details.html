@@ -1,0 +1,63 @@
+<ng-template #docBody>
+  @if (payment(); as p) {
+    @let customer = kind() === 'customer';
+    <div class="doc-facts">
+      <div>
+        <small>{{ (customer ? 'sales.customer' : 'purchase.supplier') | translate }}</small>
+        <b>{{ p.partyName ?? ('sales.walkIn' | translate) }}</b>
+      </div>
+      <div><small>{{ 'common.date' | translate }}</small><b>{{ p.paidAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
+      <div><small>{{ 'common.method' | translate }}</small><b>{{ 'docs.methods.' + p.method | translate }}</b></div>
+      <div>
+        <small>{{ 'common.amount' | translate }}</small>
+        <b>{{ p.currency === 'USD' ? '$' : '៛' }}{{ p.amount | number: (p.currency === 'USD' ? '1.2-2' : '1.0-0') }}
+          @if (p.currency !== 'USD') { <small class="muted">· {{ p.amountUsd | currency: 'USD' }}</small> }</b>
+      </div>
+      @if (p.reference) {
+        <div><small>{{ 'common.reference' | translate }}</small><b>{{ p.reference }}</b></div>
+      }
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + p.status">{{ 'docs.status.' + p.status | translate }}</span></b></div>
+    </div>
+
+    <p-table class="ms-table" [value]="p.allocations">
+      <ng-template #header>
+        <tr><th>{{ 'voids.paysTitle' | translate }}</th><th class="num">{{ 'common.amount' | translate }}</th></tr>
+      </ng-template>
+      <ng-template #body let-a>
+        <tr><td>{{ 'voids.toType.' + a.toType | translate }}</td><td class="num strong">{{ a.amount | currency: 'USD' }}</td></tr>
+      </ng-template>
+      <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'voids.nothingPaid' | translate }}</td></tr></ng-template>
+      <ng-template #footer>
+        @if (p.unallocatedUsd > 0 && p.allocations.length) {
+          <tr><td>{{ (customer ? 'voids.deposit' : 'voids.advance') | translate }}</td><td class="num strong">{{ p.unallocatedUsd | currency: 'USD' }}</td></tr>
+        }
+      </ng-template>
+    </p-table>
+  }
+</ng-template>
+<ng-template #docActions>
+    @if (payment(); as p) {
+      <div class="dialog-actions">
+        @if (voidable()) {
+          <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(p)" [loading]="busy()" [disabled]="busy()">
+            <span pButtonLabel>{{ 'voids.button' | translate }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+        <ms-attach-button [type]="kind() === 'customer' ? 'payments-received' : 'supplier-payments'" [docId]="p.id" [number]="p.number" />
+      </div>
+    }
+</ng-template>
+<p-dialog [visible]="!inline() && !!payment()" (visibleChange)="!$event && payment.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="payment()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+  <ng-container [ngTemplateOutlet]="docBody" />
+  <ng-template #footer><ng-container [ngTemplateOutlet]="docActions" /></ng-template>
+</p-dialog>
+
+<!-- On a document's own page (PLAIN.md 12.2 View): the same content and actions, in the page -->
+@if (inline() && !!payment()) {
+  <div class="doc-inline">
+    <ng-container [ngTemplateOutlet]="docBody" />
+    <div class="doc-inline-actions"><ng-container [ngTemplateOutlet]="docActions" /></div>
+  </div>
+}

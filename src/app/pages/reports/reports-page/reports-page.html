@@ -384,6 +384,11 @@
           </div>
           <div class="reorder-head">
             <p class="muted small rule">{{ 'reports.reorderRule' | translate: { cover: ro.coverDays, days: ro.salesDays } }}</p>
+            @if (canRecalc()) {
+              <button pButton type="button" [text]="true" size="small" class="no-print" (click)="recalculate()" [loading]="recalcBusy()">
+                <i class="pi pi-refresh" pButtonIcon></i><span pButtonLabel>{{ 'reports.recalculate' | translate }}</span>
+              </button>
+            }
             @if (canOrder() && ro.rows.length) {
               <button pButton type="button" [outlined]="true" size="small" class="no-print" (click)="createOrder(ro)" [loading]="orderBusy()">
                 <i class="pi pi-file-plus" pButtonIcon></i><span pButtonLabel>{{ 'reports.makeOrder' | translate }}</span>
@@ -409,7 +414,12 @@
                 <tr>
                   <td><div class="strong">{{ lang.name(row.name, row.nameKm) }}</div><div class="muted small">{{ row.sku }}</div></td>
                   <td class="num danger-text">{{ row.onHand | packQty: row.pack : row.unitSymbol }}</td>
-                  <td class="num muted">{{ row.reorderLevel | number: '1.0-3' }}</td>
+                  <td class="num muted">
+                    {{ row.reorderLevel | number: '1.0-3' }}
+                    <div class="small" [title]="(row.basis === 'SALES' ? 'reports.basisSalesHint' : 'reports.basisManualHint') | translate: { safety: row.safetyStock, max: row.maxDailySales }">
+                      {{ (row.basis === 'SALES' ? 'reports.basisSales' : 'reports.basisManual') | translate }}
+                    </div>
+                  </td>
                   <td class="num muted">{{ row.soldPerDay | number: '1.0-2' }}</td>
                   <td class="num muted">{{ row.leadTimeDays }}</td>
                   <td class="num strong">{{ row.suggestedQty | packQty: row.pack : row.unitSymbol }}</td>

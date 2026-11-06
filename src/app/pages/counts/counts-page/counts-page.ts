@@ -1,10 +1,12 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
+import { DatePicker } from 'primeng/datepicker';
 import { Dialog } from 'primeng/dialog';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
@@ -22,10 +24,15 @@ import { BusinessService } from '../../../core/business/business.service';
 import { CatalogService } from '../../../core/catalog/catalog.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
+import { VoidService } from '../../../core/void.service';
 import { CameraScanner } from '../../../shared/camera-scanner/camera-scanner';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { LazyList } from '../../../shared/lazy-list';
 import { Option, warehouseOptions } from '../../../shared/options';
+import { AttachButton } from '../../../shared/attach-button/attach-button';
+import { exportList } from '../../../shared/list-export';
+import { toIsoDate } from '../../../shared/dates';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 interface CountLine {
   id: number;
@@ -82,7 +89,7 @@ interface StockCount {
  */
 @Component({
   selector: 'ms-counts-page',
-  imports: [
+  imports: [AttachButton, DatePicker,
     FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Dialog, IconField, InputIcon,
     InputNumber, InputText, ProgressBar, Select, SelectButton, ToggleSwitch, AutoComplete, ButtonDirective, ButtonIcon,
     ButtonLabel, FieldLabel, CameraScanner,
@@ -99,8 +106,60 @@ export class CountsPage {
   private readonly notify = inject(NotifyService);
   private readonly confirm = inject(ConfirmationService);
   private readonly translate = inject(TranslateService);
+  private readonly voids = inject(VoidService);
 
-  protected readonly list = new LazyList<StockCount>((q) => this.api.page('/stock-counts', q), (e) => this.notify.error(e));
+  // List filters (PLAIN.md 12.2): number, status, dates; Export on the right
+  protected readonly fQ = signal('');
+  protected readonly fStatus = signal<CountStatus | null>(null);
+  protected readonly fFrom = signal<Date | null>(null);
+  protected readonly fTo = signal<Date | null>(null);
+  protected readonly statusOptions = (['DRAFT', 'SUBMITTED', 'POSTED', 'VOID'] as CountStatus[]).map((s) => ({ value: s, label: `counts.status.${s}` }));
+  protected readonly exporting = signal(false);
+  private readonly listSearch = new Subject<string>();
+  protected readonly list = new LazyList<StockCount>((q) => this.api.page('/stock-counts', q, this.listFilters()), (e) => this.notify.error(e));
+
+  protected onListSearch(value: string): void {
+    this.listSearch.next(value);
+  }
+
+  protected setListFilter(key: 'status' | 'from' | 'to', value: CountStatus | Date | null): void {
+    if (key === 'status') {
+      this.fStatus.set(value as CountStatus | null);
+    } else if (key === 'from') {
+      this.fFrom.set(value as Date | null);
+    } else {
+      this.fTo.set(value as Date | null);
+    }
+    this.list.reload();
+  }
+
+  protected async exportAll(): Promise<void> {
+    const t = (key: string) => this.translate.instant(key);
+    this.exporting.set(true);
+    try {
+      await exportList<StockCount>(
+        (page, size) => this.api.page<StockCount>('/stock-counts', { page, size }, this.listFilters()),
+        [
+          { header: t('common.number'), value: (c) => c.number },
+          { header: t('common.date'), value: (c) => (c.postedAt ?? c.submittedAt ?? c.createdAt)?.slice(0, 10) },
+          { header: t('common.warehouse'), value: (c) => c.warehouseName },
+          { header: t('counts.what'), value: (c) => this.scopeLabel(c) },
+          { header: t('counts.counted'), value: (c) => `${c.counted} / ${c.lineCount}` },
+          { header: t('counts.difference'), value: (c) => c.differenceValue, format: '#,##0.00' },
+          { header: t('common.status'), value: (c) => t('counts.status.' + c.status) },
+        ],
+        'stock-counts',
+      );
+    } catch (e) {
+      this.notify.error(e);
+    } finally {
+      this.exporting.set(false);
+    }
+  }
+
+  private listFilters(): Record<string, string | null> {
+    return { q: this.fQ() || null, status: this.fStatus(), from: toIsoDate(this.fFrom()), to: toIsoDate(this.fTo()) };
+  }
   protected readonly canCount = computed(() => this.business.can('count:manage'));
   protected readonly canApprove = computed(() => this.business.can('adjustment:approve'));
 
@@ -176,6 +235,10 @@ export class CountsPage {
 
   constructor() {
     this.catalog.loadLists();
+    this.listSearch.pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(inject(DestroyRef))).subscribe((q) => {
+      this.fQ.set(q.trim());
+      this.list.reload();
+    });
   }
 
   protected scopeLabel(c: StockCount): string {
@@ -332,6 +395,18 @@ export class CountsPage {
       rejectButtonProps: { text: true },
       accept: () => (c.status === 'DRAFT' ? this.save(post) : post()),
     });
+  }
+
+  /** A posted count that was wrong: its differences are undone (PLAIN.md 11.1); count again afterwards. */
+  protected voidCount(): void {
+    const c = this.count();
+    if (!c) {
+      return;
+    }
+    this.voids.void<StockCount>('count', `/stock-counts/${c.id}`, c.number, (v) => {
+      this.count.set(v);
+      this.list.refresh();
+    }, (on) => this.busy.set(on));
   }
 
   protected remove(): void {

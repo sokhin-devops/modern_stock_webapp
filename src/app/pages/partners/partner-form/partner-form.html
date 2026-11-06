@@ -76,7 +76,6 @@
         </button>
       }
       <span class="spacer"></span>
-      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
       @if (canManage() || !partner()) {
         <button pButton type="submit" form="partner-form" [loading]="busy()" [disabled]="busy()">
           <span pButtonLabel>{{ 'common.save' | translate }}</span>

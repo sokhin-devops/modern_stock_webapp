@@ -670,3 +670,33 @@
     padding-bottom: 4px;
   }
 }
+
+// A document's own page (PLAIN.md 12.2 View): the dialog's content in a card, its actions at the bottom.
+.doc-page {
+  max-width: 1100px;
+  padding: 24px;
+}
+
+.doc-page-actions,
+.doc-inline-actions {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+
+  &:empty {
+    display: none;
+  }
+}
+
+.breadcrumb .doc-status {
+  margin-inline-start: 8px;
+
+  &::before {
+    content: none !important;
+  }
+}
+
+.doc-loading {
+  padding: 24px;
+  text-align: center;
+}

@@ -40,7 +40,6 @@
     }
   </div>
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="submit()" [loading]="busy()"
             [disabled]="busy() || !party() || !amount() || !reason().trim()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>

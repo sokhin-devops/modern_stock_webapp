@@ -33,7 +33,6 @@
     </div>
   </div>
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !any()">
       <span pButtonLabel>{{ 'orders.deliverInvoice' | translate }}</span>
     </button>

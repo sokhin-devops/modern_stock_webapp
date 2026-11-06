@@ -1,5 +1,4 @@
-<p-dialog [visible]="!!view()" (visibleChange)="!$event && view.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
-          [header]="view()?.doc?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+<ng-template #docBody>
   @if (view(); as v) {
     <div class="doc-facts">
       <div><small>{{ 'sales.customer' | translate }}</small><b>{{ v.doc.customerName }}</b></div>
@@ -98,7 +97,8 @@
       </ul>
     }
   }
-  <ng-template #footer>
+</ng-template>
+<ng-template #docActions>
     @if (view(); as v) {
       <div class="dialog-actions">
         @if (quotation(); as q) {
@@ -118,6 +118,7 @@
           }
         }
         <span class="spacer"></span>
+        <ms-attach-button [type]="v.kind === 'quotation' ? 'quotations' : 'sales-orders'" [docId]="v.doc.id" [number]="v.doc.number" />
         <button pButton type="button" [outlined]="true" (click)="print()">
           <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
         </button>
@@ -157,8 +158,20 @@
         }
       </div>
     }
-  </ng-template>
+</ng-template>
+<p-dialog [visible]="!inline() && !!view()" (visibleChange)="!$event && view.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="view()?.doc?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+  <ng-container [ngTemplateOutlet]="docBody" />
+  <ng-template #footer><ng-container [ngTemplateOutlet]="docActions" /></ng-template>
 </p-dialog>
 
 <ms-deliver-dialog [order]="order()" [(visible)]="deliverOpen" (delivered)="delivered($event)" />
 <ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />
+
+<!-- On a document's own page (PLAIN.md 12.2 View): the same content and actions, in the page -->
+@if (inline() && !!view()) {
+  <div class="doc-inline">
+    <ng-container [ngTemplateOutlet]="docBody" />
+    <div class="doc-inline-actions"><ng-container [ngTemplateOutlet]="docActions" /></div>
+  </div>
+}

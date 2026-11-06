@@ -8,6 +8,8 @@ import { navPages } from './layout/nav';
 const BUILT: Record<string, () => Promise<Type<unknown>>> = {
   products: () => import('./pages/products/products-page/products-page').then((m) => m.ProductsPage),
   'inventory/stock': () => import('./pages/stock/stock-page/stock-page').then((m) => m.StockPage),
+  'inventory/stock-card': () => import('./pages/stock/stock-card-page/stock-card-page').then((m) => m.StockCardPage),
+  'inventory/batches': () => import('./pages/stock/batches-page/batches-page').then((m) => m.BatchesPage),
   customers: () => import('./pages/partners/partners-page/partners-page').then((m) => m.PartnersPage),
   suppliers: () => import('./pages/partners/partners-page/partners-page').then((m) => m.PartnersPage),
   'settings/profile': () => import('./pages/settings/profile-page/profile-page').then((m) => m.ProfilePage),
@@ -101,6 +103,32 @@ export const routes: Routes = [
           data: { permissions: page.permissions, title: page.label },
           loadComponent: BUILT[page.path] ?? (() => import('./pages/coming-soon/coming-soon').then((m) => m.ComingSoon)),
         })),
+      // A document's own page (PLAIN.md 12.2 View): Customers › Invoices › INV-202611-0045
+      {
+        path: 'customers/transactions/:view/:id',
+        canActivate: [permissionGuard],
+        data: { permissions: ['sale:create', 'customer:view', 'sales_order:view', 'delivery:manage'], title: 'nav.customerTransactions' },
+        loadComponent: () => import('./pages/sales/sales-page/sales-page').then((m) => m.SalesPage),
+      },
+      {
+        path: 'suppliers/transactions/:view/:id',
+        canActivate: [permissionGuard],
+        data: { permissions: ['purchase_order:view', 'bill:manage'], title: 'nav.supplierTransactions' },
+        loadComponent: () => import('./pages/purchases/purchases-page/purchases-page').then((m) => m.PurchasesPage),
+      },
+      // One customer or supplier (PLAIN.md 12.2): after the menu pages, so customers/transactions stays that page
+      {
+        path: 'customers/:id',
+        canActivate: [permissionGuard],
+        data: { permissions: ['customer:view'], title: 'nav.customers' },
+        loadComponent: () => import('./pages/partners/partner-page/partner-page').then((m) => m.PartnerPage),
+      },
+      {
+        path: 'suppliers/:id',
+        canActivate: [permissionGuard],
+        data: { permissions: ['supplier:view'], title: 'nav.suppliers' },
+        loadComponent: () => import('./pages/partners/partner-page/partner-page').then((m) => m.PartnerPage),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

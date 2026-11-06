@@ -6,8 +6,24 @@
     </nav>
   </div>
   <div class="page-body list-page">
+    <div class="toolbar">
+      <p-select [options]="statuses" optionLabel="label" optionValue="value" [ngModel]="status()" (ngModelChange)="setStatus($event)"
+                [showClear]="true" [placeholder]="'shifts.anyStatus' | translate" [ariaLabel]="'common.status' | translate" class="filter" appendTo="body">
+        <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
+        <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+      </p-select>
+      <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+                    appendTo="body" [placeholder]="'common.from' | translate" [ariaLabel]="'common.from' | translate" class="date-filter" />
+      <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+                    appendTo="body" [placeholder]="'common.to' | translate" [ariaLabel]="'common.to' | translate" class="date-filter" />
+      <span class="spacer"></span>
+      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+        <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+      </button>
+    </div>
     <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
-             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
+             dataKey="id" [rowHover]="true">
       <ng-template #header>
         <tr>
           <th>{{ 'shifts.cashier' | translate }}</th>
@@ -21,14 +37,16 @@
         </tr>
       </ng-template>
       <ng-template #body let-s>
-        <tr>
+        <tr class="clickable" tabindex="0" (click)="open(s)" (keydown.enter)="open(s)">
           <td class="strong">{{ s.cashierName }}</td>
           <td>{{ s.openedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-          <td class="muted">{{ s.closedAt | date: 'dd/MM HH:mm' }}</td>
+          <td class="muted">{{ s.closedAt ? (s.closedAt | date: 'dd/MM HH:mm') : '—' }}</td>
           <td class="num">${{ s.expectedUsd | number: '1.2-2' }}<br /><small class="muted">៛{{ s.expectedKhr | number: '1.0-0' }}</small></td>
           <td class="num">
             @if (s.countedUsd != null) {
               ${{ s.countedUsd | number: '1.2-2' }}<br /><small class="muted">៛{{ s.countedKhr | number: '1.0-0' }}</small>
+            } @else {
+              <span class="muted">—</span>
             }
           </td>
           <td class="num">
@@ -36,6 +54,8 @@
               <span [class.danger-text]="s.differenceUsd < 0 || s.differenceKhr < 0">
                 {{ s.differenceUsd | number: '1.2-2' }} $<br /><small>{{ s.differenceKhr | number: '1.0-0' }} ៛</small>
               </span>
+            } @else {
+              <span class="muted">—</span>
             }
           </td>
           <td class="num">{{ s.receipts }}</td>
@@ -46,3 +66,35 @@
     </p-table>
   </div>
 </div>
+
+<!-- One shift: how the expected cash was reached, in both currencies -->
+<p-dialog [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="(viewing()?.cashierName ?? '') + ' · ' + (viewing()?.openedAt | date: 'dd/MM/yyyy')" [closeAriaLabel]="'common.close' | translate">
+  @if (viewing(); as s) {
+    <div class="doc-facts">
+      <div><small>{{ 'shifts.opened' | translate }}</small><b>{{ s.openedAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
+      <div><small>{{ 'shifts.closed' | translate }}</small><b>{{ s.closedAt ? (s.closedAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</b></div>
+      <div><small>{{ 'shifts.receipts' | translate }}</small><b>{{ s.receipts }}@if (s.voidedReceipts) { <span class="danger-text"> · {{ 'shifts.voided' | translate: { n: s.voidedReceipts } }}</span> }</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class.tag-primary]="s.status === 'OPEN'">{{ 'docs.status.' + s.status | translate }}</span></b></div>
+    </div>
+    <table class="cash-table">
+      <thead><tr><th></th><th class="num">USD</th><th class="num">KHR</th></tr></thead>
+      <tbody>
+        <tr><td>{{ 'shifts.opening' | translate }}</td><td class="num">${{ s.openingUsd | number: '1.2-2' }}</td><td class="num">៛{{ s.openingKhr | number: '1.0-0' }}</td></tr>
+        <tr><td>+ {{ 'shifts.cashReceived' | translate }}</td><td class="num">${{ s.cashReceivedUsd ?? 0 | number: '1.2-2' }}</td><td class="num">៛{{ s.cashReceivedKhr ?? 0 | number: '1.0-0' }}</td></tr>
+        <tr><td>− {{ 'shifts.changeGiven' | translate }}</td><td class="num">${{ s.changeGivenUsd ?? 0 | number: '1.2-2' }}</td><td class="num">៛{{ s.changeGivenKhr ?? 0 | number: '1.0-0' }}</td></tr>
+        <tr><td>+ {{ 'shifts.cashAdded' | translate }}</td><td class="num">${{ s.cashAddedUsd ?? 0 | number: '1.2-2' }}</td><td class="num">៛{{ s.cashAddedKhr ?? 0 | number: '1.0-0' }}</td></tr>
+        <tr><td>− {{ 'shifts.cashTaken' | translate }}</td><td class="num">${{ s.cashTakenUsd ?? 0 | number: '1.2-2' }}</td><td class="num">៛{{ s.cashTakenKhr ?? 0 | number: '1.0-0' }}</td></tr>
+        <tr class="strong-row"><td>{{ 'shifts.expected' | translate }}</td><td class="num">${{ s.expectedUsd | number: '1.2-2' }}</td><td class="num">៛{{ s.expectedKhr | number: '1.0-0' }}</td></tr>
+        @if (s.countedUsd != null) {
+          <tr><td>{{ 'shifts.counted' | translate }}</td><td class="num">${{ s.countedUsd | number: '1.2-2' }}</td><td class="num">៛{{ s.countedKhr | number: '1.0-0' }}</td></tr>
+          <tr class="strong-row">
+            <td>{{ 'shifts.difference' | translate }}</td>
+            <td class="num" [class.danger-text]="s.differenceUsd! < 0">{{ s.differenceUsd | number: '1.2-2' }}</td>
+            <td class="num" [class.danger-text]="s.differenceKhr! < 0">{{ s.differenceKhr | number: '1.0-0' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</p-dialog>

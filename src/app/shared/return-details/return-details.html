@@ -1,5 +1,4 @@
-<p-dialog [visible]="!!doc()" (visibleChange)="!$event && doc.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
-          [header]="doc()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+<ng-template #docBody>
   @if (doc(); as r) {
     @let customer = kind() === 'customer';
     @let waiting = r.status === 'WAITING_APPROVAL';
@@ -83,10 +82,25 @@
       }
     </div>
   }
-  <ng-template #footer>
+</ng-template>
+<ng-template #docActions>
+    @if (doc(); as r) {
+      @if (r.status !== 'WAITING_APPROVAL' || !canDecide()) {
+        <div class="dialog-actions">
+          @if (r.status === 'POSTED' && canDecide()) {
+            <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(r)" [loading]="busy()" [disabled]="busy()">
+              <span pButtonLabel>{{ 'voids.button' | translate }}</span>
+            </button>
+          }
+          <span class="spacer"></span>
+          <ms-attach-button [type]="kind() === 'customer' ? 'sales-returns' : 'purchase-returns'" [docId]="r.id" [number]="r.number" />
+        </div>
+      }
+    }
     @if (doc()?.status === 'WAITING_APPROVAL' && canDecide()) {
       <div class="dialog-actions">
         <span class="spacer"></span>
+        <ms-attach-button [type]="kind() === 'customer' ? 'sales-returns' : 'purchase-returns'" [docId]="doc()!.id" [number]="doc()!.number" />
         <button pButton type="button" [text]="true" severity="danger" (click)="decide(doc()!, 'reject')" [disabled]="busy()">
           <span pButtonLabel>{{ 'common.reject' | translate }}</span>
         </button>
@@ -95,5 +109,17 @@
         </button>
       </div>
     }
-  </ng-template>
+</ng-template>
+<p-dialog [visible]="!inline() && !!doc()" (visibleChange)="!$event && doc.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="doc()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+  <ng-container [ngTemplateOutlet]="docBody" />
+  <ng-template #footer><ng-container [ngTemplateOutlet]="docActions" /></ng-template>
 </p-dialog>
+
+<!-- On a document's own page (PLAIN.md 12.2 View): the same content and actions, in the page -->
+@if (inline() && !!doc()) {
+  <div class="doc-inline">
+    <ng-container [ngTemplateOutlet]="docBody" />
+    <div class="doc-inline-actions"><ng-container [ngTemplateOutlet]="docActions" /></div>
+  </div>
+}

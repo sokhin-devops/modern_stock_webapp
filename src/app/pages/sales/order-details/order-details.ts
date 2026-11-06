@@ -1,5 +1,5 @@
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, model, output, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { Component, computed, inject, model, output, signal, input } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
@@ -13,6 +13,7 @@ import { NotifyService } from '../../../core/notify.service';
 import { PrintDialog, PrintDocument } from '../../../shared/print-dialog/print-dialog';
 import { DeliverDialog } from '../deliver-dialog/deliver-dialog';
 import { Delivered, OrderFormTarget, Quotation, SalesOrder } from '../orders/orders';
+import { AttachButton } from '../../../shared/attach-button/attach-button';
 
 export type OrderView = { kind: 'quotation'; doc: Quotation } | { kind: 'order'; doc: SalesOrder };
 
@@ -30,11 +31,13 @@ interface Customer {
  */
 @Component({
   selector: 'ms-order-details',
-  imports: [TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Dialog, TableModule, ButtonDirective, ButtonIcon, ButtonLabel, PrintDialog, DeliverDialog],
+  imports: [NgTemplateOutlet, AttachButton, TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Dialog, TableModule, ButtonDirective, ButtonIcon, ButtonLabel, PrintDialog, DeliverDialog],
   templateUrl: './order-details.html',
   styleUrl: './order-details.scss',
 })
 export class OrderDetails {
+  /** On a document's own page: no dialog, the content and actions in the page. */
+  readonly inline = input(false);
   readonly view = model<OrderView | null>(null);
   readonly edit = output<OrderFormTarget>();
   readonly changed = output<void>();
