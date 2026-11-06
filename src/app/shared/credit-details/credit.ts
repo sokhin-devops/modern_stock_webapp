@@ -15,6 +15,9 @@ export interface Credit {
   left: number;
   status: 'OPEN' | 'CLOSED' | 'VOID';
   reason: string | null;
+  /** Made by a return: voided with the return, not on its own. */
+  salesReturnId?: number | null;
+  purchaseReturnId?: number | null;
 }
 
 /** What differs between the two kinds: where they live, what they pay, and who may change them. */

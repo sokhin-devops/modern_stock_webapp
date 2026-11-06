@@ -1,0 +1,17 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.product-filter {
+  width: min(320px, 100%);
+}
+
+.filter {
+  min-width: 200px;
+}
+
+.date-filter {
+  width: 160px;
+}

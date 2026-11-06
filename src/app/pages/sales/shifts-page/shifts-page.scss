@@ -3,3 +3,39 @@
   flex: 1;
   min-height: 0;
 }
+
+.filter {
+  min-width: 160px;
+}
+
+.date-filter {
+  width: 160px;
+}
+
+// The shift's cash, step by step: opening, in, out, expected, counted, difference.
+.cash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .num {
+    text-align: right;
+  }
+
+  .strong-row td {
+    font-weight: 500;
+  }
+}

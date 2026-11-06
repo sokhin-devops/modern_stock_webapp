@@ -62,6 +62,7 @@ export class Dashboard {
 
   private readonly billingState = inject(BillingService);
   protected readonly billing = this.billingState.billing;
+  protected readonly trialLeft = this.billingState.trialDaysLeft;
 
   /** The sales chart: the last 7 or 30 days. */
   protected readonly span = signal<7 | 30>(7);

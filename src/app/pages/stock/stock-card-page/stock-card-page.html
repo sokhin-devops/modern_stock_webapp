@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>{{ 'nav.inventory' | translate }}</span>
+      <span class="current">{{ 'nav.stockCard' | translate }}</span>
+    </nav>
+  </div>
+
+  <div class="page-body list-page">
+    <div class="toolbar">
+      <p-autocomplete [ngModel]="product()" (ngModelChange)="setProduct($event)" [suggestions]="suggestions()" (completeMethod)="find($event)"
+                      optionLabel="label" [forceSelection]="true" [showClear]="true" [placeholder]="'stockCard.allProducts' | translate"
+                      [ariaLabel]="'products.colProduct' | translate" class="product-filter" appendTo="body" />
+      @if (warehouseChoices().length > 1) {
+        <p-select [options]="warehouseChoices()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+                  (ngModelChange)="setWarehouse($event)" [showClear]="true" [placeholder]="'stock.allWarehouses' | translate"
+                  [ariaLabel]="'common.warehouse' | translate" class="filter" appendTo="body" />
+      }
+      <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+                    appendTo="body" [placeholder]="'common.from' | translate" [ariaLabel]="'common.from' | translate" class="date-filter" />
+      <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+                    appendTo="body" [placeholder]="'common.to' | translate" [ariaLabel]="'common.to' | translate" class="date-filter" />
+      <span class="spacer"></span>
+      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+        <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+      </button>
+    </div>
+
+    <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'stock.date' | translate }}</th>
+          @if (!product()) {
+            <th>{{ 'products.colProduct' | translate }}</th>
+          }
+          <th>{{ 'stock.warehouse' | translate }}</th>
+          <th>{{ 'stock.movement' | translate }}</th>
+          <th class="num">{{ 'stock.qty' | translate }}</th>
+          <th class="num">{{ 'stock.balance' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-m>
+        <tr>
+          <td>{{ m.at | date: 'dd/MM/yyyy HH:mm' }}</td>
+          @if (!product()) {
+            <td class="strong">{{ m.productName }}</td>
+          }
+          <td class="muted">{{ m.warehouseName }}</td>
+          <td>{{ 'stock.types.' + m.type | translate }}</td>
+          <td class="num" [class.danger-text]="m.qty < 0">{{ m.qty > 0 ? '+' : '' }}{{ m.qty | number: '1.0-3' }}</td>
+          <td class="num strong">{{ m.balanceAfter | number: '1.0-3' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td [attr.colspan]="product() ? 5 : 6" class="empty-cell">{{ 'stock.noMovements' | translate }}</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

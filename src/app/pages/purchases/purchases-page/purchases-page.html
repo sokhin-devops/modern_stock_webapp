@@ -1,3 +1,54 @@
+@if (pageMode()) {
+<!-- A document's own page (PLAIN.md 12.2 View): breadcrumb, status, the document, the next step as the main button -->
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/suppliers/transactions">{{ 'nav.supplierMenu' | translate }}</a>
+      <a routerLink="/suppliers/transactions" [queryParams]="{ tab: docView() }">{{ 'tx.views.' + docView() | translate }}</a>
+      <span class="current">{{ pageDoc()?.number || '…' }}</span>
+      @if (pageDoc()?.status; as st) {
+        <span class="tag doc-status" [class]="'status-' + st">{{ pageDoc()!.statusKey | translate }}</span>
+      }
+    </nav>
+  </div>
+  <div class="page-body">
+    <section class="card doc-page">
+      @switch (docView()) {
+        @case ('purchase-orders') {
+          @if (viewing()) {
+            <ng-container [ngTemplateOutlet]="orderBody" />
+            <div class="doc-page-actions"><ng-container [ngTemplateOutlet]="orderActions" /></div>
+          }
+        }
+        @case ('goods-receipts') {
+          @if (viewingReceipt()) {
+            <ng-container [ngTemplateOutlet]="receiptBody" />
+            <div class="doc-page-actions"><ng-container [ngTemplateOutlet]="receiptActions" /></div>
+          }
+        }
+        @case ('bills') {
+          @if (viewingBill()) {
+            <ng-container [ngTemplateOutlet]="billBody" />
+            <div class="doc-page-actions"><ng-container [ngTemplateOutlet]="billActions" /></div>
+          }
+        }
+        @case ('payments') {
+          <ms-payment-details kind="supplier" [inline]="true" [(payment)]="payment" (changed)="reloadAll()" />
+        }
+        @case ('returns') {
+          <ms-return-details kind="supplier" [inline]="true" [(doc)]="returnDoc" (changed)="reloadAll()" />
+        }
+        @case ('credits') {
+          <ms-credit-details kind="supplier" [inline]="true" [(credit)]="credit" (changed)="reloadAll()" />
+        }
+      }
+      @if (!pageDoc()) {
+        <p class="muted doc-loading"><i class="pi pi-spin pi-spinner"></i></p>
+      }
+    </section>
+  </div>
+</div>
+} @else {
 <div class="page">
   <div class="page-head">
     <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -5,31 +56,18 @@
       <span class="current">{{ 'nav.supplierTransactions' | translate }}</span>
     </nav>
     <div class="page-actions">
-      @if (tab() === 'credits' && canBills()) {
-        <button pButton type="button" [outlined]="true" (click)="newCreditOpen.set(true)">
-          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'credits.supplier.new' | translate }}</span>
+      @if (newItems().length) {
+        <button pButton type="button" (click)="newMenu.toggle($event)" aria-haspopup="true">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'tx.newButton' | translate }}</span>
         </button>
-      }
-      @if (canBills()) {
-        <button pButton type="button" [outlined]="true" (click)="payOpen.set(true)">
-          <i class="pi pi-wallet" pButtonIcon></i><span pButtonLabel>{{ 'purchase.pay' | translate }}</span>
-        </button>
-      }
-      @if (canOrder()) {
-        <button pButton type="button" [outlined]="true" (click)="openForm('order')">
-          <i class="pi pi-file" pButtonIcon></i><span pButtonLabel>{{ 'purchase.newOrder' | translate }}</span>
-        </button>
-      }
-      @if (canQuick()) {
-        <button pButton type="button" (click)="openForm('quick')">
-          <i class="pi pi-bolt" pButtonIcon></i><span pButtonLabel>{{ 'purchase.quick' | translate }}</span>
-        </button>
+        <p-menu #newMenu [model]="newItems()" [popup]="true" appendTo="body" />
       }
     </div>
   </div>
   <div class="page-body list-page">
-    <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))" class="ms-tabs">
+    <p-tabs [value]="tab()" (valueChange)="setTab($any($event))" class="ms-tabs">
       <p-tablist>
+        <p-tab value="all">{{ 'tx.views.all' | translate }}</p-tab>
         <p-tab value="orders">{{ 'purchase.tabOrders' | translate }}</p-tab>
         <p-tab value="receipts">{{ 'purchase.tabReceipts' | translate }}</p-tab>
         @if (canBills()) {
@@ -44,6 +82,9 @@
         }
       </p-tablist>
       <p-tabpanels>
+        <p-tabpanel value="all">
+          <ms-transactions-table #allTable side="SUPPLIER" fileName="supplier-transactions" (open)="go($event.view, $event.id)" />
+        </p-tabpanel>
         <p-tabpanel value="orders">
           <p-table class="ms-table" [value]="orders.rows()" [lazy]="true" (onLazyLoad)="orders.load($event)" [loading]="orders.loading()"
                    [paginator]="true" [rows]="20" [first]="orders.first()" [totalRecords]="orders.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
@@ -54,7 +95,7 @@
               </tr>
             </ng-template>
             <ng-template #body let-o>
-              <tr class="clickable" tabindex="0" (click)="viewing.set(o)" (keydown.enter)="viewing.set(o)">
+              <tr class="clickable" tabindex="0" (click)="go('purchase-orders', o.id)" (keydown.enter)="go('purchase-orders', o.id)">
                 <td class="strong doc-no">{{ o.number }}</td><td>{{ o.supplierName }}</td><td>{{ o.orderDate | date: 'dd/MM/yyyy' }}</td>
                 <td class="muted">{{ o.receiveWarehouseName }}</td><td class="num">{{ o.total | currency: 'USD' }}</td>
                 <td><span class="tag" [class]="'status-' + o.status">{{ 'docs.status.' + o.status | translate }}</span></td>
@@ -71,7 +112,7 @@
                 <th>{{ 'purchase.bill' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
             </ng-template>
             <ng-template #body let-g>
-              <tr class="clickable" tabindex="0" (click)="openReceipt(g)" (keydown.enter)="openReceipt(g)">
+              <tr class="clickable" tabindex="0" (click)="go('goods-receipts', g.id)" (keydown.enter)="go('goods-receipts', g.id)">
                 <td><div class="strong doc-no">{{ g.number }}</div><small class="muted">{{ g.supplierName }}</small></td>
                 <td>{{ g.receivedAt | date: 'dd/MM/yyyy HH:mm' }}</td><td class="muted">{{ g.warehouseName }}</td>
                 <td class="muted">{{ g.billNumber }}</td><td class="num">{{ g.total | currency: 'USD' }}</td>
@@ -84,14 +125,14 @@
         @if (canBills()) {
           <p-tabpanel value="bills">
             <p-table class="ms-table" [value]="bills.rows()" [lazy]="true" (onLazyLoad)="bills.load($event)" [loading]="bills.loading()"
-                     [paginator]="true" [rows]="20" [first]="bills.first()" [totalRecords]="bills.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+                     [paginator]="true" [rows]="20" [first]="bills.first()" [totalRecords]="bills.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
               <ng-template #header>
                 <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'purchase.supplier' | translate }}</th><th>{{ 'purchase.due' | translate }}</th>
                   <th class="num">{{ 'common.total' | translate }}</th><th class="num">{{ 'purchase.balance' | translate }}</th><th>{{ 'common.status' | translate }}</th>
                   <th class="actions"></th></tr>
               </ng-template>
               <ng-template #body let-b>
-                <tr>
+                <tr class="clickable" tabindex="0" (click)="go('bills', b.id)" (keydown.enter)="go('bills', b.id)">
                   <td class="strong doc-no">{{ b.number }}@if ($any(b).supplierInvoiceNo) { <small class="muted"> · {{ $any(b).supplierInvoiceNo }}</small> }</td>
                   <td>{{ $any(b).supplierName }}</td>
                   <td [class.danger-text]="$any(b).overdue">{{ $any(b).dueDate | date: 'dd/MM/yyyy' }}</td>
@@ -99,7 +140,7 @@
                   <td class="num strong">{{ $any(b).balance | currency: 'USD' }}</td>
                   <td><span class="tag" [class]="'status-' + $any(b).status">{{ 'docs.status.' + $any(b).status | translate }}</span></td>
                   <td class="actions">
-                    <button pButton type="button" [rounded]="true" [text]="true" [severity]="$any(b).hasPhoto ? 'primary' : 'secondary'" (click)="openBillPhoto(b)"
+                    <button pButton type="button" [rounded]="true" [text]="true" [severity]="$any(b).hasPhoto ? 'primary' : 'secondary'" (click)="$event.stopPropagation(); openBillPhoto(b)" (keydown.enter)="$event.stopPropagation()"
                             [attr.aria-label]="($any(b).hasPhoto ? 'docPhoto.invoiceView' : 'docPhoto.invoiceAdd') | translate"
                             [pTooltip]="($any(b).hasPhoto ? 'docPhoto.invoiceView' : 'docPhoto.invoiceAdd') | translate" tooltipPosition="left">
                       <i class="pi" [class.pi-image]="$any(b).hasPhoto" [class.pi-camera]="!$any(b).hasPhoto" pButtonIcon></i>
@@ -114,14 +155,14 @@
         @if (canBills()) {
           <p-tabpanel value="payments">
             <p-table class="ms-table" [value]="payments.rows()" [lazy]="true" (onLazyLoad)="payments.load($event)" [loading]="payments.loading()"
-                     [paginator]="true" [rows]="20" [first]="payments.first()" [totalRecords]="payments.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+                     [paginator]="true" [rows]="20" [first]="payments.first()" [totalRecords]="payments.total()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
               <ng-template #header>
                 <tr><th>{{ 'common.number' | translate }}</th><th>{{ 'purchase.supplier' | translate }}</th><th>{{ 'common.date' | translate }}</th><th>{{ 'common.method' | translate }}</th>
                   <th class="num">{{ 'common.amount' | translate }}</th><th class="num">USD</th></tr>
               </ng-template>
               <ng-template #body let-p>
-                <tr>
-                  <td class="strong doc-no">{{ p.number }}</td><td>{{ $any(p).partyName }}</td><td>{{ $any(p).paidAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <tr class="clickable" tabindex="0" (click)="go('payments', p.id)" (keydown.enter)="go('payments', p.id)">
+                  <td class="strong doc-no">{{ p.number }}@if (p.status === 'VOID') { <span class="tag status-VOID type-tag">{{ 'docs.status.VOID' | translate }}</span> }</td><td>{{ $any(p).partyName }}</td><td>{{ $any(p).paidAt | date: 'dd/MM/yyyy HH:mm' }}</td>
                   <td>{{ 'docs.methods.' + $any(p).method | translate }}</td>
                   <td class="num">{{ $any(p).currency === 'USD' ? '$' : '៛' }}{{ $any(p).amount | number: ($any(p).currency === 'USD' ? '1.2-2' : '1.0-0') }}</td>
                   <td class="num strong">
@@ -147,7 +188,7 @@
                   <th>{{ 'returns.madeBy' | translate }}</th><th class="num">{{ 'purchaseReturns.total' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
               </ng-template>
               <ng-template #body let-r>
-                <tr class="clickable" tabindex="0" (click)="returnDoc.set(r)" (keydown.enter)="returnDoc.set(r)">
+                <tr class="clickable" tabindex="0" (click)="go('returns', r.id)" (keydown.enter)="go('returns', r.id)">
                   <td><div class="strong doc-no">{{ r.number }}</div><small class="muted doc-no">{{ r.goodsReceiptNumber }}</small></td>
                   <td>{{ r.supplierName }}</td>
                   <td>{{ r.returnedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
@@ -171,7 +212,7 @@
                   <th>{{ 'common.status' | translate }}</th></tr>
               </ng-template>
               <ng-template #body let-c>
-                <tr class="clickable" tabindex="0" (click)="credit.set(c)" (keydown.enter)="credit.set(c)">
+                <tr class="clickable" tabindex="0" (click)="go('credits', c.id)" (keydown.enter)="go('credits', c.id)">
                   <td><div class="strong doc-no">{{ c.number }}</div>@if (c.reason) { <small class="muted">{{ c.reason }}</small> }</td>
                   <td>{{ c.supplierName }}</td>
                   <td>{{ c.issuedAt | date: 'dd/MM/yyyy' }}</td>
@@ -188,12 +229,66 @@
     </p-tabs>
   </div>
 </div>
+}
 
 <ms-purchase-form [mode]="formMode()" [(visible)]="formOpen" (saved)="reloadAll()" />
 <ms-payment-dialog kind="supplier" [(visible)]="payOpen" (saved)="reloadAll()" />
+@if (!pageMode()) {
+  <ms-payment-details kind="supplier" [(payment)]="payment" (changed)="reloadAll()" />
+}
 
-<p-dialog [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
-          [header]="viewing()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+<!-- A bill: what is owed for a goods receipt, and when -->
+<ng-template #billBody>
+  @if (viewingBill(); as b) {
+    <div class="doc-facts">
+      <div><small>{{ 'purchase.supplier' | translate }}</small><b>{{ b.supplierName }}</b></div>
+      <div><small>{{ 'common.date' | translate }}</small><b>{{ b.billDate | date: 'dd/MM/yyyy' }}</b></div>
+      <div><small>{{ 'purchase.due' | translate }}</small><b [class.danger-text]="b.overdue">{{ b.dueDate | date: 'dd/MM/yyyy' }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + b.status">{{ 'docs.status.' + b.status | translate }}</span></b></div>
+      @if (b.supplierInvoiceNo) {
+        <div><small>{{ 'purchase.invoiceNo' | translate }}</small><b>{{ b.supplierInvoiceNo }}</b></div>
+      }
+    </div>
+    <div class="doc-facts">
+      <div><small>{{ 'common.total' | translate }}</small><b>{{ b.total | currency: 'USD' }}</b></div>
+      <div><small>{{ 'purchase.paid' | translate }}</small><b>{{ b.paidAmount | currency: 'USD' }}</b></div>
+      <div><small>{{ 'purchase.balance' | translate }}</small><b [class.danger-text]="b.balance > 0 && b.overdue">{{ b.balance | currency: 'USD' }}</b></div>
+    </div>
+    @if (b.note) {
+      <p class="muted">{{ b.note }}</p>
+    }
+  }
+</ng-template>
+<ng-template #billActions>
+    @if (viewingBill(); as b) {
+      <div class="dialog-actions">
+        @if (b.status === 'UNPAID' && !b.paidAmount) {
+          <button pButton type="button" [text]="true" severity="danger" (click)="voidBill(b)" [disabled]="busy()">
+            <span pButtonLabel>{{ 'voids.button' | translate }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+        @if (b.status !== 'VOID') {
+          <button pButton type="button" [outlined]="true" (click)="billAction(b, 'photo')">
+            <i class="pi" [class.pi-image]="b.hasPhoto" [class.pi-camera]="!b.hasPhoto" pButtonIcon></i>
+            <span pButtonLabel>{{ (b.hasPhoto ? 'docPhoto.invoiceView' : 'docPhoto.invoiceAdd') | translate }}</span>
+          </button>
+        }
+        @if (b.balance > 0 && b.status !== 'VOID') {
+          <button pButton type="button" (click)="billAction(b, 'pay')">
+            <i class="pi pi-wallet" pButtonIcon></i><span pButtonLabel>{{ 'purchase.pay' | translate }}</span>
+          </button>
+        }
+      </div>
+    }
+</ng-template>
+<p-dialog [visible]="!pageMode() && !!viewingBill()" (visibleChange)="!$event && viewingBill.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewingBill()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+  <ng-container [ngTemplateOutlet]="billBody" />
+  <ng-template #footer><ng-container [ngTemplateOutlet]="billActions" /></ng-template>
+</p-dialog>
+
+<ng-template #orderBody>
   @if (viewing(); as o) {
     <div class="doc-facts">
       <div><small>{{ 'purchase.supplier' | translate }}</small><b>{{ o.supplierName }}</b></div>
@@ -220,7 +315,8 @@
       </ng-template>
     </p-table>
   }
-  <ng-template #footer>
+</ng-template>
+<ng-template #orderActions>
     @if (viewing(); as o) {
       <div class="dialog-actions">
         @if (canOrder()) {
@@ -232,6 +328,7 @@
           }
         }
         <span class="spacer"></span>
+        <ms-attach-button type="purchase-orders" [docId]="o.id" [number]="o.number" />
         @if (o.status !== 'CANCELLED') {
           <button pButton type="button" [outlined]="true" (click)="printOrder(o)">
             <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
@@ -247,17 +344,21 @@
         }
       </div>
     }
-  </ng-template>
+</ng-template>
+<p-dialog [visible]="!pageMode() && !!viewing()" (visibleChange)="!$event && viewing.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewing()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+  <ng-container [ngTemplateOutlet]="orderBody" />
+  <ng-template #footer><ng-container [ngTemplateOutlet]="orderActions" /></ng-template>
 </p-dialog>
 
-<p-dialog [visible]="!!viewingReceipt()" (visibleChange)="!$event && viewingReceipt.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
-          [header]="viewingReceipt()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+<ng-template #receiptBody>
   @if (viewingReceipt(); as g) {
     <div class="doc-facts">
       <div><small>{{ 'purchase.supplier' | translate }}</small><b>{{ g.supplierName }}</b></div>
       <div><small>{{ 'common.date' | translate }}</small><b>{{ g.receivedAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
       <div><small>{{ 'common.warehouse' | translate }}</small><b>{{ g.warehouseName }}</b></div>
       <div><small>{{ 'purchase.bill' | translate }}</small><b>{{ g.billNumber ?? '—' }}</b></div>
+      <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + g.status">{{ 'docs.status.' + g.status | translate }}</span></b></div>
     </div>
     <p-table class="ms-table" [value]="g.lines" dataKey="id">
       <ng-template #header>
@@ -285,23 +386,44 @@
       </ng-template>
     </p-table>
   }
-  <ng-template #footer>
+</ng-template>
+<ng-template #receiptActions>
     @if (viewingReceipt(); as g) {
-      @if (canReturn() && g.status === 'POSTED') {
-        <div class="dialog-actions">
-          <span class="spacer"></span>
+      <div class="dialog-actions">
+        @if (canBills() && g.status === 'POSTED') {
+          <button pButton type="button" [text]="true" severity="danger" (click)="voidReceipt(g)" [disabled]="busy()">
+            <span pButtonLabel>{{ 'voids.button' | translate }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+        <ms-attach-button type="goods-receipts" [docId]="g.id" [number]="g.number" />
+        @if (canReturn() && g.status === 'POSTED') {
           <button pButton type="button" [outlined]="true" (click)="returnOpen.set(true)">
             <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ (canBills() ? 'purchaseReturns.button' : 'purchaseReturns.prepareButton') | translate }}</span>
           </button>
-        </div>
-      }
+        }
+        <!-- The next step is the main button: the bill to pay -->
+        @if (canBills() && g.billId) {
+          <button pButton type="button" (click)="openReceiptBill(g)">
+            <i class="pi pi-file" pButtonIcon></i><span pButtonLabel>{{ 'tx.openBill' | translate }}</span>
+          </button>
+        }
+      </div>
     }
-  </ng-template>
+</ng-template>
+<p-dialog [visible]="!pageMode() && !!viewingReceipt()" (visibleChange)="!$event && viewingReceipt.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="viewingReceipt()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+  <ng-container [ngTemplateOutlet]="receiptBody" />
+  <ng-template #footer><ng-container [ngTemplateOutlet]="receiptActions" /></ng-template>
 </p-dialog>
 
 <ms-purchase-return-dialog [receiptId]="viewingReceipt()?.id ?? null" [(visible)]="returnOpen" (saved)="returned($event)" />
-<ms-return-details kind="supplier" [(doc)]="returnDoc" (changed)="reloadAll()" />
-<ms-credit-details kind="supplier" [(credit)]="credit" (changed)="reloadAll()" />
+@if (!pageMode()) {
+  <ms-return-details kind="supplier" [(doc)]="returnDoc" (changed)="reloadAll()" />
+}
+@if (!pageMode()) {
+  <ms-credit-details kind="supplier" [(credit)]="credit" (changed)="reloadAll()" />
+}
 <ms-credit-dialog kind="supplier" [(visible)]="newCreditOpen" (saved)="credits.refresh(); credit.set($event)" />
 <ms-print-dialog [doc]="printDoc()" [(visible)]="printOpen" />
 

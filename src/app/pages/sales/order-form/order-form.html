@@ -83,7 +83,6 @@
   <ng-template #footer>
     <div class="dialog-actions">
       <span class="spacer"></span>
-      <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
       @if (kind() === 'order' && !editing() && canDeliver()) {
         <button pButton type="button" [outlined]="true" (click)="submit(true)" [disabled]="busy() || !customer() || !filled().length">
           <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'orders.saveDeliver' | translate }}</span>

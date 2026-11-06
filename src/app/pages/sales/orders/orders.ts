@@ -65,5 +65,5 @@ export interface Delivered {
 
 /** What the form edits: a new quotation or order, or an existing one. */
 export type OrderFormTarget =
-  | { kind: 'quotation'; doc: Quotation | null }
-  | { kind: 'order'; doc: SalesOrder | null };
+  | { kind: 'quotation'; doc: Quotation | null; customer?: { id: number; name: string } }
+  | { kind: 'order'; doc: SalesOrder | null; customer?: { id: number; name: string } };

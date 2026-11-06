@@ -38,6 +38,8 @@ export const NAV: NavItem[] = [
   {
     id: 'inventory', icon: 'pi pi-box', label: 'nav.inventory', children: [
       { path: 'inventory/stock', label: 'nav.stock', permissions: ['stock:view'] },
+      { path: 'inventory/stock-card', label: 'nav.stockCard', permissions: ['stock:view'] },
+      { path: 'inventory/batches', label: 'nav.batches', permissions: ['stock:view'] },
       { path: 'inventory/adjustments', label: 'nav.adjustments', permissions: ['stock:view'] },
       { path: 'inventory/transfers', label: 'nav.transfers', permissions: ['stock:view'] },
       { path: 'inventory/stock-counts', label: 'nav.stockCounts', permissions: ['count:manage'] },

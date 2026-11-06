@@ -78,16 +78,42 @@
 <!-- Alerts for the member's role in the selected branch; each opens the page that deals with it -->
 <p-popover #notifications appendTo="body">
   <div class="notifications">
-    <b>{{ 'shell.notifications' | translate }}</b>
+    <div class="notif-head">
+      <b>{{ 'shell.notifications' | translate }}</b>
+      @if (alerts.anyUnread()) {
+        <button type="button" class="mark-read" (click)="alerts.markAllRead()">{{ 'shell.markAllRead' | translate }}</button>
+      }
+    </div>
     @for (a of alerts.alerts(); track a.kind) {
-      <a class="alert-row" [class]="'level-' + a.level" [routerLink]="targets[a.kind].link" [queryParams]="queryOf(a)"
-         (click)="notifications.hide()">
+      <a class="alert-row" [class]="'level-' + a.level" [class.read]="a.read" [routerLink]="targets[a.kind].link" [queryParams]="queryOf(a)"
+         (click)="alerts.markRead(a.kind); notifications.hide()">
         <i class="icon" [class]="targets[a.kind].icon"></i>
         <span class="grow">{{ 'alerts.' + a.kind | translate: { n: a.count, days: a.days } }}</span>
+        @if (!a.read) {
+          <span class="unread-dot" [attr.aria-label]="'shell.unread' | translate"></span>
+        }
         <i class="icon pi pi-chevron-right chev"></i>
       </a>
     } @empty {
-      <p class="muted none"><i class="icon pi pi-check-circle"></i>{{ 'shell.noNotifications' | translate }}</p>
+      @if (!alerts.notifications().length) {
+        <p class="muted none"><i class="icon pi pi-check-circle"></i>{{ 'shell.noNotifications' | translate }}</p>
+      }
+    }
+    <!-- What happened, for this member (stored notifications), newest first -->
+    @if (alerts.notifications().length) {
+      <small class="notif-section">{{ 'shell.recent' | translate }}</small>
+      @for (n of alerts.notifications(); track n.id) {
+        <button type="button" class="alert-row notif-row" [class.read]="n.read" (click)="openNotification(n, notifications)">
+          <i class="icon" [class]="notificationIcons[n.type] ?? 'pi pi-bell'"></i>
+          <span class="grow">
+            {{ 'notifications.' + n.type | translate: notificationParams(n) }}
+            <small class="muted notif-time">{{ n.createdAt | date: 'dd/MM HH:mm' }}</small>
+          </span>
+          @if (!n.read) {
+            <span class="unread-dot" [attr.aria-label]="'shell.unread' | translate"></span>
+          }
+        </button>
+      }
     }
   </div>
 </p-popover>

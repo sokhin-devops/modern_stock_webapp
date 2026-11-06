@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -12,8 +12,10 @@ import { ApiService } from '../../core/api/api.service';
 import { PageResponse } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
 import { NotifyService } from '../../core/notify.service';
+import { VoidService } from '../../core/void.service';
 import { FieldLabel } from '../field-label/field-label';
 import { Credit, CREDIT_KINDS, CreditKind, creditParty } from './credit';
+import { AttachButton } from '../attach-button/attach-button';
 
 /** An invoice or a bill that still has something to pay. */
 interface OpenDoc {
@@ -29,7 +31,7 @@ interface OpenDoc {
  */
 @Component({
   selector: 'ms-credit-details',
-  imports: [
+  imports: [NgTemplateOutlet, AttachButton, 
     FormsModule, TranslatePipe, CurrencyPipe, DatePipe, Dialog, Select, SelectButton, InputNumber, ButtonDirective, ButtonIcon,
     ButtonLabel, FieldLabel,
   ],
@@ -37,6 +39,8 @@ interface OpenDoc {
   styleUrl: './credit-details.scss',
 })
 export class CreditDetails {
+  /** On a document's own page: no dialog, the content and actions in the page. */
+  readonly inline = input(false);
   readonly kind = input.required<CreditKind>();
   readonly credit = model<Credit | null>(null);
   readonly changed = output<Credit>();
@@ -44,6 +48,7 @@ export class CreditDetails {
   private readonly api = inject(ApiService);
   private readonly notify = inject(NotifyService);
   private readonly business = inject(BusinessService);
+  private readonly voids = inject(VoidService);
 
   private readonly config = computed(() => CREDIT_KINDS[this.kind()]);
   protected readonly party = computed(() => (this.credit() ? creditParty(this.credit()!) : null));
@@ -81,6 +86,12 @@ export class CreditDetails {
     }
     const doc = this.docs().find((d) => d.id === this.docId());
     return doc ? Math.min(left, doc.balance) : left;
+  });
+
+  /** A credit written by hand and not refunded can be voided; one from a return goes with its return (PLAIN.md 11.1). */
+  protected readonly voidable = computed(() => {
+    const c = this.credit();
+    return !!c && this.canManage() && c.status !== 'VOID' && !c.refundedAmount && !c.salesReturnId && !c.purchaseReturnId;
   });
 
   constructor() {
@@ -148,5 +159,15 @@ export class CreditDetails {
         },
       });
     }
+  }
+
+  protected voidIt(c: Credit): void {
+    const customer = this.kind() === 'customer';
+    this.voids.void<Credit>(customer ? 'creditNote' : 'supplierCredit', `${this.config().path}/${c.id}`, c.number,
+      (updated) => {
+        this.changed.emit(updated);
+        this.credit.set(updated);
+      },
+      (on) => this.busy.set(on));
   }
 }

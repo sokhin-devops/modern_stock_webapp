@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, model, output, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
@@ -8,6 +8,8 @@ import { TableModule } from 'primeng/table';
 import { ApiService } from '../../core/api/api.service';
 import { BusinessService } from '../../core/business/business.service';
 import { NotifyService } from '../../core/notify.service';
+import { VoidService } from '../../core/void.service';
+import { AttachButton } from '../attach-button/attach-button';
 
 /** A sales return (customer) or a purchase return (supplier), as the API sends it. */
 export interface ReturnDoc {
@@ -48,11 +50,13 @@ export interface ReturnDoc {
  */
 @Component({
   selector: 'ms-return-details',
-  imports: [TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Dialog, TableModule, ButtonDirective, ButtonLabel],
+  imports: [NgTemplateOutlet, AttachButton, TranslatePipe, CurrencyPipe, DatePipe, DecimalPipe, Dialog, TableModule, ButtonDirective, ButtonLabel],
   templateUrl: './return-details.html',
   styleUrl: './return-details.scss',
 })
 export class ReturnDetails {
+  /** On a document's own page: no dialog, the content and actions in the page. */
+  readonly inline = input(false);
   readonly kind = input.required<'customer' | 'supplier'>();
   readonly doc = model<ReturnDoc | null>(null);
   readonly changed = output<ReturnDoc>();
@@ -60,6 +64,7 @@ export class ReturnDetails {
   private readonly api = inject(ApiService);
   private readonly notify = inject(NotifyService);
   private readonly business = inject(BusinessService);
+  private readonly voids = inject(VoidService);
 
   protected readonly busy = signal(false);
   protected readonly canDecide = computed(() => this.business.can(this.kind() === 'customer' ? 'sale:void' : 'bill:manage'));
@@ -79,5 +84,16 @@ export class ReturnDetails {
         this.notify.error(e);
       },
     });
+  }
+
+  /** A posted return made by mistake: its goods and its credit are undone (PLAIN.md 11.1). */
+  protected voidIt(r: ReturnDoc): void {
+    const customer = this.kind() === 'customer';
+    this.voids.void<ReturnDoc>(customer ? 'salesReturn' : 'purchaseReturn', `/${customer ? 'sales-returns' : 'purchase-returns'}/${r.id}`, r.number,
+      (updated) => {
+        this.doc.set(updated);
+        this.changed.emit(updated);
+      },
+      (on) => this.busy.set(on));
   }
 }

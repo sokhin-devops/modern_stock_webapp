@@ -286,7 +286,10 @@
     "choosePlan": "Choose a plan",
     "branchReadOnly": "This branch is read-only on your plan: you can look at everything, but not add new work.",
     "readOnly": "read-only",
-    "help": "Help for this page"
+    "help": "Help for this page",
+    "markAllRead": "Mark all read",
+    "unread": "Unread",
+    "recent": "Recent"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -319,7 +322,9 @@
     "telegram": "Telegram",
     "appearance": "Appearance",
     "billing": "Plan and billing",
-    "activity": "Activity log"
+    "activity": "Activity log",
+    "stockCard": "Stock card",
+    "batches": "Batches and expiry"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -384,7 +389,8 @@
     "noSales": "No sales in the last 30 days.",
     "countsToApprove": "Counts to approve",
     "returnsToApprove": "Customer returns to approve",
-    "purchaseReturnsToApprove": "Supplier returns to approve"
+    "purchaseReturnsToApprove": "Supplier returns to approve",
+    "trialUntil": "Free trial until {{date}} · {{days}} days left"
   },
   "comingSoon": {
     "title": "Coming next",
@@ -501,7 +507,9 @@
     "lowSomewhere": "Low in a branch",
     "notWatched": "not watched",
     "reserved": "For orders",
-    "free": "{{n}} free"
+    "free": "{{n}} free",
+    "allWarehouses": "All warehouses",
+    "unit": "Unit"
   },
   "pos": {
     "title": "POS",
@@ -1124,7 +1132,13 @@
     "difference": "Difference",
     "receipts": "Receipts",
     "over": "Over",
-    "short": "Short"
+    "short": "Short",
+    "anyStatus": "Any status",
+    "cashReceived": "Cash received",
+    "changeGiven": "Change given",
+    "cashAdded": "Cash added",
+    "cashTaken": "Cash taken out",
+    "voided": "{{n}} voided"
   },
   "expenses": {
     "new": "New expense",
@@ -1184,7 +1198,8 @@
       "SUBMITTED": "Waiting approval",
       "POSTED": "Posted",
       "VOID": "Void"
-    }
+    },
+    "listSearchPh": "Count number"
   },
   "reports": {
     "from": "From",
@@ -1291,7 +1306,7 @@
     "toReorder": "To reorder",
     "orderValue": "Suggested order",
     "atAvgCost": "At average cost",
-    "reorderRule": "Order = enough for the delivery days plus {{cover}} days of sales (average of the last {{days}} days), keeping the reorder level as safety stock, minus what is on hand.",
+    "reorderRule": "Reorder level: a branch's own level if set; else the reorder point recalculated every morning from the last {{days}} days of sales (average daily sales × lead time + safety stock, where safety stock = busiest day × longest lead time − average daily sales × average lead time); else the product's level. The order brings stock to that level plus {{cover}} days of sales.",
     "soldPerDay": "Sold per day",
     "suggested": "Order",
     "expiredBatches": "Expired batches",
@@ -1406,7 +1421,13 @@
     "eoqOrders": "Orders a year",
     "eoqEvery": "Order every",
     "eoqDays": "{{n}} days",
-    "onHandNow": "On hand"
+    "onHandNow": "On hand",
+    "basisSales": "from sales",
+    "basisManual": "manual level",
+    "basisSalesHint": "Safety stock {{safety}}; busiest day {{max}} sold",
+    "basisManualHint": "Not enough sales history yet: the reorder level set on the product",
+    "recalculate": "Recalculate now",
+    "recalculated": "Reorder points recalculated: {{n}} products from sales history."
   },
   "telegram": {
     "lead": "Get yesterday's sales and stock news every morning in a Telegram chat or group.",
@@ -1948,7 +1969,16 @@
       "COUPON_REDEEMED": "Coupon used",
       "FREE_MONTHS_GIVEN": "Free months given",
       "ADJUSTMENT_VOIDED": "Adjustment voided",
-      "TRANSFER_VOIDED": "Transfer voided"
+      "TRANSFER_VOIDED": "Transfer voided",
+      "GOODS_RECEIPT_VOIDED": "Goods receipt voided",
+      "SUPPLIER_PAYMENT_VOIDED": "Supplier payment voided",
+      "PURCHASE_RETURN_VOIDED": "Supplier return voided",
+      "SUPPLIER_CREDIT_VOIDED": "Supplier credit voided",
+      "INVOICE_VOIDED": "Invoice voided",
+      "PAYMENT_RECEIVED_VOIDED": "Payment received voided",
+      "SALES_RETURN_VOIDED": "Customer return voided",
+      "CREDIT_NOTE_VOIDED": "Credit note voided",
+      "COUNT_VOIDED": "Stock count voided"
     },
     "types": {
       "PRODUCT": "Products",
@@ -1969,7 +1999,9 @@
       "EXCHANGE_RATE": "Exchange rate",
       "SUBSCRIPTION": "Plan and billing",
       "SALES_RETURN": "Customer returns",
-      "PURCHASE_RETURN": "Supplier returns"
+      "PURCHASE_RETURN": "Supplier returns",
+      "GOODS_RECEIPT": "Goods receipts",
+      "SUPPLIER": "Suppliers"
     },
     "fields": {
       "nameEn": "Name (English)",
@@ -2207,5 +2239,154 @@
       "balanceAfter": "Balance after",
       "referenceType": "Document"
     }
+  },
+  "voids": {
+    "button": "Void",
+    "header": "Void {{number}}",
+    "done": "{{number}} voided",
+    "ask": {
+      "invoice": "Void invoice {{number}}? Its delivery is voided too: the goods go back into stock, and the customer no longer owes it.",
+      "goodsReceipt": "Void {{number}} and its bill? The goods leave stock again and the supplier is no longer owed for them. This only works while the goods are still in stock.",
+      "bill": "Void bill {{number}} and its goods receipt? The goods leave stock again. This only works while the goods are still in stock.",
+      "supplierPayment": "Void payment {{number}}? The bills it paid are open again.",
+      "paymentReceived": "Void payment {{number}}? The invoices it paid are open again, and cash leaves the shift.",
+      "salesReturn": "Void return {{number}}? The goods leave stock again and its credit note is voided.",
+      "purchaseReturn": "Void return {{number}}? The goods come back into stock and its supplier credit is voided.",
+      "creditNote": "Void credit note {{number}}? Credit used on invoices is taken off them.",
+      "supplierCredit": "Void supplier credit {{number}}? Credit used on bills is taken off them.",
+      "count": "Void count {{number}}? Every difference it posted is undone. This only works while what it added is still in stock."
+    },
+    "paysTitle": "What it paid",
+    "nothingPaid": "Nothing yet: all of it is a deposit or advance.",
+    "toType": {
+      "INVOICE": "Invoice",
+      "BILL": "Bill",
+      "SALES_RECEIPT": "Sale"
+    },
+    "deposit": "Deposit",
+    "advance": "Advance"
+  },
+  "attach": {
+    "add": "Attach photo",
+    "view": "Photo",
+    "title": "Photo"
+  },
+  "tx": {
+    "type": "Type",
+    "allTypes": "All types",
+    "searchPh": "Number or name",
+    "searchNumberPh": "Document number",
+    "export": "Export",
+    "newButton": "New",
+    "balance": "Balance",
+    "due": "Due",
+    "overdue": "Overdue",
+    "openInvoice": "Open invoice",
+    "views": {
+      "all": "All",
+      "quotations": "Quotations",
+      "sales-orders": "Sales orders",
+      "deliveries": "Deliveries",
+      "invoices": "Invoices",
+      "sales-receipts": "Sales receipts",
+      "payments": "Payments",
+      "returns": "Returns",
+      "credits": "Credits",
+      "purchase-orders": "Purchase orders",
+      "goods-receipts": "Goods receipts",
+      "bills": "Bills"
+    },
+    "types": {
+      "QUOTATION": "Quotation",
+      "SALES_ORDER": "Sales order",
+      "DELIVERY": "Delivery",
+      "INVOICE": "Invoice",
+      "DEBIT_NOTE": "Debit note",
+      "SALES_RECEIPT": "Sales receipt",
+      "PAYMENT_RECEIVED": "Payment received",
+      "REFUND": "Refund",
+      "SALES_RETURN": "Return",
+      "CREDIT_NOTE": "Credit note",
+      "PURCHASE_ORDER": "Purchase order",
+      "GOODS_RECEIPT": "Goods receipt",
+      "BILL": "Bill",
+      "SUPPLIER_PAYMENT": "Supplier payment",
+      "PURCHASE_RETURN": "Return",
+      "SUPPLIER_CREDIT": "Supplier credit"
+    },
+    "new": {
+      "sale": "Sale at the POS",
+      "quotation": "Quotation",
+      "salesOrder": "Sales order",
+      "payment": "Payment received",
+      "creditNote": "Credit note",
+      "debitNote": "Debit note",
+      "purchaseOrder": "Purchase order",
+      "quickPurchase": "Save, receive and pay now",
+      "supplierPayment": "Supplier payment",
+      "supplierCredit": "Supplier credit"
+    },
+    "openBill": "Open bill",
+    "allCustomers": "All customers",
+    "allSuppliers": "All suppliers"
+  },
+  "party": {
+    "summary": "Summary",
+    "showSummary": "Show summary",
+    "hideSummary": "Hide summary",
+    "vatTin": "VAT TIN",
+    "address": "Address",
+    "owesYou": "Owes you",
+    "youOwe": "You owe",
+    "deposit": "Deposit",
+    "advance": "Advance",
+    "overdue": "Overdue",
+    "overdueInvoices": "{{n}} invoices",
+    "overdueBills": "{{n}} bills",
+    "salesYear": "Sales this year",
+    "billsYear": "Bills this year",
+    "byBranch": "By branch:",
+    "opening": "Opening balance",
+    "overLimit": "Over credit limit",
+    "tabTransactions": "Transactions",
+    "tabStatement": "Statement",
+    "debit": "Debit",
+    "credit": "Credit",
+    "runningBalance": "Balance",
+    "statementEmpty": "Nothing in these dates.",
+    "statementTypes": {
+      "OPENING": "Opening balance",
+      "CLOSING": "Closing balance",
+      "INVOICE": "Invoice",
+      "BILL": "Bill",
+      "PAYMENT": "Payment",
+      "CREDIT_NOTE": "Credit note",
+      "SUPPLIER_CREDIT": "Supplier credit",
+      "REFUND": "Refund"
+    }
+  },
+  "stockCard": {
+    "allProducts": "All products (search to pick one)"
+  },
+  "batches": {
+    "searchPh": "Product or batch",
+    "expired": "Expired",
+    "within30": "Expiring in 30 days",
+    "within60": "Expiring in 60 days",
+    "within90": "Expiring in 90 days",
+    "all": "All with an expiry date",
+    "daysLeft": "Days left",
+    "inDays": "{{n}} days left",
+    "empty": "No batches in this list."
+  },
+  "notifications": {
+    "APPROVAL_ADJUSTMENT": "Adjustment {{number}} waits for your approval ({{by}})",
+    "APPROVAL_STOCK_COUNT": "Stock count {{number}} waits for your approval ({{by}})",
+    "APPROVAL_SALES_RETURN": "Customer return {{number}} waits for your approval ({{by}})",
+    "APPROVAL_PURCHASE_RETURN": "Supplier return {{number}} waits for your approval ({{by}})",
+    "TRANSFER_SENT": "Transfer {{number}} from {{from}} is on its way to your branch",
+    "SHIFT_SHORT": "{{cashier}} closed a cash shift short: ${{usd}} · ៛{{khr}}",
+    "SALE_VOIDED": "Sale {{number}} (${{amount}}) was voided by {{by}}: {{reason}}",
+    "STOCK_OUT": "{{product}} is out of stock in {{warehouse}}"
   }
 }

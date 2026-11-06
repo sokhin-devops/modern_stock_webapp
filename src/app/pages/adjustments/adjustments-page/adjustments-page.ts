@@ -13,6 +13,8 @@ import { BusinessService } from '../../../core/business/business.service';
 import { NotifyService } from '../../../core/notify.service';
 import { LazyList } from '../../../shared/lazy-list';
 import { AdjustmentForm } from '../adjustment-form/adjustment-form';
+import { AttachButton } from '../../../shared/attach-button/attach-button';
+import { exportList } from '../../../shared/list-export';
 
 interface Adjustment {
   id: number;
@@ -34,7 +36,7 @@ interface Adjustment {
  */
 @Component({
   selector: 'ms-adjustments-page',
-  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Dialog, ButtonDirective, ButtonIcon, ButtonLabel, AdjustmentForm],
+  imports: [AttachButton, FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Select, Dialog, ButtonDirective, ButtonIcon, ButtonLabel, AdjustmentForm],
   templateUrl: './adjustments-page.html',
   styleUrl: './adjustments-page.scss',
 })
@@ -58,6 +60,33 @@ export class AdjustmentsPage {
     (e) => this.notify.error(e),
     'createdAt,desc',
   );
+
+  protected readonly exporting = signal(false);
+
+  /** Every row of the list (its filters too) as an Excel file (PLAIN.md 12.2: Export on the right of every list). */
+  protected async exportAll(): Promise<void> {
+    const t = (key: string) => this.translate.instant(key);
+    this.exporting.set(true);
+    try {
+      await exportList<Adjustment>(
+        (page, size) => this.api.page<Adjustment>('/adjustments', { page, size }, { status: this.status() }),
+        [
+          { header: t('common.number'), value: (a) => a.number },
+          { header: t('common.date'), value: (a) => (a.postedAt ?? a.createdAt).slice(0, 10) },
+          { header: t('common.warehouse'), value: (a) => a.warehouseName },
+          { header: t('adjust.reason'), value: (a) => t('adjust.reasons.' + a.reason) },
+          { header: t('stock.value'), value: (a) => a.totalValue, format: '#,##0.00' },
+          { header: t('common.status'), value: (a) => t('docs.status.' + a.status) },
+          { header: t('common.note'), value: (a) => a.note },
+        ],
+        'adjustments',
+      );
+    } catch (e) {
+      this.notify.error(e);
+    } finally {
+      this.exporting.set(false);
+    }
+  }
   protected readonly formOpen = signal(false);
   protected readonly viewing = signal<Adjustment | null>(null);
   protected readonly busy = signal(false);

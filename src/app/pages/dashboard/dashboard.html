@@ -58,7 +58,7 @@
           <div class="kpi-value" [class.warn]="s.lowStockItems > 0">{{ s.lowStockItems }}</div>
           <div class="kpi-sub">{{ (s.lowStockItems === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
         </a>
-        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'expiry' }">
+        <a class="kpi link" routerLink="/inventory/batches" [queryParams]="{ window: s.expiredBatches && !s.expiringSoon ? 'expired' : '' + s.expiringDays }">
           <div class="kpi-label"><i class="icon pi pi-calendar-times"></i>{{ 'dashboard.expiring' | translate: { n: s.expiringDays } }}</div>
           <div class="kpi-value">{{ s.expiringSoon }}</div>
           <div class="kpi-sub">
@@ -230,6 +230,13 @@
               <span class="spacer"></span>
               <span class="tag tag-primary">{{ plan.effectivePlanCode }}</span>
             </div>
+            <!-- The trial's end date and days left are always on the plan card (PLAIN.md 12.3) -->
+            @if (plan.status === 'TRIALING' && plan.trialEndsAt) {
+              <p class="trial-line" [class.danger-text]="(trialLeft() ?? 0) <= 3">
+                <i class="pi pi-calendar" aria-hidden="true"></i>
+                {{ 'dashboard.trialUntil' | translate: { date: (plan.trialEndsAt | date: 'dd/MM/yyyy'), days: trialLeft() ?? 0 } }}
+              </p>
+            }
             @for (u of plan.usage; track u.key) {
               @if (u.key === 'branches' || u.key === 'members' || u.key === 'products') {
                 <div class="usage">

@@ -1,0 +1,73 @@
+<div class="toolbar">
+  <p-iconfield class="search">
+    <p-inputicon class="pi pi-search" />
+    <input pInputText type="search" [placeholder]="(partyId() ? 'tx.searchNumberPh' : 'tx.searchPh') | translate"
+           [attr.aria-label]="'common.search' | translate" (input)="onSearch($any($event.target).value)" />
+  </p-iconfield>
+  @if (!partyId()) {
+    <p-autocomplete [ngModel]="party()" (ngModelChange)="setParty($event)" [suggestions]="parties()" (completeMethod)="findParty($event)"
+                    optionLabel="name" [showClear]="true" (onClear)="setParty(null)" appendTo="body" class="party-filter"
+                    [placeholder]="(side() === 'CUSTOMER' ? 'tx.allCustomers' : 'tx.allSuppliers') | translate"
+                    [ariaLabel]="(side() === 'CUSTOMER' ? 'sales.customer' : 'purchase.supplier') | translate" />
+  }
+  @if (!lockedView()) {
+  <p-select [options]="viewOptions()" optionLabel="label" optionValue="value" [ngModel]="view()" (ngModelChange)="setView($event)"
+            [showClear]="true" [placeholder]="'tx.allTypes' | translate" [ariaLabel]="'tx.type' | translate" class="filter" appendTo="body">
+    <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
+    <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+  </p-select>
+  }
+  <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+                appendTo="body" [placeholder]="'common.from' | translate" [ariaLabel]="'common.from' | translate" class="date-filter" />
+  <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+                appendTo="body" [placeholder]="'common.to' | translate" [ariaLabel]="'common.to' | translate" class="date-filter" />
+  <span class="spacer"></span>
+  <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+    <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+  </button>
+</div>
+
+<p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+         [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
+         dataKey="number" [rowHover]="true">
+  <ng-template #header>
+    <tr>
+      <th>{{ 'common.date' | translate }}</th>
+      @if (!lockedView()) {
+        <th>{{ 'tx.type' | translate }}</th>
+      }
+      <th>{{ 'common.number' | translate }}</th>
+      @if (!partyId()) {
+        <th>{{ (side() === 'CUSTOMER' ? 'sales.customer' : 'purchase.supplier') | translate }}</th>
+      }
+      <th>{{ 'tx.due' | translate }}</th>
+      <th class="num">{{ 'common.total' | translate }}</th>
+      <th class="num">{{ 'tx.balance' | translate }}</th>
+      <th>{{ 'common.status' | translate }}</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-r>
+    <tr class="clickable" tabindex="0" [class.voided]="r.status === 'VOID'" (click)="openRow(r)" (keydown.enter)="openRow(r)">
+      <td>{{ r.date | date: 'dd/MM/yyyy' }}</td>
+      @if (!lockedView()) {
+        <td>{{ 'tx.types.' + r.type | translate }}</td>
+      }
+      <td class="strong doc-no">{{ r.number }}</td>
+      @if (!partyId()) {
+        <td>{{ r.partyName ?? ('sales.walkIn' | translate) }}</td>
+      }
+      <td [class.danger-text]="r.overdue">{{ r.dueDate ? (r.dueDate | date: 'dd/MM/yyyy') : '—' }}</td>
+      <td class="num">{{ r.total ? (r.total | currency: 'USD') : '—' }}</td>
+      <td class="num strong">{{ r.balance ? (r.balance | currency: 'USD') : '—' }}</td>
+      <td>
+        <span class="tag" [class]="'status-' + r.status">{{ statusKey(r.type, r.status) | translate }}</span>
+        @if (r.overdue) {
+          <span class="tag tag-danger">{{ 'tx.overdue' | translate }}</span>
+        }
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr><td [attr.colspan]="(partyId() ? 7 : 8) - (lockedView() ? 1 : 0)" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr>
+  </ng-template>
+</p-table>

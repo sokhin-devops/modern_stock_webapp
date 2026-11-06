@@ -180,7 +180,8 @@ export class OrderForm {
     this.preview.set(null);
     this.payNow.set(false);
     this.method.set('CASH');
-    this.customer.set(doc ? { id: doc.customerId, name: doc.customerName, phone: null } : null);
+    const preset = target?.customer;
+    this.customer.set(doc ? { id: doc.customerId, name: doc.customerName, phone: null } : preset ? { ...preset, phone: null } : null);
     this.discount.set(doc?.orderDiscount || null);
     this.note.set(doc?.note ?? '');
     if (target?.kind === 'quotation') {

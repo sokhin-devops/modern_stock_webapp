@@ -1,5 +1,4 @@
-<p-dialog [visible]="!!credit()" (visibleChange)="!$event && credit.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
-          [header]="credit()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+<ng-template #docBody>
   @if (credit(); as c) {
     <div class="doc-facts">
       <div><small>{{ 'credits.' + kind() + '.party' | translate }}</small><b>{{ party()?.name ?? ('sales.walkIn' | translate) }}</b></div>
@@ -54,18 +53,37 @@
       </div>
     }
   }
-  <ng-template #footer>
+</ng-template>
+<ng-template #docActions>
     @if (credit(); as c) {
-      @if (c.status === 'OPEN' && c.left > 0 && canManage()) {
-        <div class="dialog-actions">
-          <span class="spacer"></span>
+      <div class="dialog-actions">
+        @if (voidable()) {
+          <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(c)" [disabled]="busy()">
+            <span pButtonLabel>{{ 'voids.button' | translate }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+        <ms-attach-button [type]="kind() === 'customer' ? 'credit-notes' : 'supplier-credits'" [docId]="c.id" [number]="c.number" />
+        @if (c.status === 'OPEN' && c.left > 0 && canManage()) {
           <button pButton type="button" (click)="submit()" [loading]="busy()"
                   [disabled]="busy() || !amount() || amount()! > most() || (action() === 'apply' && !docId())">
             <i class="pi" [class.pi-file]="action() === 'apply'" [class.pi-wallet]="action() === 'refund'" pButtonIcon></i>
             <span pButtonLabel>{{ 'credits.' + kind() + '.' + (action() === 'apply' ? 'useOn' : 'refund') | translate }}</span>
           </button>
-        </div>
-      }
+        }
+      </div>
     }
-  </ng-template>
+</ng-template>
+<p-dialog [visible]="!inline() && !!credit()" (visibleChange)="!$event && credit.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+          [header]="credit()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
+  <ng-container [ngTemplateOutlet]="docBody" />
+  <ng-template #footer><ng-container [ngTemplateOutlet]="docActions" /></ng-template>
 </p-dialog>
+
+<!-- On a document's own page (PLAIN.md 12.2 View): the same content and actions, in the page -->
+@if (inline() && !!credit()) {
+  <div class="doc-inline">
+    <ng-container [ngTemplateOutlet]="docBody" />
+    <div class="doc-inline-actions"><ng-container [ngTemplateOutlet]="docActions" /></div>
+  </div>
+}

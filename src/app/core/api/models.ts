@@ -824,6 +824,15 @@ export interface CashShift {
   differenceUsd: number | null;
   differenceKhr: number | null;
   receipts: number;
+  cashReceivedUsd?: number;
+  cashReceivedKhr?: number;
+  changeGivenUsd?: number;
+  changeGivenKhr?: number;
+  cashAddedUsd?: number;
+  cashAddedKhr?: number;
+  cashTakenUsd?: number;
+  cashTakenKhr?: number;
+  voidedReceipts?: number;
 }
 
 export interface Customer {
@@ -840,6 +849,8 @@ export interface Customer {
   active: boolean;
   /** What the customer owes now, USD (negative = deposit). */
   balance: number;
+  /** The part of it past its due date. */
+  overdue?: number;
 }
 
 export interface Supplier {
@@ -856,6 +867,8 @@ export interface Supplier {
   active: boolean;
   /** What we owe the supplier now, USD (negative = advance paid). */
   balance: number;
+  /** The part of it past its due date. */
+  overdue?: number;
 }
 
 /** The open business's profile (Settings: Business profile). */

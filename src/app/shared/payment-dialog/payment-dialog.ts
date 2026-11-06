@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
@@ -55,6 +55,8 @@ interface Chosen {
 export class PaymentDialog {
   readonly kind = input.required<'customer' | 'supplier'>();
   readonly visible = model(false);
+  /** Opened from a customer or supplier page: that party, already picked. */
+  readonly preset = input<{ id: number; name: string; balance?: number } | null>(null);
   readonly saved = output<void>();
 
   private readonly api = inject(ApiService);
@@ -114,6 +116,10 @@ export class PaymentDialog {
         this.openDocs.set([]);
         this.mode.set('oldest');
         this.chosen.set([]);
+        const preset = untracked(() => this.preset());
+        if (preset) {
+          untracked(() => this.pick({ id: preset.id, name: preset.name, balance: preset.balance ?? 0 }));
+        }
         if (this.isCustomer()) {
           this.api.get<BusinessSettings>('/business/settings').subscribe({
             next: (s) => this.enabled.set({ khqr: s.khqrEnabled, bank: s.bankEnabled }),

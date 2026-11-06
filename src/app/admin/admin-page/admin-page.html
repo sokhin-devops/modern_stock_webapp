@@ -161,7 +161,6 @@
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="freeFor.set(null)"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
     <button pButton type="button" (click)="giveFree()" [loading]="busy() === freeFor()?.id" [disabled]="busy() !== null">
       <span pButtonLabel>{{ 'admin.free.give' | translate }}</span>
     </button>

@@ -18,6 +18,11 @@
                   (ngModelChange)="setCategory($event)" [showClear]="true" [placeholder]="'products.allCategories' | translate"
                   [ariaLabel]="'products.category' | translate" class="category-filter" appendTo="body" />
       }
+      @if (!onlyLow() && !byBranch() && warehouseChoices().length > 1) {
+        <p-select [options]="warehouseChoices()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+                  (ngModelChange)="setWarehouse($event)" [showClear]="true" [placeholder]="'stock.allWarehouses' | translate"
+                  [ariaLabel]="'common.warehouse' | translate" class="category-filter" appendTo="body" />
+      }
       <p-togglebutton [ngModel]="onlyLow()" (ngModelChange)="setOnlyLow($event)"
                       [onLabel]="(byBranch() ? 'stock.lowSomewhere' : 'products.low') | translate"
                       [offLabel]="(byBranch() ? 'stock.lowSomewhere' : 'products.low') | translate"
@@ -27,6 +32,12 @@
                         class="view-switch">
           <ng-template #item let-option>{{ option.label | translate }}</ng-template>
         </p-selectbutton>
+      }
+      <span class="spacer"></span>
+      @if (!byBranch() && !onlyLow()) {
+        <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !total()">
+          <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+        </button>
       }
     </div>
 

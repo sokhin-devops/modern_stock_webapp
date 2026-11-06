@@ -1,0 +1,45 @@
+// Fills the tab or page it sits in: the toolbar stays, only the table rows scroll.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.toolbar {
+  flex: none;
+}
+
+p-table {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.search {
+  width: min(280px, 100%);
+
+  input {
+    width: 100%;
+  }
+}
+
+.filter {
+  min-width: 180px;
+}
+
+.date-filter {
+  width: 160px;
+}
+
+// A voided document stays listed, dimmed.
+.voided td {
+  color: var(--muted);
+}
+
+.tag + .tag {
+  margin-left: 4px;
+}
+
+.party-filter {
+  width: 220px;
+}

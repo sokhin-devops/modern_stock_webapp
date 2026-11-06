@@ -160,3 +160,11 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.trial-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}

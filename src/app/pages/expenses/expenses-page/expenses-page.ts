@@ -22,6 +22,7 @@ import { toIsoDate } from '../../../shared/dates';
 import { DocPhotoDialog } from '../../../shared/doc-photo-dialog/doc-photo-dialog';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { LazyList } from '../../../shared/lazy-list';
+import { exportList } from '../../../shared/list-export';
 
 export interface ExpenseCategory {
   id: number;
@@ -80,6 +81,35 @@ export class ExpensesPage {
       this.api.page<Expense>('/expenses', q, { from: toIsoDate(this.from()), to: toIsoDate(this.to()), categoryId: this.categoryId() }),
     (e) => this.notify.error(e),
   );
+
+  protected readonly exporting = signal(false);
+
+  /** Every row of the list (its filters too) as an Excel file (PLAIN.md 12.2: Export on the right of every list). */
+  protected async exportAll(): Promise<void> {
+    const t = (key: string) => this.translate.instant(key);
+    this.exporting.set(true);
+    try {
+      await exportList<Expense>(
+        (page, size) => this.api.page<Expense>('/expenses', { page, size }, { from: toIsoDate(this.from()), to: toIsoDate(this.to()), categoryId: this.categoryId() }),
+        [
+          { header: t('common.number'), value: (x) => x.number },
+          { header: t('common.date'), value: (x) => x.expenseDate },
+          { header: t('expenses.category'), value: (x) => x.categoryName },
+          { header: t('common.method'), value: (x) => t('docs.methods.' + x.method) },
+          { header: t('common.amount'), value: (x) => x.amount, format: '#,##0.##' },
+          { header: t('common.currency'), value: (x) => x.currency },
+          { header: 'USD', value: (x) => x.amountUsd, format: '#,##0.00' },
+          { header: t('common.status'), value: (x) => t('docs.status.' + x.status) },
+          { header: t('common.note'), value: (x) => x.note },
+        ],
+        'expenses',
+      );
+    } catch (e) {
+      this.notify.error(e);
+    } finally {
+      this.exporting.set(false);
+    }
+  }
   protected readonly pageTotal = computed(() =>
     this.list.rows().filter((e) => e.status === 'POSTED').reduce((s, e) => s + e.amountUsd, 0),
   );

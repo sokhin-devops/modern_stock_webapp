@@ -1,0 +1,163 @@
+<div class="page">
+  <div class="page-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a [routerLink]="isCustomer ? '/customers' : '/suppliers'">{{ (isCustomer ? 'nav.customers' : 'nav.suppliers') | translate }}</a>
+      <span class="current">{{ partner()?.name ?? '…' }}</span>
+      <button type="button" class="chevron" (click)="toggleSummary()" [attr.aria-expanded]="showSummary()"
+              [attr.aria-label]="(showSummary() ? 'party.hideSummary' : 'party.showSummary') | translate">
+        <i class="pi" [class.pi-chevron-up]="showSummary()" [class.pi-chevron-down]="!showSummary()"></i>
+      </button>
+    </nav>
+    <div class="page-actions">
+      @if (canEdit() && partner()) {
+        <button pButton type="button" [outlined]="true" (click)="editOpen.set(true)">
+          <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
+        </button>
+      }
+      @if (newItems().length) {
+        <button pButton type="button" (click)="newMenu.toggle($event)" aria-haspopup="true">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'tx.newButton' | translate }}</span>
+        </button>
+        <p-menu #newMenu [model]="newItems()" [popup]="true" appendTo="body" />
+      }
+    </div>
+  </div>
+
+  <div class="page-body list-page">
+    @if (showSummary() && partner(); as p) {
+      <section class="summary" [attr.aria-label]="'party.summary' | translate">
+        <div class="facts">
+          @if (p.phone) {
+            <div><small>{{ 'partners.phone' | translate }}</small><b class="num">{{ p.phone }}</b></div>
+          }
+          @if (supplier()?.contactPerson) {
+            <div><small>{{ 'partners.contact' | translate }}</small><b>{{ supplier()!.contactPerson }}</b></div>
+          }
+          @if (supplier()?.telegram) {
+            <div><small>Telegram</small><b>{{ supplier()!.telegram }}</b></div>
+          }
+          @if (customer(); as c) {
+            <div><small>{{ 'partners.type' | translate }}</small><b>{{ 'partners.' + c.type | translate }}</b></div>
+            <div><small>{{ 'partners.creditLimit' | translate }}</small><b>{{ c.creditLimit ? (c.creditLimit | currency: 'USD') : ('partners.cash' | translate) }}</b></div>
+          }
+          <div><small>{{ 'partners.terms' | translate }}</small><b>{{ p.paymentTermsDays ? ('partners.days' | translate: { n: p.paymentTermsDays }) : '—' }}</b></div>
+          @if (p.vatTin) {
+            <div><small>{{ 'party.vatTin' | translate }}</small><b>{{ p.vatTin }}</b></div>
+          }
+          @if (p.address) {
+            <div class="wide"><small>{{ 'party.address' | translate }}</small><b>{{ p.address }}</b></div>
+          }
+          @if (!p.active) {
+            <div><small>{{ 'common.status' | translate }}</small><b><span class="tag">{{ 'partners.inactive' | translate }}</span></b></div>
+          }
+        </div>
+        @if (summary(); as s) {
+          <div class="amounts">
+            <div class="amount">
+              <small>{{ (isCustomer ? (s.balance < 0 ? 'party.deposit' : 'party.owesYou') : (s.balance < 0 ? 'party.advance' : 'party.youOwe')) | translate }}</small>
+              <b [class.danger-text]="isCustomer && s.balance > 0">{{ s.balance ? ((s.balance < 0 ? -s.balance : s.balance) | currency: 'USD') : '—' }}</b>
+            </div>
+            <div class="amount">
+              <small>{{ 'party.overdue' | translate }}</small>
+              <b [class.danger-text]="s.overdue > 0">{{ s.overdue ? (s.overdue | currency: 'USD') : '—' }}</b>
+              @if (s.overdueCount) {
+                <span class="muted sub">{{ (isCustomer ? 'party.overdueInvoices' : 'party.overdueBills') | translate: { n: s.overdueCount } }}</span>
+              }
+            </div>
+            <div class="amount">
+              <small>{{ (isCustomer ? 'party.salesYear' : 'party.billsYear') | translate }}</small>
+              <b>{{ s.thisYear ? (s.thisYear | currency: 'USD') : '—' }}</b>
+            </div>
+          </div>
+          @if (s.branches.length > 1 || (s.branches.length && s.openingBalance)) {
+            <div class="by-branch">
+              <small class="muted">{{ 'party.byBranch' | translate }}</small>
+              @for (b of s.branches; track b.branchId) {
+                <span class="chip-line">{{ b.branchName }} <b>{{ b.balance | currency: 'USD' }}</b></span>
+              }
+              @if (s.openingBalance) {
+                <span class="chip-line">{{ 'party.opening' | translate }} <b>{{ s.openingBalance | currency: 'USD' }}</b></span>
+              }
+            </div>
+          }
+        }
+      </section>
+    }
+
+    <p-tabs [value]="tab()" (valueChange)="setTab($any($event))" class="ms-tabs">
+      <p-tablist>
+        <p-tab value="transactions">{{ 'party.tabTransactions' | translate }}</p-tab>
+        <p-tab value="statement">{{ 'party.tabStatement' | translate }}</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="transactions">
+          <ms-transactions-table [side]="isCustomer ? 'CUSTOMER' : 'SUPPLIER'" [partyId]="partyId()"
+                                 [fileName]="'transactions-' + (partner()?.name ?? partyId())" (open)="openDoc($event)" />
+        </p-tabpanel>
+        <p-tabpanel value="statement">
+          <div class="toolbar">
+            <p-datepicker [ngModel]="stFrom()" (ngModelChange)="setStFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+                          [ariaLabel]="'common.from' | translate" class="date-filter" />
+            <p-datepicker [ngModel]="stTo()" (ngModelChange)="setStTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+                          [ariaLabel]="'common.to' | translate" class="date-filter" />
+            <span class="spacer"></span>
+            <button pButton type="button" [outlined]="true" (click)="exportStatement()" [disabled]="!statement()">
+              <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
+            </button>
+          </div>
+          <p-table class="ms-table" [value]="statement()?.lines ?? []" [loading]="stLoading()" [scrollable]="true" scrollHeight="flex">
+            <ng-template #header>
+              <tr>
+                <th>{{ 'common.date' | translate }}</th>
+                <th>{{ 'tx.type' | translate }}</th>
+                <th>{{ 'common.number' | translate }}</th>
+                <th class="num">{{ 'party.debit' | translate }}</th>
+                <th class="num">{{ 'party.credit' | translate }}</th>
+                <th class="num">{{ 'party.runningBalance' | translate }}</th>
+              </tr>
+              @if (statement(); as s) {
+                <tr class="opening">
+                  <td>{{ day(s.from) | date: 'dd/MM/yyyy' }}</td>
+                  <td colspan="4">{{ 'party.statementTypes.OPENING' | translate }}</td>
+                  <td class="num strong">{{ s.opening | currency: 'USD' }}</td>
+                </tr>
+              }
+            </ng-template>
+            <ng-template #body let-l>
+              <tr>
+                <td>{{ day(l.date) | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ 'party.statementTypes.' + l.type | translate }}</td>
+                <td class="doc-no">{{ l.number }}</td>
+                <td class="num">{{ l.debit ? (l.debit | currency: 'USD') : '—' }}</td>
+                <td class="num">{{ l.credit ? (l.credit | currency: 'USD') : '—' }}</td>
+                <td class="num strong">{{ l.balance | currency: 'USD' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr><td colspan="6" class="empty-cell">{{ 'party.statementEmpty' | translate }}</td></tr>
+            </ng-template>
+            <ng-template #footer>
+              @if (statement(); as s) {
+                <tr>
+                  <td colspan="3">{{ 'party.statementTypes.CLOSING' | translate }}</td>
+                  <td class="num">{{ s.debits | currency: 'USD' }}</td>
+                  <td class="num">{{ s.credits | currency: 'USD' }}</td>
+                  <td class="num strong">{{ s.closing | currency: 'USD' }}</td>
+                </tr>
+              }
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+
+<ms-partner-form [kind]="kind" [partner]="partner()" [(visible)]="editOpen" (saved)="changed()" />
+<ms-payment-dialog [kind]="kind" [preset]="preset()" [(visible)]="payOpen" (saved)="changed()" />
+<ms-credit-dialog [kind]="kind" [preset]="preset()" [(visible)]="creditOpen" (saved)="changed()" />
+@if (isCustomer) {
+  <ms-order-form [target]="orderTarget()" [(visible)]="orderOpen" (saved)="changed()" />
+} @else {
+  <ms-purchase-form [mode]="purchaseMode()" [presetSupplier]="presetSupplier()" [(visible)]="purchaseOpen" (saved)="changed()" />
+}
