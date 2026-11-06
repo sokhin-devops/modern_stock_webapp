@@ -23,7 +23,7 @@
     "@zxing/browser": "0.1.5",
     "@zxing/library": "0.21.3",
     "jsbarcode": "3.12.3",
-    "primeicons": "^7.0.0",
+    "primeicons": "^8.0.2",
     "primeng": "19.1.4",
     "qrcode": "1.5.4",
     "read-excel-file": "9.3.14",
