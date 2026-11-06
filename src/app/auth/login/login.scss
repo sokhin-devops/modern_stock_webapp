@@ -5,3 +5,10 @@
 .submit {
   min-width: 140px;
 }
+
+.resend {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
