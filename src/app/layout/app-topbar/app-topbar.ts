@@ -112,6 +112,12 @@ export class AppTopbar {
         p[key] = p[key + 'Km'];
       }
     }
+    // A short cash shift: only the currency that is short ("$9.00", "៛4,000" or both)
+    if (n.type === 'SHIFT_SHORT') {
+      const usd = Number(p['usd'] ?? 0);
+      const khr = Number(p['khr'] ?? 0);
+      p['amounts'] = [usd > 0 ? '$' + usd.toFixed(2) : '', khr > 0 ? '៛' + Math.round(khr).toLocaleString('en-US') : ''].filter(Boolean).join(' · ');
+    }
     return p;
   }
 

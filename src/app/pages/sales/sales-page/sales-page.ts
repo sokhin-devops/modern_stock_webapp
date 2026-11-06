@@ -189,6 +189,28 @@ export class SalesPage {
   private readonly deliveryTable = viewChild<TransactionsTable>('deliveryTable');
   protected readonly viewingDelivery = signal<Delivery | null>(null);
 
+  /** The open invoice's less frequent actions: a debit note, taking goods back, the delivery note. */
+  protected readonly invoiceMore = computed<MenuItem[]>(() => {
+    const i = this.viewingInvoice();
+    if (!i) {
+      return [];
+    }
+    const t = (key: string) => this.translate.instant(key);
+    const goods = i.type !== 'DEBIT_NOTE' && i.status !== 'VOID';
+    const items: (MenuItem & { ok: boolean })[] = [
+      {
+        label: t('debit.button'), icon: 'pi pi-plus', ok: goods && this.canVoid(),
+        command: () => this.newDebit({ customerId: i.customerId, customerName: i.customerName, invoiceId: i.id }),
+      },
+      {
+        label: t(this.canVoid() ? 'returns.button' : 'returns.askButton'), icon: 'pi pi-replay', ok: goods && this.canStartReturn(),
+        command: () => this.startReturn(null, i.id),
+      },
+      { label: t('print.printDelivery'), icon: 'pi pi-truck', ok: !!i.deliveryId, command: () => this.printDelivery(i) },
+    ];
+    return items.filter((x) => x.ok).map(({ ok: _ok, ...x }) => x);
+  });
+
   /** "+ New": every document this member can make, with the type picked here (PLAIN.md 12.2). */
   protected readonly newItems = computed<MenuItem[]>(() => {
     const t = (key: string) => this.translate.instant(key);
@@ -258,6 +280,15 @@ export class SalesPage {
         }
       });
     });
+  }
+
+  /** A draft quotation opens its edit form (PLAIN.md 12.2); the others their page. */
+  protected openQuotationRow(q: Quotation): void {
+    if (q.status === 'DRAFT' && this.canManageOrders()) {
+      this.editDoc({ kind: 'quotation', doc: q });
+    } else {
+      this.go('quotations', q.id);
+    }
   }
 
   /** Opens a document on its own page. */
@@ -341,7 +372,9 @@ export class SalesPage {
   }
 
   protected editDoc(target: OrderFormTarget): void {
-    this.orderView.set(null);
+    if (!this.pageMode()) {
+      this.orderView.set(null);
+    }
     this.formTarget.set(target);
     this.formOpen.set(true);
   }

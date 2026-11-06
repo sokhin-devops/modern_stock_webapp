@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, model, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, model, output, signal, input, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
@@ -15,11 +15,25 @@ import { NotifyService } from '../../../core/notify.service';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { DocLine, LinesEditor, emptyLine } from '../../../shared/lines-editor/lines-editor';
 import { filledLines, warehouseOptions } from '../../../shared/options';
+import { forkJoin } from 'rxjs';
+import { CatalogService } from '../../../core/catalog/catalog.service';
 
 /**
  * A new transfer (prototype transfer-form.html, PLAIN.md 11.3): between two warehouses of a branch (moved at once),
  * or to another branch (sent, in transit, then received there). Save as a draft, or move or send straight away.
  */
+/** A draft transfer as the API sends it, to change it. */
+export interface DraftTransfer {
+  id: number;
+  kind: 'MOVE' | 'BRANCH';
+  fromWarehouseId: number;
+  toWarehouseId: number | null;
+  toBranchId: number | null;
+  carrierNote: string | null;
+  note: string | null;
+  lines: { productId: number; unitId: number | null; qty: number }[];
+}
+
 @Component({
   selector: 'ms-transfer-form',
   imports: [FormsModule, TranslatePipe, Dialog, InputText, Select, SelectButton, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
@@ -28,12 +42,15 @@ import { filledLines, warehouseOptions } from '../../../shared/options';
 })
 export class TransferForm {
   readonly visible = model(false);
+  /** A draft transfer to change (PLAIN.md 12.2: draft rows open their edit form). */
+  readonly draft = input<DraftTransfer | null>(null);
   readonly saved = output<void>();
 
   private readonly api = inject(ApiService);
   private readonly business = inject(BusinessService);
   private readonly lang = inject(LangService);
   private readonly notify = inject(NotifyService);
+  private readonly catalog = inject(CatalogService);
 
   protected readonly kinds = [
     { value: 'MOVE', label: 'transfer.MOVE' },
@@ -66,14 +83,41 @@ export class TransferForm {
   constructor() {
     effect(() => {
       if (this.visible()) {
-        this.kind.set('MOVE');
-        this.fromId.set(this.fromOptions()[0]?.value ?? null);
-        this.toWarehouseId.set(null);
-        this.toBranchId.set(null);
-        this.carrier.set('');
-        this.note.set('');
-        this.lines.set([emptyLine()]);
+        const d = untracked(() => this.draft());
+        this.kind.set(d?.kind ?? 'MOVE');
+        this.fromId.set(d?.fromWarehouseId ?? untracked(() => this.fromOptions()[0]?.value ?? null));
+        this.toWarehouseId.set(d?.kind === 'MOVE' ? d.toWarehouseId : null);
+        this.toBranchId.set(d?.kind === 'BRANCH' ? d.toBranchId : null);
+        this.carrier.set(d?.carrierNote ?? '');
+        this.note.set(d?.note ?? '');
+        if (d) {
+          untracked(() => this.loadLines(d.lines.map((l) => ({ productId: l.productId, unitId: l.unitId, qty: l.qty }))));
+        } else {
+          this.lines.set([emptyLine()]);
+        }
       }
+    });
+  }
+
+  /** The editor works with whole products: fetch each one once, then rebuild the draft's lines. */
+  private loadLines(src: { productId: number; unitId: number | null; qty: number; unitCost?: number | null }[]): void {
+    this.lines.set([emptyLine()]);
+    if (!src.length) {
+      return;
+    }
+    const ids = [...new Set(src.map((l) => l.productId))];
+    forkJoin(ids.map((id) => this.catalog.getProduct(id))).subscribe({
+      next: (products) => {
+        const byId = new Map(products.map((p) => [p.id, p]));
+        this.lines.set([
+          ...src.map((l) => {
+            const p = byId.get(l.productId) ?? null;
+            return { ...emptyLine(), product: p, unitId: p && l.unitId === p.baseUnitId ? null : l.unitId, qty: l.qty, unitCost: l.unitCost ?? null };
+          }),
+          emptyLine(),
+        ]);
+      },
+      error: (e) => this.notify.error(e),
     });
   }
 
@@ -94,7 +138,8 @@ export class TransferForm {
       lines: lines.map((l) => ({ productId: l.product!.id, unitId: l.unitId, qty: l.qty })),
     };
     this.busy.set(true);
-    const create$ = this.api.post<{ id: number }>('/transfers', body);
+    const d = this.draft();
+    const create$ = d ? this.api.put<{ id: number }>(`/transfers/${d.id}`, body) : this.api.post<{ id: number }>('/transfers', body);
     (go ? create$.pipe(switchMap((t) => this.api.post(`/transfers/${t.id}/${move ? 'move' : 'send'}`))) : create$).subscribe({
       next: () => {
         this.busy.set(false);

@@ -1,4 +1,4 @@
-<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog" [header]="'transfer.new' | translate" [modal]="true" [draggable]="false" [resizable]="false"
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog" [header]="(draft() ? 'transfer.edit' : 'transfer.new') | translate" [modal]="true" [draggable]="false" [resizable]="false"
           [closeAriaLabel]="'common.close' | translate">
   <div class="ms-form">
     <p-selectbutton [options]="kinds" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" [allowEmpty]="false">

@@ -14,10 +14,24 @@ import { PaymentMethod, Supplier } from '../../../core/api/models';
 import { BusinessService } from '../../../core/business/business.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
-import { toIsoDate } from '../../../shared/dates';
+import { fromIsoDate, toIsoDate } from '../../../shared/dates';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { DocLine, LinesEditor, emptyLine } from '../../../shared/lines-editor/lines-editor';
 import { filledLines, receivingWarehouse, warehouseOptions } from '../../../shared/options';
+import { forkJoin } from 'rxjs';
+import { CatalogService } from '../../../core/catalog/catalog.service';
+
+/** A draft purchase order as the API sends it, to change it. */
+export interface DraftPurchaseOrder {
+  id: number;
+  supplierId: number;
+  supplierName: string;
+  receiveWarehouseId: number;
+  orderDate: string;
+  expectedDate: string | null;
+  note: string | null;
+  lines: { productId: number; unitId: number | null; qtyOrdered: number; unitCost: number }[];
+}
 
 /**
  * Buy from a supplier (prototype po-form.html, PLAIN.md 11.8). "quick": bought at the market, so the purchase is saved,
@@ -36,12 +50,15 @@ export class PurchaseForm {
   readonly visible = model(false);
   /** Opened from a supplier page: that supplier, already picked. */
   readonly presetSupplier = input<Supplier | null>(null);
+  /** A draft purchase order to change (PLAIN.md 12.2: draft rows open their edit form); the form is in "order" mode. */
+  readonly order = input<DraftPurchaseOrder | null>(null);
   readonly saved = output<void>();
 
   private readonly api = inject(ApiService);
   private readonly business = inject(BusinessService);
   private readonly lang = inject(LangService);
   private readonly notify = inject(NotifyService);
+  private readonly catalog = inject(CatalogService);
 
   protected readonly supplier = signal<Supplier | null>(null);
   protected readonly suppliers = signal<Supplier[]>([]);
@@ -65,15 +82,42 @@ export class PurchaseForm {
   constructor() {
     effect(() => {
       if (this.visible()) {
-        this.supplier.set(untracked(() => this.presetSupplier()));
-        this.warehouseId.set(receivingWarehouse(this.business.branches(), this.business.branchId()));
+        const order = untracked(() => this.order());
+        this.supplier.set(order ? ({ id: order.supplierId, name: order.supplierName } as Supplier) : untracked(() => this.presetSupplier()));
+        this.warehouseId.set(order?.receiveWarehouseId ?? receivingWarehouse(this.business.branches(), this.business.branchId()));
         this.invoiceNo.set('');
-        this.expected.set(null);
-        this.note.set('');
-        this.lines.set([...(untracked(() => this.start()) ?? []), emptyLine()]);
+        this.expected.set(order ? fromIsoDate(order.expectedDate) : null);
+        this.note.set(order?.note ?? '');
+        if (order) {
+          untracked(() => this.loadLines(order.lines.map((l) => ({ productId: l.productId, unitId: l.unitId, qty: l.qtyOrdered, unitCost: l.unitCost }))));
+        } else {
+          this.lines.set([...(untracked(() => this.start()) ?? []), emptyLine()]);
+        }
         this.payNow.set(true);
         this.method.set('CASH');
       }
+    });
+  }
+
+  /** The editor works with whole products: fetch each one once, then rebuild the draft's lines. */
+  private loadLines(src: { productId: number; unitId: number | null; qty: number; unitCost?: number | null }[]): void {
+    this.lines.set([emptyLine()]);
+    if (!src.length) {
+      return;
+    }
+    const ids = [...new Set(src.map((l) => l.productId))];
+    forkJoin(ids.map((id) => this.catalog.getProduct(id))).subscribe({
+      next: (products) => {
+        const byId = new Map(products.map((p) => [p.id, p]));
+        this.lines.set([
+          ...src.map((l) => {
+            const p = byId.get(l.productId) ?? null;
+            return { ...emptyLine(), product: p, unitId: p && l.unitId === p.baseUnitId ? null : l.unitId, qty: l.qty, unitCost: l.unitCost ?? null };
+          }),
+          emptyLine(),
+        ]);
+      },
+      error: (e) => this.notify.error(e),
     });
   }
 
@@ -108,11 +152,11 @@ export class PurchaseForm {
             })),
             payment: this.payNow() && this.total() > 0 ? { method: this.method(), currency: 'USD', amount: round2(this.total()) } : null,
           })
-        : this.api.post('/purchase-orders', {
+        : (this.order() ? (b: unknown) => this.api.put(`/purchase-orders/${this.order()!.id}`, b) : (b: unknown) => this.api.post('/purchase-orders', b))({
             supplierId: supplier.id,
             branchId,
             receiveWarehouseId: this.warehouseId(),
-            orderDate: toIsoDate(new Date()),
+            orderDate: this.order()?.orderDate ?? toIsoDate(new Date()),
             expectedDate: toIsoDate(this.expected()),
             note: this.note().trim() || null,
             lines: lines.map((l) => ({ productId: l.product!.id, unitId: l.unitId, qty: l.qty, unitCost: l.unitCost ?? 0 })),
@@ -120,7 +164,7 @@ export class PurchaseForm {
     call.subscribe({
       next: () => {
         this.busy.set(false);
-        this.notify.showKey(this.mode() === 'quick' ? 'purchase.received' : 'docs.created');
+        this.notify.showKey(this.mode() === 'quick' ? 'purchase.received' : this.order() ? 'common.saved' : 'docs.created');
         this.saved.emit();
         this.visible.set(false);
       },

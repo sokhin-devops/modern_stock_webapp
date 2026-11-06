@@ -1,5 +1,5 @@
 <p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
-          [header]="(mode() === 'quick' ? 'purchase.quick' : 'purchase.newOrder') | translate">
+          [header]="(mode() === 'quick' ? 'purchase.quick' : order() ? 'purchase.editOrder' : 'purchase.newOrder') | translate">
   <div class="ms-form">
     @if (mode() === 'quick') {
       <p class="muted small">{{ 'purchase.quickLead' | translate }}</p>

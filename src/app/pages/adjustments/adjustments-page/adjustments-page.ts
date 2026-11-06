@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, input, effect, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
@@ -89,6 +89,14 @@ export class AdjustmentsPage {
   }
   protected readonly formOpen = signal(false);
   protected readonly viewing = signal<Adjustment | null>(null);
+  /** ?open=<id>: an adjustment opened from a notification or a link. */
+  readonly openParam = input<string | undefined>(undefined, { alias: 'open' });
+  private readonly opening = effect(() => {
+    const id = Number(this.openParam());
+    if (id) {
+      untracked(() => this.api.get<Adjustment>(`/adjustments/${id}`).subscribe({ next: (a) => this.viewing.set(a), error: (e) => this.notify.error(e) }));
+    }
+  });
   protected readonly busy = signal(false);
 
   protected setStatus(value: string | null): void {

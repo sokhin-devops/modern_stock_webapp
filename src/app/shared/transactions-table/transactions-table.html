@@ -17,6 +17,11 @@
     <ng-template #item let-o>{{ o.label | translate }}</ng-template>
   </p-select>
   }
+  <p-select [options]="statusOptions()" optionLabel="label" optionValue="value" [ngModel]="status()" (ngModelChange)="setStatus($event)"
+            [showClear]="true" [placeholder]="'tx.anyStatus' | translate" [ariaLabel]="'common.status' | translate" class="status-filter" appendTo="body">
+    <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
+    <ng-template #item let-o>{{ o.label | translate }}</ng-template>
+  </p-select>
   <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
                 appendTo="body" [placeholder]="'common.from' | translate" [ariaLabel]="'common.from' | translate" class="date-filter" />
   <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
