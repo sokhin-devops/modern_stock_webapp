@@ -117,7 +117,7 @@
                   <th>{{ 'orders.validUntil' | translate }}</th><th class="num">{{ 'common.total' | translate }}</th><th>{{ 'common.status' | translate }}</th></tr>
               </ng-template>
               <ng-template #body let-q>
-                <tr class="clickable" tabindex="0" (click)="go('quotations', q.id)" (keydown.enter)="go('quotations', q.id)">
+                <tr class="clickable" tabindex="0" (click)="openQuotationRow(q)" (keydown.enter)="openQuotationRow(q)">
                   <td><div class="strong doc-no">{{ q.number }}</div>@if (q.salesOrderNumber) { <small class="muted">→ {{ q.salesOrderNumber }}</small> }</td>
                   <td>{{ q.customerName }}</td>
                   <td>{{ q.quoteDate | date: 'dd/MM/yyyy' }}</td>
@@ -377,20 +377,12 @@
             <span pButtonLabel>{{ 'voids.button' | translate }}</span>
           </button>
         }
-        @if (i.type !== 'DEBIT_NOTE' && canVoid() && i.status !== 'VOID') {
-          <button pButton type="button" [outlined]="true" (click)="newDebit({ customerId: i.customerId, customerName: i.customerName, invoiceId: i.id })">
-            <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'debit.button' | translate }}</span>
+        <!-- What is done less often waits under "More", so the next step stays the one main button -->
+        @if (invoiceMore().length) {
+          <button pButton type="button" [outlined]="true" (click)="invoiceMenu.toggle($event)" aria-haspopup="true">
+            <i class="pi pi-ellipsis-h" pButtonIcon></i><span pButtonLabel>{{ 'common.more' | translate }}</span>
           </button>
-        }
-        @if (canStartReturn() && i.status !== 'VOID' && i.type !== 'DEBIT_NOTE') {
-          <button pButton type="button" [outlined]="true" (click)="startReturn(null, i.id)">
-            <i class="pi pi-replay" pButtonIcon></i><span pButtonLabel>{{ (canVoid() ? 'returns.button' : 'returns.askButton') | translate }}</span>
-          </button>
-        }
-        @if (i.deliveryId) {
-          <button pButton type="button" [outlined]="true" (click)="printDelivery(i)">
-            <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'print.printDelivery' | translate }}</span>
-          </button>
+          <p-menu #invoiceMenu [model]="invoiceMore()" [popup]="true" appendTo="body" />
         }
         <span class="spacer"></span>
         <ms-attach-button type="invoices" [docId]="i.id" [number]="i.number" />

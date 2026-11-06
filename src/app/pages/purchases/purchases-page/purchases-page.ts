@@ -32,6 +32,8 @@ import { AttachButton } from '../../../shared/attach-button/attach-button';
 
 interface PoLine {
   id: number;
+  productId: number;
+  unitId: number | null;
   productName: string;
   unitSymbol: string;
   qtyOrdered: number;
@@ -239,6 +241,29 @@ export class PurchasesPage {
     });
   }
 
+  /** The draft purchase order being changed in the form. */
+  protected readonly editingOrder = signal<PurchaseOrder | null>(null);
+
+  /** A draft order opens its edit form (PLAIN.md 12.2); the others their page. */
+  protected openOrderRow(o: PurchaseOrder): void {
+    if (o.status === 'DRAFT' && this.canOrder()) {
+      this.editOrder(o);
+    } else {
+      this.go('purchase-orders', o.id);
+    }
+  }
+
+  protected editOrder(o: PurchaseOrder): void {
+    this.editingOrder.set(o);
+    this.formMode.set('order');
+    this.formOpen.set(true);
+  }
+
+  protected formSaved(): void {
+    this.editingOrder.set(null);
+    this.reloadAll();
+  }
+
   /** Opens a document on its own page. */
   protected go(view: string, id: number): void {
     void this.router.navigate(['/suppliers/transactions', view, id]);
@@ -311,6 +336,7 @@ export class PurchasesPage {
   }
 
   protected openForm(mode: 'quick' | 'order'): void {
+    this.editingOrder.set(null);
     this.formMode.set(mode);
     this.formOpen.set(true);
   }

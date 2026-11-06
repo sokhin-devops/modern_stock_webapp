@@ -11,7 +11,7 @@
         </button>
       }
       @if (canManage() && view() === 'transfers') {
-        <button pButton type="button" (click)="formOpen.set(true)">
+        <button pButton type="button" (click)="newTransfer()">
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'transfer.new' | translate }}</span>
         </button>
       }
@@ -51,7 +51,7 @@
               </tr>
             </ng-template>
             <ng-template #body let-t>
-              <tr class="clickable" tabindex="0" (click)="viewing.set(t)" (keydown.enter)="viewing.set(t)">
+              <tr class="clickable" tabindex="0" (click)="openRow(t)" (keydown.enter)="openRow(t)">
                 <td class="strong doc-no">{{ t.number }}</td>
                 <td>{{ 'transfer.' + t.kind | translate }}</td>
                 <td>{{ t.fromName }}</td>
@@ -84,7 +84,7 @@
   </div>
 </div>
 
-<ms-transfer-form [(visible)]="formOpen" (saved)="list.reload()" />
+<ms-transfer-form [(visible)]="formOpen" [draft]="editingDraft()" (saved)="editingDraft.set(null); list.reload()" />
 
 <p-dialog [visible]="!!viewing()" (visibleChange)="!$event && viewing.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
           [header]="viewing()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
@@ -141,6 +141,9 @@
         <span class="spacer"></span>
         <ms-attach-button type="transfers" [docId]="t.id" [number]="t.number" />
         @if (t.status === 'DRAFT' && canManage()) {
+          <button pButton type="button" [outlined]="true" (click)="editDraft(t)" [disabled]="busy()">
+            <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
+          </button>
           <button pButton type="button" (click)="act(t, t.kind === 'MOVE' ? 'move' : 'send')" [loading]="busy()" [disabled]="busy()">
             <span pButtonLabel>{{ (t.kind === 'MOVE' ? 'transfer.moveNow' : 'transfer.sendNow') | translate }}</span>
           </button>

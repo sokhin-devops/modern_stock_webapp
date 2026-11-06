@@ -106,6 +106,15 @@ export class TransactionsTable {
   protected readonly party = signal<{ id: number; name: string } | null>(null);
   protected readonly parties = signal<{ id: number; name: string }[]>([]);
   protected readonly exporting = signal(false);
+  /** One dropdown per filter (PLAIN.md 12.2), status included: the statuses this side's documents use. */
+  protected readonly status = signal<string | null>(null);
+  protected readonly statusOptions = computed(() => {
+    const own = this.side() === 'CUSTOMER'
+      ? [['DRAFT', 'QUOTATION'], ['SENT', 'QUOTATION'], ['CONFIRMED', 'SALES_ORDER'], ['UNPAID', 'INVOICE'], ['PARTLY_PAID', 'INVOICE'], ['PAID', 'INVOICE']]
+      : [['DRAFT', 'PURCHASE_ORDER'], ['ORDERED', 'PURCHASE_ORDER'], ['PARTIALLY_RECEIVED', 'PURCHASE_ORDER'], ['UNPAID', 'BILL'], ['PARTLY_PAID', 'BILL'], ['PAID', 'BILL']];
+    return [...own, ['POSTED', 'INVOICE'], ['WAITING_APPROVAL', 'INVOICE'], ['OPEN', 'INVOICE'], ['VOID', 'INVOICE']]
+      .map(([value, type]) => ({ value, label: statusKey(type, value) }));
+  });
   protected readonly viewOptions = computed(() => this.views().map((v) => ({ value: v, label: `tx.views.${v}` })));
 
   private readonly search = new Subject<string>();
@@ -167,6 +176,11 @@ export class TransactionsTable {
     this.list.reload();
   }
 
+  protected setStatus(s: string | null): void {
+    this.status.set(s);
+    this.list.reload();
+  }
+
   protected setFrom(d: Date | null): void {
     this.from.set(d);
     this.list.reload();
@@ -217,6 +231,7 @@ export class TransactionsTable {
       partyId: this.partyId() ?? this.party()?.id ?? null,
       view: this.lockedView() ?? this.view(),
       q: this.q() || null,
+      status: this.status(),
       from: toIsoDate(this.from()),
       to: toIsoDate(this.to()),
     };

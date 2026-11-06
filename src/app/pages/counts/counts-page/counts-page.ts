@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal, input, effect, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -233,8 +233,17 @@ export class CountsPage {
   protected readonly scanned = signal<{ lineId: number | null; text: string } | null>(null);
   protected readonly hasCamera = typeof navigator !== 'undefined' && !!navigator.mediaDevices;
 
+  /** ?open=<id>: a count opened from a notification or a link. */
+  readonly openParam = input<string | undefined>(undefined, { alias: 'open' });
+
   constructor() {
     this.catalog.loadLists();
+    effect(() => {
+      const id = Number(this.openParam());
+      if (id) {
+        untracked(() => this.open({ id } as StockCount));
+      }
+    });
     this.listSearch.pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(inject(DestroyRef))).subscribe((q) => {
       this.fQ.set(q.trim());
       this.list.reload();

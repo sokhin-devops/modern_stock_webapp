@@ -1067,7 +1067,8 @@
     "done": "Done.",
     "late": "Late",
     "void": "Void transfer",
-    "voidAsk": "Void {{number}}? The goods go back to where they came from. This only works while the destination still has them."
+    "voidAsk": "Void {{number}}? The goods go back to where they came from. This only works while the destination still has them.",
+    "edit": "Edit transfer"
   },
   "purchase": {
     "tabOrders": "Purchase orders",
@@ -1098,7 +1099,8 @@
     "payLead": "Pays the oldest bills first. Money left over is kept as an advance and pays the next bill.",
     "advance": "Advance {{amount}}",
     "advanceHint": "Not used on a bill yet: it pays the next bill from this supplier.",
-    "bill": "Bill"
+    "bill": "Bill",
+    "editOrder": "Edit purchase order"
   },
   "sales": {
     "tabReceipts": "Sales receipts",
@@ -2328,7 +2330,8 @@
     },
     "openBill": "Open bill",
     "allCustomers": "All customers",
-    "allSuppliers": "All suppliers"
+    "allSuppliers": "All suppliers",
+    "anyStatus": "Any status"
   },
   "party": {
     "summary": "Summary",
@@ -2385,7 +2388,7 @@
     "APPROVAL_SALES_RETURN": "Customer return {{number}} waits for your approval ({{by}})",
     "APPROVAL_PURCHASE_RETURN": "Supplier return {{number}} waits for your approval ({{by}})",
     "TRANSFER_SENT": "Transfer {{number}} from {{from}} is on its way to your branch",
-    "SHIFT_SHORT": "{{cashier}} closed a cash shift short: ${{usd}} · ៛{{khr}}",
+    "SHIFT_SHORT": "{{cashier}} closed a cash shift short: {{amounts}}",
     "SALE_VOIDED": "Sale {{number}} (${{amount}}) was voided by {{by}}: {{reason}}",
     "STOCK_OUT": "{{product}} is out of stock in {{warehouse}}"
   }

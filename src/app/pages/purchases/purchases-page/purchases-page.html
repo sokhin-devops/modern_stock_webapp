@@ -95,7 +95,7 @@
               </tr>
             </ng-template>
             <ng-template #body let-o>
-              <tr class="clickable" tabindex="0" (click)="go('purchase-orders', o.id)" (keydown.enter)="go('purchase-orders', o.id)">
+              <tr class="clickable" tabindex="0" (click)="openOrderRow(o)" (keydown.enter)="openOrderRow(o)">
                 <td class="strong doc-no">{{ o.number }}</td><td>{{ o.supplierName }}</td><td>{{ o.orderDate | date: 'dd/MM/yyyy' }}</td>
                 <td class="muted">{{ o.receiveWarehouseName }}</td><td class="num">{{ o.total | currency: 'USD' }}</td>
                 <td><span class="tag" [class]="'status-' + o.status">{{ 'docs.status.' + o.status | translate }}</span></td>
@@ -231,7 +231,7 @@
 </div>
 }
 
-<ms-purchase-form [mode]="formMode()" [(visible)]="formOpen" (saved)="reloadAll()" />
+<ms-purchase-form [mode]="formMode()" [order]="editingOrder()" [(visible)]="formOpen" (saved)="formSaved()" />
 <ms-payment-dialog kind="supplier" [(visible)]="payOpen" (saved)="reloadAll()" />
 @if (!pageMode()) {
   <ms-payment-details kind="supplier" [(payment)]="payment" (changed)="reloadAll()" />
@@ -336,6 +336,9 @@
         }
         @if (canOrder()) {
           @if (o.status === 'DRAFT') {
+            <button pButton type="button" [outlined]="true" (click)="editOrder(o)" [disabled]="busy()">
+              <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
+            </button>
             <button pButton type="button" [outlined]="true" (click)="act(o, 'order')" [disabled]="busy()"><span pButtonLabel>{{ 'purchase.order' | translate }}</span></button>
           }
           @if (o.status === 'DRAFT' || o.status === 'ORDERED' || o.status === 'PARTIALLY_RECEIVED') {

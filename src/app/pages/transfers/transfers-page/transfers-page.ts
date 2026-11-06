@@ -33,7 +33,10 @@ interface Transfer {
   note: string | null;
   shortLines: number;
   value: number | null;
-  lines: { id: number; productName: string; unitSymbol: string; qty: number; qtyReceived: number | null; batchNo: string | null }[];
+  fromWarehouseId: number;
+  toWarehouseId: number | null;
+  toBranchId: number | null;
+  lines: { id: number; productId: number; unitId: number | null; productName: string; unitSymbol: string; qty: number; qtyReceived: number | null; batchNo: string | null }[];
 }
 
 /**
@@ -102,6 +105,27 @@ export class TransfersPage {
     }
   }
   protected readonly formOpen = signal(false);
+  /** The draft being changed in the form (PLAIN.md 12.2: draft rows open their edit form). */
+  protected readonly editingDraft = signal<Transfer | null>(null);
+
+  protected openRow(t: Transfer): void {
+    if (t.status === 'DRAFT' && this.canManage()) {
+      this.editDraft(t);
+    } else {
+      this.viewing.set(t);
+    }
+  }
+
+  protected editDraft(t: Transfer): void {
+    this.viewing.set(null);
+    this.editingDraft.set(t);
+    this.formOpen.set(true);
+  }
+
+  protected newTransfer(): void {
+    this.editingDraft.set(null);
+    this.formOpen.set(true);
+  }
   protected readonly viewing = signal<Transfer | null>(null);
   protected readonly busy = signal(false);
 
