@@ -126,12 +126,6 @@
   margin: -4px 0 0;
 }
 
-// Tables sit in a white card; the card adds no padding of its own around the table.
-.table-card {
-  padding: 0;
-  overflow: hidden;
-}
-
 // A row's share of the biggest one, under its name (sales by product, category...).
 .share {
   height: 3px;

@@ -2,7 +2,6 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
@@ -17,10 +16,14 @@ import { toIsoDate } from '../../../shared/dates';
 import { LazyList } from '../../../shared/lazy-list';
 import { exportList } from '../../../shared/list-export';
 import { warehouseOptions } from '../../../shared/options';
+import { PickField } from '../../../shared/pick/pick';
 
+/** The product the card shows: what the picker gives (a product), or the name from a link. */
 interface ProductPick {
-  productId: number;
-  label: string;
+  id: number;
+  nameEn: string;
+  nameKm?: string | null;
+  sku?: string;
 }
 
 /**
@@ -29,7 +32,7 @@ interface ProductPick {
  */
 @Component({
   selector: 'ms-stock-card-page',
-  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, TableModule, AutoComplete, Select, DatePicker, ButtonDirective, ButtonIcon, ButtonLabel],
+  imports: [FormsModule, TranslatePipe, DatePipe, DecimalPipe, TableModule, PickField, Select, DatePicker, ButtonDirective, ButtonIcon, ButtonLabel],
   templateUrl: './stock-card-page.html',
   styleUrl: './stock-card-page.scss',
 })
@@ -44,7 +47,6 @@ export class StockCardPage {
   protected readonly lang = inject(LangService);
 
   protected readonly product = signal<ProductPick | null>(null);
-  protected readonly suggestions = signal<ProductPick[]>([]);
   protected readonly warehouseId = signal<number | null>(null);
   protected readonly from = signal<Date | null>(null);
   protected readonly to = signal<Date | null>(null);
@@ -63,9 +65,9 @@ export class StockCardPage {
       const id = Number(this.productParam());
       if (id) {
         untracked(() =>
-          this.api.get<{ productId: number; nameEn: string }>(`/stock/levels/${id}`).subscribe({
+          this.api.get<{ productId: number; nameEn: string; nameKm: string | null; sku: string }>(`/stock/levels/${id}`).subscribe({
             next: (p) => {
-              this.product.set({ productId: id, label: p.nameEn });
+              this.product.set({ id, nameEn: p.nameEn, nameKm: p.nameKm, sku: p.sku });
               this.list.reload();
             },
           }),
@@ -84,14 +86,8 @@ export class StockCardPage {
     });
   }
 
-  protected find(e: AutoCompleteCompleteEvent): void {
-    this.api.page<StockRow>('/stock/levels', { page: 0, size: 10 }, { q: e.query }).subscribe({
-      next: (p) => this.suggestions.set(p.content.map((r) => ({ productId: r.productId, label: `${this.lang.name(r.nameEn, r.nameKm)} · ${r.sku}` }))),
-    });
-  }
-
   protected setProduct(p: ProductPick | null): void {
-    this.product.set(p?.productId ? p : null);
+    this.product.set(p?.id ? p : null);
     this.list.reload();
   }
 
@@ -135,7 +131,7 @@ export class StockCardPage {
 
   private filters(): Record<string, string | number | null> {
     return {
-      productId: this.product()?.productId ?? null,
+      productId: this.product()?.id ?? null,
       warehouseId: this.warehouseId(),
       from: toIsoDate(this.from()),
       to: toIsoDate(this.to()),

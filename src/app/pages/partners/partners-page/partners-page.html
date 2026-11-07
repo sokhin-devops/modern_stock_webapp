@@ -6,7 +6,7 @@
     </nav>
     <div class="page-actions">
       @if (canAdd()) {
-        <button pButton type="button" (click)="add()">
+        <button pButton size="small" type="button" (click)="add()">
           <i class="pi pi-plus" pButtonIcon></i>
           <span pButtonLabel>{{ (isCustomer ? 'partners.newCustomer' : 'partners.newSupplier') | translate }}</span>
         </button>
@@ -18,72 +18,74 @@
     <div class="toolbar">
       <p-iconfield class="search">
         <p-inputicon class="pi pi-search" />
-        <input pInputText type="search" [placeholder]="'partners.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
+        <input pInputText pSize="small" type="search" [placeholder]="'partners.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
                (input)="onSearch($any($event.target).value)" />
       </p-iconfield>
       <span class="spacer"></span>
-      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+      <button pButton size="small" type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
         <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
       </button>
     </div>
 
-    <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
-             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [rowsPerPageOptions]="[20, 50, 100]"
-             [showCurrentPageReport]="true" [currentPageReportTemplate]="'{first}–{last} / {totalRecords}'"
-             [scrollable]="true" scrollHeight="flex" sortField="name" [sortOrder]="1" dataKey="id" [rowHover]="true">
-      <ng-template #header>
-        <tr>
-          <th pSortableColumn="name">{{ 'partners.name' | translate }} <p-sortIcon field="name" /></th>
-          <th>{{ (isCustomer ? 'partners.type' : 'partners.contact') | translate }}</th>
-          <th>{{ 'partners.phone' | translate }}</th>
-          <th class="num">{{ 'partners.balance' | translate }}</th>
-          <th class="num">{{ 'party.overdue' | translate }}</th>
-          <th>{{ 'common.status' | translate }}</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-p>
-        <tr class="clickable" tabindex="0" (click)="open(p)" (keydown.enter)="open(p)">
-          <td>
-            <div class="strong">{{ p.name }}</div>
-            @if (p.address) {
-              <small class="muted">{{ p.address }}</small>
-            }
-          </td>
-          <td>{{ isCustomer ? ('partners.' + p.type | translate) : (p.contactPerson || '—') }}</td>
-          <td class="muted"><span class="num">{{ p.phone || '—' }}</span></td>
-          <td class="num">
-            @if (p.balance > 0) {
-              <span class="strong">{{ p.balance | currency: 'USD' }}</span>
-            } @else if (p.balance < 0) {
-              <span>{{ -p.balance | currency: 'USD' }}</span>
-              <small class="muted balance-note">{{ (isCustomer ? 'partners.deposit' : 'party.advance') | translate }}</small>
-            } @else {
-              <span class="muted">—</span>
-            }
-          </td>
-          <td class="num">
-            @if (p.overdue > 0) {
-              <span class="strong danger-text">{{ p.overdue | currency: 'USD' }}</span>
-            } @else {
-              <span class="muted">—</span>
-            }
-          </td>
-          <td>
-            <!-- A tag only when something needs attention -->
-            @if (!p.active) {
-              <span class="tag">{{ 'partners.inactive' | translate }}</span>
-            } @else if (p.overdue > 0) {
-              <span class="tag tag-danger">{{ 'party.overdue' | translate }}</span>
-            } @else if (isCustomer && p.creditLimit > 0 && p.balance > p.creditLimit) {
-              <span class="tag tag-warning">{{ 'party.overLimit' | translate }}</span>
-            }
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template #emptymessage>
-        <tr><td colspan="6" class="empty-cell">{{ 'partners.empty' | translate }}</td></tr>
-      </ng-template>
-    </p-table>
+    <section class="card table-card">
+      <p-table size="small" class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+               [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [rowsPerPageOptions]="[20, 50, 100]"
+               [showCurrentPageReport]="true" [currentPageReportTemplate]="'{first}–{last} / {totalRecords}'"
+               [scrollable]="true" scrollHeight="flex" sortField="name" [sortOrder]="1" dataKey="id" [rowHover]="true">
+        <ng-template #header>
+          <tr>
+            <th pSortableColumn="name">{{ 'partners.name' | translate }} <p-sortIcon field="name" /></th>
+            <th>{{ (isCustomer ? 'partners.type' : 'partners.contact') | translate }}</th>
+            <th>{{ 'partners.phone' | translate }}</th>
+            <th class="num">{{ 'partners.balance' | translate }}</th>
+            <th class="num">{{ 'party.overdue' | translate }}</th>
+            <th>{{ 'common.status' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-p>
+          <tr class="clickable" tabindex="0" (click)="open(p)" (keydown.enter)="open(p)">
+            <td>
+              <div class="strong">{{ p.name }}</div>
+              @if (p.address) {
+                <small class="muted">{{ p.address }}</small>
+              }
+            </td>
+            <td>{{ isCustomer ? ('partners.' + p.type | translate) : (p.contactPerson || '—') }}</td>
+            <td class="muted"><span class="num">{{ p.phone || '—' }}</span></td>
+            <td class="num">
+              @if (p.balance > 0) {
+                <span class="strong">{{ p.balance | currency: 'USD' }}</span>
+              } @else if (p.balance < 0) {
+                <span>{{ -p.balance | currency: 'USD' }}</span>
+                <small class="muted balance-note">{{ (isCustomer ? 'partners.deposit' : 'party.advance') | translate }}</small>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td class="num">
+              @if (p.overdue > 0) {
+                <span class="strong danger-text">{{ p.overdue | currency: 'USD' }}</span>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td>
+              <!-- A tag only when something needs attention -->
+              @if (!p.active) {
+                <span class="tag">{{ 'partners.inactive' | translate }}</span>
+              } @else if (p.overdue > 0) {
+                <span class="tag tag-danger">{{ 'party.overdue' | translate }}</span>
+              } @else if (isCustomer && p.creditLimit > 0 && p.balance > p.creditLimit) {
+                <span class="tag tag-warning">{{ 'party.overLimit' | translate }}</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr><td colspan="6" class="empty-cell">{{ 'partners.empty' | translate }}</td></tr>
+        </ng-template>
+      </p-table>
+    </section>
   </div>
 </div>
 

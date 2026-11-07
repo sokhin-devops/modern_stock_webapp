@@ -1,0 +1,64 @@
+<!-- One row of the list: the name, then a muted line (phone and balance, or SKU and price) -->
+<ng-template #rowTpl let-o>
+  @if (o._none) {
+    <div class="pick-row none"><i class="pi pi-user" aria-hidden="true"></i><b>{{ o._label }}</b></div>
+  } @else if (kind() === 'product') {
+    <div class="pick-row">
+      <b>{{ o._label }}</b>
+      <small>{{ o.sku }}@if (o.barcode) { · {{ o.barcode }} } · ${{ o.sellPrice | number: '1.2-2' }}</small>
+    </div>
+  } @else {
+    <div class="pick-row">
+      <b>{{ o._label }}</b>
+      @if (o.phone || o.balance > 0) {
+        <small>{{ o.phone }}@if (o.phone && o.balance > 0) { · }@if (o.balance > 0) { ${{ o.balance | number: '1.2-2' }} }</small>
+      }
+    </div>
+  }
+</ng-template>
+
+<!-- The foot of the list: a hint when the search would find more, and "+ New" -->
+<ng-template #footTpl>
+  @if (more() || canAdd()) {
+    <div class="pick-foot">
+      @if (more()) {
+        <small class="muted">{{ 'pick.typeForMore' | translate }}</small>
+      }
+      @if (canAdd()) {
+        <button pButton size="small" type="button" [text]="true" class="pick-add" (click)="openAdd()">
+          <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ addLabel() | translate }}</span>
+        </button>
+      }
+    </div>
+  }
+</ng-template>
+
+@if (multiple()) {
+  <p-multiselect size="small" [options]="options()" [ngModel]="model()" (ngModelChange)="onPickMany($event)" optionLabel="_label" dataKey="id"
+                 [filter]="true" filterBy="_label,_search" (onFilter)="onFilter($event.filter)" (onPanelShow)="onShow()" [resetFilterOnHide]="true"
+                 [showToggleAll]="false" display="chip" [placeholder]="placeholder()" [inputId]="inputId()" [ariaLabel]="ariaLabel()"
+                 [filterPlaceHolder]="'common.search' | translate" [showClear]="showClear()" [disabled]="disabled()" [fluid]="fluid()" [loading]="loading()"
+                 [emptyMessage]="(loading() ? 'common.loading' : 'common.noResults') | translate" [emptyFilterMessage]="(loading() ? 'common.loading' : 'common.noResults') | translate"
+                 appendTo="body" panelStyleClass="pick-panel">
+    <ng-template #item let-o><ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" /></ng-template>
+    <ng-template #footer><ng-container *ngTemplateOutlet="footTpl" /></ng-template>
+  </p-multiselect>
+} @else {
+  <p-select size="small" [options]="options()" [ngModel]="model()" (ngModelChange)="onPick($event)" optionLabel="_label" dataKey="id"
+            [filter]="true" filterBy="_label,_search" (onFilter)="onFilter($event.filter)" (onShow)="onShow()" [resetFilterOnHide]="true"
+            [placeholder]="placeholder()" [inputId]="inputId()" [ariaLabel]="ariaLabel()" [filterPlaceholder]="'common.search' | translate"
+            [showClear]="showClear() && !!value()" [disabled]="disabled()" [fluid]="fluid()" [loading]="loading()"
+            [emptyMessage]="(loading() ? 'common.loading' : 'common.noResults') | translate" [emptyFilterMessage]="(loading() ? 'common.loading' : 'common.noResults') | translate"
+            appendTo="body" panelStyleClass="pick-panel">
+    <ng-template #item let-o><ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" /></ng-template>
+    <ng-template #footer><ng-container *ngTemplateOutlet="footTpl" /></ng-template>
+  </p-select>
+}
+
+@if (addOpen()) {
+  @if (kind() === 'product') {
+    <ms-product-form [product]="null" [(visible)]="addOpen" (saved)="added($event)" />
+  } @else {
+    <ms-quick-party-dialog [kind]="kind() === 'supplier' ? 'supplier' : 'customer'" [typed]="typed()" [(visible)]="addOpen" (saved)="added($event)" />
+  }
+}

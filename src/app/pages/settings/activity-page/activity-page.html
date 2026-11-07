@@ -10,72 +10,74 @@
     <div class="toolbar">
       <p-iconfield class="search">
         <p-inputicon class="pi pi-search" />
-        <input pInputText type="search" [placeholder]="'activity.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
+        <input pInputText pSize="small" type="search" [placeholder]="'activity.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
                (input)="onSearch($any($event.target).value)" />
       </p-iconfield>
-      <p-select [options]="types()" optionLabel="label" optionValue="value" [ngModel]="type()" (ngModelChange)="set(type, $event)"
+      <p-select size="small" [options]="types()" optionLabel="label" optionValue="value" [ngModel]="type()" (ngModelChange)="set(type, $event)"
                 [showClear]="true" [placeholder]="'activity.allTypes' | translate" [ariaLabel]="'activity.type' | translate" appendTo="body" />
       @if (people().length) {
-        <p-select [options]="people()" optionLabel="label" optionValue="value" [ngModel]="userId()" (ngModelChange)="set(userId, $event)"
+        <p-select size="small" [options]="people()" optionLabel="label" optionValue="value" [ngModel]="userId()" (ngModelChange)="set(userId, $event)"
                   [showClear]="true" [filter]="people().length > 8" [placeholder]="'activity.everyone' | translate"
                   [ariaLabel]="'activity.who' | translate" appendTo="body" />
       }
       <div class="dates">
-        <p-datepicker [ngModel]="from()" (ngModelChange)="set(from, $event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+        <p-datepicker size="small" [ngModel]="from()" (ngModelChange)="set(from, $event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
                       [maxDate]="to()" [placeholder]="'reports.from' | translate" [ariaLabel]="'reports.from' | translate" appendTo="body" />
         <span class="muted">–</span>
-        <p-datepicker [ngModel]="to()" (ngModelChange)="set(to, $event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+        <p-datepicker size="small" [ngModel]="to()" (ngModelChange)="set(to, $event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
                       [minDate]="from()" [placeholder]="'reports.to' | translate" [ariaLabel]="'reports.to' | translate" appendTo="body" />
       </div>
     </div>
 
-    <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
-             [paginator]="true" [rows]="30" [first]="list.first()" [totalRecords]="list.total()" [rowsPerPageOptions]="[30, 60, 100]"
-             [showCurrentPageReport]="true" [currentPageReportTemplate]="'{first}–{last} / {totalRecords}'"
-             [scrollable]="true" scrollHeight="flex" dataKey="id">
-      <ng-template #header>
-        <tr>
-          <th class="when">{{ 'activity.when' | translate }}</th>
-          <th>{{ 'activity.who' | translate }}</th>
-          <th>{{ 'activity.what' | translate }}</th>
-          <th>{{ 'activity.changes' | translate }}</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-e>
-        <tr>
-          <td class="when">
-            <div>{{ e.at | date: 'dd/MM/yyyy' }}</div>
-            <small class="muted">{{ e.at | date: 'HH:mm' }}</small>
-          </td>
-          <td>
-            <div>{{ e.userName ?? '—' }}</div>
-            @if (e.branchName) {
-              <small class="muted">{{ e.branchName }}</small>
-            }
-          </td>
-          <td>
-            <div class="strong">{{ what(e) }}</div>
-            <small class="muted">{{ about(e) }}</small>
-          </td>
-          <td>
-            <ul class="changes">
-              @for (c of changes(e); track c.field) {
-                <li>
-                  <span class="field">{{ c.field }}:</span>
-                  @if (c.before != null) {
-                    <span class="old">{{ c.before }}</span>
-                    <i class="pi pi-arrow-right" aria-hidden="true"></i>
-                  }
-                  <span>{{ c.after }}</span>
-                </li>
+    <section class="card table-card">
+      <p-table size="small" class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+               [paginator]="true" [rows]="30" [first]="list.first()" [totalRecords]="list.total()" [rowsPerPageOptions]="[30, 60, 100]"
+               [showCurrentPageReport]="true" [currentPageReportTemplate]="'{first}–{last} / {totalRecords}'"
+               [scrollable]="true" scrollHeight="flex" dataKey="id">
+        <ng-template #header>
+          <tr>
+            <th class="when">{{ 'activity.when' | translate }}</th>
+            <th>{{ 'activity.who' | translate }}</th>
+            <th>{{ 'activity.what' | translate }}</th>
+            <th>{{ 'activity.changes' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-e>
+          <tr>
+            <td class="when">
+              <div>{{ e.at | date: 'dd/MM/yyyy' }}</div>
+              <small class="muted">{{ e.at | date: 'HH:mm' }}</small>
+            </td>
+            <td>
+              <div>{{ e.userName ?? '—' }}</div>
+              @if (e.branchName) {
+                <small class="muted">{{ e.branchName }}</small>
               }
-            </ul>
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template #emptymessage>
-        <tr><td colspan="4" class="empty-cell">{{ 'activity.empty' | translate }}</td></tr>
-      </ng-template>
-    </p-table>
+            </td>
+            <td>
+              <div class="strong">{{ what(e) }}</div>
+              <small class="muted">{{ about(e) }}</small>
+            </td>
+            <td>
+              <ul class="changes">
+                @for (c of changes(e); track c.field) {
+                  <li>
+                    <span class="field">{{ c.field }}:</span>
+                    @if (c.before != null) {
+                      <span class="old">{{ c.before }}</span>
+                      <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                    }
+                    <span>{{ c.after }}</span>
+                  </li>
+                }
+              </ul>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr><td colspan="4" class="empty-cell">{{ 'activity.empty' | translate }}</td></tr>
+        </ng-template>
+      </p-table>
+    </section>
   </div>
 </div>

@@ -50,6 +50,8 @@ export class ProductForm {
   private readonly fb = inject(NonNullableFormBuilder);
 
   protected readonly busy = signal(false);
+  /** Its own id: the form can be open from a product picker while the products page has one too. */
+  protected readonly formId = 'product-form-' + Math.random().toString(36).slice(2, 8);
   protected readonly canManage = computed(() => this.business.can('product:manage'));
   /** The photo is saved with the product: a new picture is uploaded, or the old one removed, after Save. */
   protected readonly photo = signal<File | null>(null);

@@ -2393,5 +2393,9 @@
     "SHIFT_SHORT": "{{cashier}} closed a cash shift short: {{amounts}}",
     "SALE_VOIDED": "Sale {{number}} (${{amount}}) was voided by {{by}}: {{reason}}",
     "STOCK_OUT": "{{product}} is out of stock in {{warehouse}}"
+  },
+  "pick": {
+    "typeForMore": "Type to find more",
+    "added": "{{name}} added."
   }
 }

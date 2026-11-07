@@ -9,7 +9,7 @@
           <div class="muted small items">{{ items(h) }}</div>
           <div class="muted small">{{ h.heldAt | date: 'HH:mm' }}</div>
         </div>
-        <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove.emit(h)"
+        <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove.emit(h)"
                 [attr.aria-label]="'pos.heldRemove' | translate">
           <i class="pi pi-times" pButtonIcon></i>
         </button>

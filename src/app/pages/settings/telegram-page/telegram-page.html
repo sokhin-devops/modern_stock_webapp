@@ -28,7 +28,7 @@
               <div class="strong">{{ 'telegram.connectedTo' | translate: { chat: s.chatTitle } }}</div>
               <div class="muted small">{{ 'telegram.connectedLead' | translate }}</div>
             </div>
-            <button pButton type="button" [text]="true" severity="danger" (click)="disconnect()" [loading]="busy() === 'disconnect'">
+            <button pButton size="small" type="button" [text]="true" severity="danger" (click)="disconnect()" [loading]="busy() === 'disconnect'">
               <span pButtonLabel>{{ 'telegram.disconnect' | translate }}</span>
             </button>
           </div>
@@ -36,10 +36,10 @@
           <div class="chat waiting">
             <p class="strong">{{ 'telegram.step' | translate }}</p>
             <div class="links">
-              <a pButton [href]="c.privateLink" target="_blank" rel="noopener">
+              <a pButton size="small" [href]="c.privateLink" target="_blank" rel="noopener">
                 <i class="pi pi-telegram" pButtonIcon></i><span pButtonLabel>{{ 'telegram.openPrivate' | translate }}</span>
               </a>
-              <a pButton [href]="c.groupLink" target="_blank" rel="noopener" [outlined]="true">
+              <a pButton size="small" [href]="c.groupLink" target="_blank" rel="noopener" [outlined]="true">
                 <i class="pi pi-users" pButtonIcon></i><span pButtonLabel>{{ 'telegram.addToGroup' | translate }}</span>
               </a>
             </div>
@@ -55,7 +55,7 @@
           <div class="chat">
             <i class="icon pi pi-telegram muted"></i>
             <p class="grow muted">{{ 'telegram.notConnected' | translate }}</p>
-            <button pButton type="button" (click)="connect()" [loading]="busy() === 'connect'" [disabled]="!s.botConfigured || busy() !== null">
+            <button pButton size="small" type="button" (click)="connect()" [loading]="busy() === 'connect'" [disabled]="!s.botConfigured || busy() !== null">
               <i class="pi pi-link" pButtonIcon></i><span pButtonLabel>{{ 'telegram.connect' | translate }}</span>
             </button>
           </div>
@@ -100,15 +100,15 @@
 
         <div class="settings-actions">
           @if (s.connected) {
-            <button pButton type="button" [outlined]="true" (click)="send('test')" [loading]="busy() === 'test'" [disabled]="busy() !== null">
+            <button pButton size="small" type="button" [outlined]="true" (click)="send('test')" [loading]="busy() === 'test'" [disabled]="busy() !== null">
               <i class="pi pi-send" pButtonIcon></i><span pButtonLabel>{{ 'telegram.test' | translate }}</span>
             </button>
-            <button pButton type="button" [outlined]="true" (click)="send('summary')" [loading]="busy() === 'summary'" [disabled]="busy() !== null">
+            <button pButton size="small" type="button" [outlined]="true" (click)="send('summary')" [loading]="busy() === 'summary'" [disabled]="busy() !== null">
               <i class="pi pi-chart-bar" pButtonIcon></i><span pButtonLabel>{{ 'telegram.sendSummary' | translate }}</span>
             </button>
           }
           <span class="spacer"></span>
-          <button pButton type="button" (click)="save()" [loading]="busy() === 'save'" [disabled]="busy() !== null">
+          <button pButton size="small" type="button" (click)="save()" [loading]="busy() === 'save'" [disabled]="busy() !== null">
             <span pButtonLabel>{{ 'common.save' | translate }}</span>
           </button>
         </div>

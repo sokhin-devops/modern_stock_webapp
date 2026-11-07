@@ -98,7 +98,7 @@
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
-    <button pButton type="button" (click)="print()"><i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span></button>
+    <button pButton size="small" type="button" [text]="true" (click)="visible.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="print()"><i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span></button>
   </ng-template>
 </p-dialog>

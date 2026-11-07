@@ -6,11 +6,11 @@
     </nav>
     <div class="page-actions">
       @if (canManage() && tab() === 'roles') {
-        <button pButton type="button" (click)="newRole()" [disabled]="customCount() >= 10">
+        <button pButton size="small" type="button" (click)="newRole()" [disabled]="customCount() >= 10">
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'roles.new' | translate }}</span>
         </button>
       } @else if (canManage()) {
-        <button pButton type="button" (click)="openInvite()">
+        <button pButton size="small" type="button" (click)="openInvite()">
           <i class="pi pi-user-plus" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.invite' | translate }}</span>
         </button>
       }
@@ -27,118 +27,124 @@
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="members">
-          <p-table class="ms-table" [value]="members()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
-            <ng-template #header>
-              <tr>
-                <th>{{ 'settings.members.name' | translate }}</th>
-                <th>{{ 'settings.members.role' | translate }}</th>
-                <th>{{ 'settings.members.branch' | translate }}</th>
-                <th>{{ 'settings.members.status' | translate }}</th>
-                <th class="actions"></th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-m>
-              <tr>
-                <td>
-                  <div class="prod-cell">
-                    <span class="biz-avatar">{{ m.fullName.slice(0, 1).toUpperCase() }}</span>
-                    <div>
-                      <div class="strong">{{ m.fullName }}@if (m.userId === myId()) { <span class="muted"> · {{ 'settings.members.you' | translate }}</span> }</div>
-                      <small>{{ m.email ?? m.username }}</small>
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="members()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'settings.members.name' | translate }}</th>
+                  <th>{{ 'settings.members.role' | translate }}</th>
+                  <th>{{ 'settings.members.branch' | translate }}</th>
+                  <th>{{ 'settings.members.status' | translate }}</th>
+                  <th class="actions"></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-m>
+                <tr>
+                  <td>
+                    <div class="prod-cell">
+                      <span class="biz-avatar">{{ m.fullName.slice(0, 1).toUpperCase() }}</span>
+                      <div>
+                        <div class="strong">{{ m.fullName }}@if (m.userId === myId()) { <span class="muted"> · {{ 'settings.members.you' | translate }}</span> }</div>
+                        <small>{{ m.email ?? m.username }}</small>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td>{{ lang.name(m.roleNameEn, m.roleNameKm) }}</td>
-                <td>{{ branchNames(m.branchIds) }}</td>
-                <td><span class="tag" [class.tag-primary]="m.status === 'ACTIVE'">{{ 'settings.members.' + m.status | translate }}</span></td>
-                <td class="actions">
-                  @if (canManage() && m.userId !== myId() && m.roleCode !== 'OWNER') {
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="openEdit(m)"
-                            [attr.aria-label]="'settings.members.edit' | translate" [pTooltip]="'settings.members.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
-                    @if (m.canResetPassword) {
-                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="resetLink(m)"
-                              [attr.aria-label]="'settings.members.resetLink' | translate" [pTooltip]="'settings.members.resetLink' | translate" tooltipPosition="top"><i class="pi pi-key" pButtonIcon></i></button>
+                  </td>
+                  <td>{{ lang.name(m.roleNameEn, m.roleNameKm) }}</td>
+                  <td>{{ branchNames(m.branchIds) }}</td>
+                  <td><span class="tag" [class.tag-primary]="m.status === 'ACTIVE'">{{ 'settings.members.' + m.status | translate }}</span></td>
+                  <td class="actions">
+                    @if (canManage() && m.userId !== myId() && m.roleCode !== 'OWNER') {
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="openEdit(m)"
+                              [attr.aria-label]="'settings.members.edit' | translate" [pTooltip]="'settings.members.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
+                      @if (m.canResetPassword) {
+                        <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="resetLink(m)"
+                                [attr.aria-label]="'settings.members.resetLink' | translate" [pTooltip]="'settings.members.resetLink' | translate" tooltipPosition="top"><i class="pi pi-key" pButtonIcon></i></button>
+                      }
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="toggleStatus(m)"
+                              [attr.aria-label]="(m.status === 'ACTIVE' ? 'settings.members.disable' : 'settings.members.enable') | translate" [pTooltip]="(m.status === 'ACTIVE' ? 'settings.members.disable' : 'settings.members.enable') | translate" tooltipPosition="top">
+                        <i class="pi" [class.pi-ban]="m.status === 'ACTIVE'" [class.pi-check-circle]="m.status !== 'ACTIVE'" pButtonIcon></i>
+                      </button>
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove(m)"
+                              [attr.aria-label]="'settings.members.remove' | translate" [pTooltip]="'settings.members.remove' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
                     }
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="toggleStatus(m)"
-                            [attr.aria-label]="(m.status === 'ACTIVE' ? 'settings.members.disable' : 'settings.members.enable') | translate" [pTooltip]="(m.status === 'ACTIVE' ? 'settings.members.disable' : 'settings.members.enable') | translate" tooltipPosition="top">
-                      <i class="pi" [class.pi-ban]="m.status === 'ACTIVE'" [class.pi-check-circle]="m.status !== 'ACTIVE'" pButtonIcon></i>
-                    </button>
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="remove(m)"
-                            [attr.aria-label]="'settings.members.remove' | translate" [pTooltip]="'settings.members.remove' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
-                  }
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
         <p-tabpanel value="invitations">
-          <p-table class="ms-table" [value]="invitations()" [scrollable]="true" scrollHeight="flex" dataKey="id">
-            <ng-template #header>
-              <tr>
-                <th>{{ 'settings.members.role' | translate }}</th>
-                <th>{{ 'settings.members.branch' | translate }}</th>
-                <th>{{ 'settings.members.email' | translate }}</th>
-                <th>{{ 'settings.members.status' | translate }}</th>
-                <th class="actions"></th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-i>
-              <tr>
-                <td class="strong">{{ lang.name(i.roleNameEn, i.roleNameKm) }}</td>
-                <td>{{ i.branchName ?? ('settings.members.allBranches' | translate) }}</td>
-                <td class="muted">{{ i.email }}</td>
-                <td>
-                  <span class="tag" [class.tag-primary]="i.status === 'PENDING'">{{ 'settings.members.' + i.status | translate }}</span>
-                  <small class="muted"> {{ 'settings.members.expires' | translate: { date: (i.expiresAt | date: 'dd/MM/yyyy') } }}</small>
-                </td>
-                <td class="actions">
-                  @if (i.status === 'PENDING' || i.status === 'EXPIRED') {
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="resend(i)"
-                            [attr.aria-label]="'settings.members.resend' | translate" [pTooltip]="'settings.members.resend' | translate" tooltipPosition="top"><i class="pi pi-refresh" pButtonIcon></i></button>
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="cancelInvite(i)"
-                            [attr.aria-label]="'settings.members.cancel' | translate" [pTooltip]="'settings.members.cancel' | translate" tooltipPosition="top"><i class="pi pi-times" pButtonIcon></i></button>
-                  }
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr><td colspan="5" class="empty-cell">{{ 'settings.members.emptyInvites' | translate }}</td></tr>
-            </ng-template>
-          </p-table>
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="invitations()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'settings.members.role' | translate }}</th>
+                  <th>{{ 'settings.members.branch' | translate }}</th>
+                  <th>{{ 'settings.members.email' | translate }}</th>
+                  <th>{{ 'settings.members.status' | translate }}</th>
+                  <th class="actions"></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-i>
+                <tr>
+                  <td class="strong">{{ lang.name(i.roleNameEn, i.roleNameKm) }}</td>
+                  <td>{{ i.branchName ?? ('settings.members.allBranches' | translate) }}</td>
+                  <td class="muted">{{ i.email }}</td>
+                  <td>
+                    <span class="tag" [class.tag-primary]="i.status === 'PENDING'">{{ 'settings.members.' + i.status | translate }}</span>
+                    <small class="muted"> {{ 'settings.members.expires' | translate: { date: (i.expiresAt | date: 'dd/MM/yyyy') } }}</small>
+                  </td>
+                  <td class="actions">
+                    @if (i.status === 'PENDING' || i.status === 'EXPIRED') {
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="resend(i)"
+                              [attr.aria-label]="'settings.members.resend' | translate" [pTooltip]="'settings.members.resend' | translate" tooltipPosition="top"><i class="pi pi-refresh" pButtonIcon></i></button>
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="cancelInvite(i)"
+                              [attr.aria-label]="'settings.members.cancel' | translate" [pTooltip]="'settings.members.cancel' | translate" tooltipPosition="top"><i class="pi pi-times" pButtonIcon></i></button>
+                    }
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="5" class="empty-cell">{{ 'settings.members.emptyInvites' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
         <p-tabpanel value="roles">
-          <p-table class="ms-table" [value]="roles()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
-            <ng-template #header>
-              <tr>
-                <th>{{ 'settings.members.role' | translate }}</th>
-                <th>{{ 'roles.kind' | translate }}</th>
-                <th class="num">{{ 'roles.permissions' | translate }}</th>
-                <th class="num">{{ 'settings.members.tabMembers' | translate }}</th>
-                <th class="actions"></th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-r>
-              <tr class="clickable" tabindex="0" (click)="openRole(r)" (keydown.enter)="openRole(r)">
-                <td class="strong">{{ lang.name(r.nameEn, r.nameKm) }}</td>
-                <td><span class="tag" [class.tag-primary]="!r.builtIn">{{ (r.builtIn ? 'roles.builtIn' : 'roles.custom') | translate }}</span></td>
-                <td class="num">{{ r.permissions.length }}</td>
-                <td class="num">{{ memberCount(r) }}</td>
-                <td class="actions">
-                  @if (canManage()) {
-                    @if (r.code !== 'OWNER') {
-                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary"
-                              (click)="$event.stopPropagation(); newRole(r)" [disabled]="customCount() >= 10"
-                              [attr.aria-label]="'roles.duplicate' | translate" [pTooltip]="'roles.duplicate' | translate" tooltipPosition="top"><i class="pi pi-copy" pButtonIcon></i></button>
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="roles()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'settings.members.role' | translate }}</th>
+                  <th>{{ 'roles.kind' | translate }}</th>
+                  <th class="num">{{ 'roles.permissions' | translate }}</th>
+                  <th class="num">{{ 'settings.members.tabMembers' | translate }}</th>
+                  <th class="actions"></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-r>
+                <tr class="clickable" tabindex="0" (click)="openRole(r)" (keydown.enter)="openRole(r)">
+                  <td class="strong">{{ lang.name(r.nameEn, r.nameKm) }}</td>
+                  <td><span class="tag" [class.tag-primary]="!r.builtIn">{{ (r.builtIn ? 'roles.builtIn' : 'roles.custom') | translate }}</span></td>
+                  <td class="num">{{ r.permissions.length }}</td>
+                  <td class="num">{{ memberCount(r) }}</td>
+                  <td class="actions">
+                    @if (canManage()) {
+                      @if (r.code !== 'OWNER') {
+                        <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary"
+                                (click)="$event.stopPropagation(); newRole(r)" [disabled]="customCount() >= 10"
+                                [attr.aria-label]="'roles.duplicate' | translate" [pTooltip]="'roles.duplicate' | translate" tooltipPosition="top"><i class="pi pi-copy" pButtonIcon></i></button>
+                      }
+                      @if (!r.builtIn) {
+                        <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="$event.stopPropagation(); deleteRole(r)"
+                                [attr.aria-label]="'roles.delete' | translate" [pTooltip]="'roles.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
+                      }
                     }
-                    @if (!r.builtIn) {
-                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="$event.stopPropagation(); deleteRole(r)"
-                              [attr.aria-label]="'roles.delete' | translate" [pTooltip]="'roles.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
-                    }
-                  }
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
@@ -158,30 +164,30 @@
     <div class="ms-form dialog-form">
       <div class="ms-field">
         <label msLabel for="iv-role">{{ 'settings.members.role' | translate }}</label>
-        <p-select inputId="iv-role" [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="inviteRole()"
+        <p-select size="small" inputId="iv-role" [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="inviteRole()"
                   (ngModelChange)="inviteRole.set($event)" appendTo="body" />
       </div>
       <div class="ms-field">
         <label msLabel for="iv-branch">{{ 'settings.members.branch' | translate }}</label>
-        <p-select inputId="iv-branch" [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="inviteBranch()"
+        <p-select size="small" inputId="iv-branch" [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="inviteBranch()"
                   (ngModelChange)="inviteBranch.set($event)" appendTo="body" />
       </div>
       <div class="ms-field">
         <label msLabel for="iv-email">{{ 'settings.members.email' | translate }}</label>
-        <input pInputText id="iv-email" type="email" [ngModel]="inviteEmail()" (ngModelChange)="inviteEmail.set($event)" />
+        <input pInputText pSize="small" id="iv-email" type="email" [ngModel]="inviteEmail()" (ngModelChange)="inviteEmail.set($event)" />
         <small class="field-hint">{{ 'settings.members.emailHint' | translate }}</small>
       </div>
     </div>
   }
   <ng-template #footer>
     @if (inviteLink(); as link) {
-      <a pButton [outlined]="true" [href]="telegramShare(link)" target="_blank" rel="noopener">
+      <a pButton size="small" [outlined]="true" [href]="telegramShare(link)" target="_blank" rel="noopener">
         <i class="pi pi-telegram" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.telegram' | translate }}</span>
       </a>
-      <button pButton type="button" [outlined]="true" (click)="copy(link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
-      <button pButton type="button" (click)="inviteOpen.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+      <button pButton size="small" type="button" [outlined]="true" (click)="copy(link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
+      <button pButton size="small" type="button" (click)="inviteOpen.set(false)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
     } @else {
-      <button pButton type="button" (click)="sendInvite()" [loading]="busy()" [disabled]="busy() || !inviteRole()"><span pButtonLabel>{{ 'settings.members.invite' | translate }}</span></button>
+      <button pButton size="small" type="button" (click)="sendInvite()" [loading]="busy()" [disabled]="busy() || !inviteRole()"><span pButtonLabel>{{ 'settings.members.invite' | translate }}</span></button>
     }
   </ng-template>
 </p-dialog>
@@ -191,7 +197,7 @@
   <div class="ms-form dialog-form">
     <div class="ms-field">
       <label msLabel for="ed-role">{{ 'settings.members.role' | translate }}</label>
-      <p-select inputId="ed-role" [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="editRole()"
+      <p-select size="small" inputId="ed-role" [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="editRole()"
                 (ngModelChange)="editRole.set($event)" appendTo="body" />
     </div>
     <div class="ms-check">
@@ -201,7 +207,7 @@
     @if (!editAll()) {
       <div class="ms-field">
         <label msLabel for="ed-branches">{{ 'settings.members.branches' | translate }}</label>
-        <p-multiselect inputId="ed-branches" [options]="branchChoices()" optionLabel="label" optionValue="value" [ngModel]="editBranches()"
+        <p-multiselect size="small" inputId="ed-branches" [options]="branchChoices()" optionLabel="label" optionValue="value" [ngModel]="editBranches()"
                        (ngModelChange)="editBranches.set($event ?? [])" [showToggleAll]="false" [filter]="false" display="chip"
                        [placeholder]="'settings.members.pickBranches' | translate" appendTo="body" />
         <small class="field-hint">{{ 'settings.members.branchesHint' | translate }}</small>
@@ -209,7 +215,7 @@
     }
   </div>
   <ng-template #footer>
-    <button pButton type="button" (click)="saveEdit()" [disabled]="!editAll() && !editBranches().length"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="saveEdit()" [disabled]="!editAll() && !editBranches().length"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>
 
@@ -224,12 +230,12 @@
   }
   <ng-template #footer>
     @if (shownLink(); as s) {
-      <a pButton [outlined]="true" [href]="telegramShare(s.link)" target="_blank" rel="noopener">
+      <a pButton size="small" [outlined]="true" [href]="telegramShare(s.link)" target="_blank" rel="noopener">
         <i class="pi pi-telegram" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.telegram' | translate }}</span>
       </a>
     }
-    <button pButton type="button" [outlined]="true" (click)="copy(shownLink()!.link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
-    <button pButton type="button" (click)="shownLink.set(null)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+    <button pButton size="small" type="button" [outlined]="true" (click)="copy(shownLink()!.link)"><i class="pi pi-copy" pButtonIcon></i><span pButtonLabel>{{ 'settings.members.copy' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="shownLink.set(null)"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
   </ng-template>
 </p-dialog>
 

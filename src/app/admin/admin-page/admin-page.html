@@ -4,7 +4,7 @@
       <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'admin.title' | translate }}</span></nav>
       @if (tab() === 'businesses') {
         <div class="page-actions">
-          <button pButton type="button" [outlined]="true" (click)="sendReminders()"><span pButtonLabel>{{ 'admin.sendReminders' | translate }}</span></button>
+          <button pButton size="small" type="button" [outlined]="true" (click)="sendReminders()"><span pButtonLabel>{{ 'admin.sendReminders' | translate }}</span></button>
         </div>
       }
     </div>
@@ -22,82 +22,84 @@
         <p-tabpanels>
           <p-tabpanel value="businesses">
             <p class="form-note"><i class="icon pi pi-info-circle"></i>{{ 'admin.lead' | translate }}</p>
-            <p-table class="ms-table" [value]="rows()" [loading]="loading()" dataKey="id" [scrollable]="true" scrollHeight="flex">
-              <ng-template #header>
-                <tr>
-                  <th>{{ 'admin.business' | translate }}</th>
-                  <th>{{ 'admin.owner' | translate }}</th>
-                  <th class="num">{{ 'admin.size' | translate }}</th>
-                  <th>{{ 'admin.plan' | translate }}</th>
-                  <th>{{ 'admin.until' | translate }}</th>
-                  <th class="actions-col">{{ 'admin.demo' | translate }}</th>
-                </tr>
-              </ng-template>
-              <ng-template #body let-r>
-                <tr>
-                  <td>
-                    <div class="strong">{{ r.nameEn }}</div>
-                    <div class="muted small">#{{ r.id }} · {{ r.createdAt | date: 'dd/MM/yyyy' }}</div>
-                    @if (r.status !== 'ACTIVE') {
-                      <span class="tag status-tag" [class.tag-danger]="r.status === 'SUSPENDED'">{{ 'admin.businessStatus.' + r.status | translate }}</span>
-                    }
-                  </td>
-                  <td class="muted">{{ r.ownerEmail ?? '—' }}</td>
-                  <td class="num muted">{{ 'admin.sizeValue' | translate: { branches: r.branches, members: r.members } }}</td>
-                  <td>
-                    <span class="strong">{{ r.planCode }}</span>
-                    <span class="tag" [class.tag-primary]="r.subscriptionStatus === 'ACTIVE' || r.subscriptionStatus === 'TRIALING'"
-                          [class.tag-danger]="r.subscriptionStatus === 'PAST_DUE'">{{ 'settings.billing.' + r.subscriptionStatus | translate }}</span>
-                    @if (r.billingCycle === 'YEARLY') {
-                      <div class="muted small">{{ 'settings.billing.YEARLY' | translate }}</div>
-                    }
-                    @if (r.addons) {
-                      <div class="muted small">+ {{ r.addons }}</div>
-                    }
-                    @if (r.cancelAtPeriodEnd) {
-                      <div class="muted small">{{ 'admin.cancelled' | translate }}</div>
-                    }
-                    @if (r.openInvoiceAmount) {
-                      <div class="danger-text small">{{ 'admin.toPay' | translate: { amount: (r.openInvoiceAmount | currency: 'USD') } }}</div>
-                    }
-                  </td>
-                  <td class="muted">
-                    @if (r.subscriptionStatus === 'TRIALING') {
-                      {{ 'admin.trialUntil' | translate: { date: (r.trialEndsAt | date: 'dd/MM/yyyy HH:mm') } }}
-                    } @else if (r.subscriptionStatus === 'ACTIVE') {
-                      {{ 'admin.periodUntil' | translate: { date: (r.currentPeriodEnd | date: 'dd/MM/yyyy HH:mm') } }}
-                    } @else if (r.subscriptionStatus === 'PAST_DUE') {
-                      {{ 'admin.pastDueSince' | translate: { date: (r.pastDueSince | date: 'dd/MM/yyyy HH:mm') } }}
-                    } @else {
-                      —
-                    }
-                  </td>
-                  <td class="actions-col">
-                    @if (r.subscriptionStatus === 'TRIALING') {
-                      <button pButton type="button" size="small" [outlined]="true" (click)="endTrial(r)" [loading]="busy() === r.id">
-                        <span pButtonLabel>{{ 'admin.endTrial' | translate }}</span>
-                      </button>
-                    } @else if (r.subscriptionStatus === 'ACTIVE' || r.subscriptionStatus === 'PAST_DUE') {
-                      <button pButton type="button" size="small" [outlined]="true" (click)="runRenewal(r)" [loading]="busy() === r.id">
-                        <span pButtonLabel>{{ 'admin.runRenewal' | translate }}</span>
-                      </button>
-                    }
-                    @if (r.subscriptionStatus !== 'PAST_DUE' && r.status !== 'ARCHIVED') {
-                      <button pButton type="button" size="small" [text]="true" (click)="openFree(r)" [disabled]="busy() === r.id">
-                        <span pButtonLabel>{{ 'admin.free.button' | translate }}</span>
-                      </button>
-                    }
-                    @if (r.status === 'ACTIVE' || r.status === 'SUSPENDED') {
-                      <button pButton type="button" size="small" [text]="true" [severity]="r.status === 'ACTIVE' ? 'danger' : 'primary'"
-                              (click)="suspend(r)" [disabled]="busy() === r.id">
-                        <span pButtonLabel>{{ (r.status === 'ACTIVE' ? 'admin.suspend' : 'admin.reactivate') | translate }}</span>
-                      </button>
-                    }
-                  </td>
-                </tr>
-              </ng-template>
-              <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'admin.none' | translate }}</td></tr></ng-template>
-            </p-table>
+            <section class="card table-card">
+              <p-table size="small" class="ms-table" [value]="rows()" [loading]="loading()" dataKey="id" [scrollable]="true" scrollHeight="flex">
+                <ng-template #header>
+                  <tr>
+                    <th>{{ 'admin.business' | translate }}</th>
+                    <th>{{ 'admin.owner' | translate }}</th>
+                    <th class="num">{{ 'admin.size' | translate }}</th>
+                    <th>{{ 'admin.plan' | translate }}</th>
+                    <th>{{ 'admin.until' | translate }}</th>
+                    <th class="actions-col">{{ 'admin.demo' | translate }}</th>
+                  </tr>
+                </ng-template>
+                <ng-template #body let-r>
+                  <tr>
+                    <td>
+                      <div class="strong">{{ r.nameEn }}</div>
+                      <div class="muted small">#{{ r.id }} · {{ r.createdAt | date: 'dd/MM/yyyy' }}</div>
+                      @if (r.status !== 'ACTIVE') {
+                        <span class="tag status-tag" [class.tag-danger]="r.status === 'SUSPENDED'">{{ 'admin.businessStatus.' + r.status | translate }}</span>
+                      }
+                    </td>
+                    <td class="muted">{{ r.ownerEmail ?? '—' }}</td>
+                    <td class="num muted">{{ 'admin.sizeValue' | translate: { branches: r.branches, members: r.members } }}</td>
+                    <td>
+                      <span class="strong">{{ r.planCode }}</span>
+                      <span class="tag" [class.tag-primary]="r.subscriptionStatus === 'ACTIVE' || r.subscriptionStatus === 'TRIALING'"
+                            [class.tag-danger]="r.subscriptionStatus === 'PAST_DUE'">{{ 'settings.billing.' + r.subscriptionStatus | translate }}</span>
+                      @if (r.billingCycle === 'YEARLY') {
+                        <div class="muted small">{{ 'settings.billing.YEARLY' | translate }}</div>
+                      }
+                      @if (r.addons) {
+                        <div class="muted small">+ {{ r.addons }}</div>
+                      }
+                      @if (r.cancelAtPeriodEnd) {
+                        <div class="muted small">{{ 'admin.cancelled' | translate }}</div>
+                      }
+                      @if (r.openInvoiceAmount) {
+                        <div class="danger-text small">{{ 'admin.toPay' | translate: { amount: (r.openInvoiceAmount | currency: 'USD') } }}</div>
+                      }
+                    </td>
+                    <td class="muted">
+                      @if (r.subscriptionStatus === 'TRIALING') {
+                        {{ 'admin.trialUntil' | translate: { date: (r.trialEndsAt | date: 'dd/MM/yyyy HH:mm') } }}
+                      } @else if (r.subscriptionStatus === 'ACTIVE') {
+                        {{ 'admin.periodUntil' | translate: { date: (r.currentPeriodEnd | date: 'dd/MM/yyyy HH:mm') } }}
+                      } @else if (r.subscriptionStatus === 'PAST_DUE') {
+                        {{ 'admin.pastDueSince' | translate: { date: (r.pastDueSince | date: 'dd/MM/yyyy HH:mm') } }}
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td class="actions-col">
+                      @if (r.subscriptionStatus === 'TRIALING') {
+                        <button pButton type="button" size="small" [outlined]="true" (click)="endTrial(r)" [loading]="busy() === r.id">
+                          <span pButtonLabel>{{ 'admin.endTrial' | translate }}</span>
+                        </button>
+                      } @else if (r.subscriptionStatus === 'ACTIVE' || r.subscriptionStatus === 'PAST_DUE') {
+                        <button pButton type="button" size="small" [outlined]="true" (click)="runRenewal(r)" [loading]="busy() === r.id">
+                          <span pButtonLabel>{{ 'admin.runRenewal' | translate }}</span>
+                        </button>
+                      }
+                      @if (r.subscriptionStatus !== 'PAST_DUE' && r.status !== 'ARCHIVED') {
+                        <button pButton type="button" size="small" [text]="true" (click)="openFree(r)" [disabled]="busy() === r.id">
+                          <span pButtonLabel>{{ 'admin.free.button' | translate }}</span>
+                        </button>
+                      }
+                      @if (r.status === 'ACTIVE' || r.status === 'SUSPENDED') {
+                        <button pButton type="button" size="small" [text]="true" [severity]="r.status === 'ACTIVE' ? 'danger' : 'primary'"
+                                (click)="suspend(r)" [disabled]="busy() === r.id">
+                          <span pButtonLabel>{{ (r.status === 'ACTIVE' ? 'admin.suspend' : 'admin.reactivate') | translate }}</span>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template #emptymessage><tr><td colspan="6" class="empty-cell">{{ 'admin.none' | translate }}</td></tr></ng-template>
+              </p-table>
+            </section>
           </p-tabpanel>
           <p-tabpanel value="stats">
             @if (tab() === 'stats') {
@@ -143,25 +145,25 @@
       <p class="muted">{{ (onFree(r) ? 'admin.free.leadFree' : r.subscriptionStatus === 'TRIALING' ? 'admin.free.leadTrial' : 'admin.free.leadActive') | translate }}</p>
       <div class="ms-field">
         <label for="fm-months">{{ 'admin.free.months' | translate }}</label>
-        <p-inputnumber inputId="fm-months" [ngModel]="freeMonths()" (ngModelChange)="freeMonths.set($event || 1)" [min]="1" [max]="24"
+        <p-inputnumber size="small" inputId="fm-months" [ngModel]="freeMonths()" (ngModelChange)="freeMonths.set($event || 1)" [min]="1" [max]="24"
                        [showButtons]="true" [fluid]="true" />
       </div>
       @if (onFree(r)) {
         <div class="ms-field">
           <span id="fm-plan">{{ 'admin.plan' | translate }}</span>
-          <p-selectbutton [options]="freePlans" optionLabel="label" optionValue="value" [ngModel]="freePlan()" (ngModelChange)="freePlan.set($event)"
+          <p-selectbutton size="small" [options]="freePlans" optionLabel="label" optionValue="value" [ngModel]="freePlan()" (ngModelChange)="freePlan.set($event)"
                           [allowEmpty]="false" ariaLabelledBy="fm-plan" />
         </div>
       }
       <div class="ms-field">
         <label for="fm-note">{{ 'common.note' | translate }}</label>
-        <input pInputText id="fm-note" [ngModel]="freeNote()" (ngModelChange)="freeNote.set($event)" maxlength="120"
+        <input pInputText pSize="small" id="fm-note" [ngModel]="freeNote()" (ngModelChange)="freeNote.set($event)" maxlength="120"
                [placeholder]="'admin.free.notePh' | translate" />
       </div>
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" (click)="giveFree()" [loading]="busy() === freeFor()?.id" [disabled]="busy() !== null">
+    <button pButton size="small" type="button" (click)="giveFree()" [loading]="busy() === freeFor()?.id" [disabled]="busy() !== null">
       <span pButtonLabel>{{ 'admin.free.give' | translate }}</span>
     </button>
   </ng-template>

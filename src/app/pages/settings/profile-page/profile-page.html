@@ -17,51 +17,51 @@
       <div class="ms-form-row">
         <div class="ms-field">
           <label msLabel for="bp-nameEn" control="nameEn">{{ 'settings.profile.nameEn' | translate }}</label>
-          <input pInputText id="bp-nameEn" formControlName="nameEn" />
+          <input pInputText pSize="small" id="bp-nameEn" formControlName="nameEn" />
         </div>
         <div class="ms-field">
           <label msLabel for="bp-nameKm" control="nameKm">{{ 'settings.profile.nameKm' | translate }}</label>
-          <input pInputText id="bp-nameKm" formControlName="nameKm" />
+          <input pInputText pSize="small" id="bp-nameKm" formControlName="nameKm" />
         </div>
       </div>
       <div class="ms-form-row">
         <div class="ms-field">
           <label msLabel for="bp-type" control="businessType">{{ 'settings.profile.type' | translate }}</label>
-          <p-select inputId="bp-type" formControlName="businessType" [options]="types()" optionLabel="label" optionValue="value" />
+          <p-select size="small" inputId="bp-type" formControlName="businessType" [options]="types()" optionLabel="label" optionValue="value" />
         </div>
         <div class="ms-field">
           <label msLabel for="bp-tin" control="vatTin">{{ 'settings.profile.vatTin' | translate }}</label>
-          <input pInputText id="bp-tin" formControlName="vatTin" />
+          <input pInputText pSize="small" id="bp-tin" formControlName="vatTin" />
         </div>
       </div>
       <div class="ms-form-row">
         <div class="ms-field">
           <label msLabel for="bp-phone" control="phone" error="errors.phone">{{ 'settings.profile.phone' | translate }}</label>
-          <input pInputText id="bp-phone" type="tel" formControlName="phone" />
+          <input pInputText pSize="small" id="bp-phone" type="tel" formControlName="phone" />
         </div>
         <div class="ms-field">
           <label msLabel for="bp-email" control="email" error="errors.email">{{ 'settings.profile.email' | translate }}</label>
-          <input pInputText id="bp-email" type="email" formControlName="email" />
+          <input pInputText pSize="small" id="bp-email" type="email" formControlName="email" />
         </div>
       </div>
       <div class="ms-form-row">
         <div class="ms-field">
           <label msLabel for="bp-address" control="address">{{ 'settings.profile.address' | translate }}</label>
-          <input pInputText id="bp-address" formControlName="address" />
+          <input pInputText pSize="small" id="bp-address" formControlName="address" />
         </div>
         <div class="ms-field">
           <label msLabel for="bp-province" control="province">{{ 'settings.profile.province' | translate }}</label>
-          <input pInputText id="bp-province" formControlName="province" />
+          <input pInputText pSize="small" id="bp-province" formControlName="province" />
         </div>
       </div>
       <div class="ms-field">
         <span msLabel id="bp-lang">{{ 'settings.profile.language' | translate }}</span>
-        <p-selectbutton formControlName="language" [options]="languages" optionLabel="label" optionValue="value" [allowEmpty]="false"
+        <p-selectbutton size="small" formControlName="language" [options]="languages" optionLabel="label" optionValue="value" [allowEmpty]="false"
                         ariaLabelledBy="bp-lang" />
       </div>
       @if (form.enabled) {
         <div class="settings-actions">
-          <button pButton type="submit" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+          <button pButton size="small" type="submit" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
         </div>
       }
     </form>
@@ -71,7 +71,7 @@
           <h3 class="form-section">{{ 'settings.export.title' | translate }}</h3>
           <p class="muted small">{{ (exportInPlan() ? 'settings.export.lead' : 'settings.export.notInPlan') | translate }}</p>
         </div>
-        <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !exportInPlan()">
+        <button pButton size="small" type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !exportInPlan()">
           <i class="pi pi-file-excel" pButtonIcon></i><span pButtonLabel>{{ 'settings.export.button' | translate }}</span>
         </button>
       </section>
@@ -82,7 +82,7 @@
           <h3 class="form-section">{{ 'settings.archive.title' | translate }}</h3>
           <p class="muted small">{{ 'settings.archive.lead' | translate }}</p>
         </div>
-        <button pButton type="button" severity="danger" [outlined]="true" (click)="archive()" [loading]="archiving()" [disabled]="archiving()">
+        <button pButton size="small" type="button" severity="danger" [outlined]="true" (click)="archive()" [loading]="archiving()" [disabled]="archiving()">
           <span pButtonLabel>{{ 'settings.archive.button' | translate }}</span>
         </button>
       </section>

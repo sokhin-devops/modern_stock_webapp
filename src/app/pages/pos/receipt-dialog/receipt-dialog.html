@@ -62,9 +62,9 @@
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" [outlined]="true" (click)="print()">
+    <button pButton size="small" type="button" [outlined]="true" (click)="print()">
       <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'pos.print' | translate }}</span>
     </button>
-    <button pButton type="button" (click)="next()"><span pButtonLabel>{{ 'pos.newSale' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="next()"><span pButtonLabel>{{ 'pos.newSale' | translate }}</span></button>
   </ng-template>
 </p-dialog>

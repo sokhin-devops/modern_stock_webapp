@@ -8,7 +8,7 @@
       @case ('done') {
         <span class="big-icon"><i class="icon pi pi-check-circle"></i></span>
         <h2 class="page-title">{{ 'auth.verified' | translate }}</h2>
-        <a pButton routerLink="/login"><span pButtonLabel>{{ 'auth.signIn' | translate }}</span></a>
+        <a pButton size="small" routerLink="/login"><span pButtonLabel>{{ 'auth.signIn' | translate }}</span></a>
       }
       @default {
         <span class="big-icon danger"><i class="icon pi pi-ban"></i></span>
@@ -20,14 +20,14 @@
             <p class="muted">{{ 'auth.newLinkLead' | translate }}</p>
             <div class="ms-field">
               <label msLabel for="ve-email" [control]="email" error="errors.email">{{ 'auth.email' | translate }}</label>
-              <input pInputText id="ve-email" type="email" [formControl]="email" autocomplete="email" autocapitalize="off" />
+              <input pInputText pSize="small" id="ve-email" type="email" [formControl]="email" autocomplete="email" autocapitalize="off" />
             </div>
-            <button pButton type="submit" [loading]="resending()" [disabled]="resending()">
+            <button pButton size="small" type="submit" [loading]="resending()" [disabled]="resending()">
               <span pButtonLabel>{{ 'auth.resend' | translate }}</span>
             </button>
           </form>
         }
-        <a pButton routerLink="/login" [text]="true"><span pButtonLabel>{{ 'auth.backToSignIn' | translate }}</span></a>
+        <a pButton size="small" routerLink="/login" [text]="true"><span pButtonLabel>{{ 'auth.backToSignIn' | translate }}</span></a>
       }
     }
   </div>

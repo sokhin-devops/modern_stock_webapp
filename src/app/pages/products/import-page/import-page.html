@@ -8,7 +8,7 @@
   <div class="page-body">
     <div class="settings-card ms-form wide">
       @if (kinds().length > 1) {
-        <p-selectbutton [options]="kinds()" optionValue="value" [ngModel]="kind()" (ngModelChange)="setKind($event)" [allowEmpty]="false"
+        <p-selectbutton size="small" [options]="kinds()" optionValue="value" [ngModel]="kind()" (ngModelChange)="setKind($event)" [allowEmpty]="false"
                         [ariaLabel]="'nav.import' | translate">
           <ng-template #item let-o>{{ o.label | translate }}</ng-template>
         </p-selectbutton>
@@ -19,7 +19,7 @@
       @if (kind() === 'stock') {
         <div class="ms-field warehouse">
           <label msLabel for="im-warehouse" required>{{ 'import.warehouse' | translate }}</label>
-          <p-select inputId="im-warehouse" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+          <p-select size="small" inputId="im-warehouse" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
                     (ngModelChange)="setWarehouse($event)" appendTo="body" />
         </div>
       }
@@ -27,7 +27,7 @@
       <ol class="steps">
         <li>
           <span class="step">1</span>
-          <button pButton type="button" [outlined]="true" (click)="downloadTemplate()">
+          <button pButton size="small" type="button" [outlined]="true" (click)="downloadTemplate()">
             <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'import.template' | translate }}</span>
           </button>
         </li>
@@ -74,40 +74,42 @@
             </label>
           }
         </div>
-        <p-table class="ms-table" [value]="shown()" [scrollable]="true" scrollHeight="440px" dataKey="row">
-          <ng-template #header>
-            <tr>
-              <th class="row-col">{{ 'import.row' | translate }}</th>
-              <th>{{ 'common.product' | translate }}</th>
-              <th>{{ 'import.result' | translate }}</th>
-            </tr>
-          </ng-template>
-          <ng-template #body let-row>
-            <tr [class.bad]="!row.ok">
-              <td class="row-col muted">{{ row.row }}</td>
-              <td class="strong">{{ row.label ?? '—' }}</td>
-              <td>
-                @if (done() && row.ok) {
-                  <span class="tag tag-primary"><i class="icon pi pi-check"></i>{{ 'import.imported' | translate }}</span>
-                } @else if (row.ok) {
-                  <span class="tag"><i class="icon pi pi-check"></i>{{ 'import.ready' | translate }}</span>
-                }
-                @for (e of row.errors; track e) {
-                  <div class="danger-text small">{{ e }}</div>
-                }
-                @if (row.ok) {
-                  @for (n of row.notes; track n) {
-                    <div class="muted small">{{ n }}</div>
+        <section class="card table-card">
+          <p-table size="small" class="ms-table" [value]="shown()" [scrollable]="true" scrollHeight="440px" dataKey="row">
+            <ng-template #header>
+              <tr>
+                <th class="row-col">{{ 'import.row' | translate }}</th>
+                <th>{{ 'common.product' | translate }}</th>
+                <th>{{ 'import.result' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-row>
+              <tr [class.bad]="!row.ok">
+                <td class="row-col muted">{{ row.row }}</td>
+                <td class="strong">{{ row.label ?? '—' }}</td>
+                <td>
+                  @if (done() && row.ok) {
+                    <span class="tag tag-primary"><i class="icon pi pi-check"></i>{{ 'import.imported' | translate }}</span>
+                  } @else if (row.ok) {
+                    <span class="tag"><i class="icon pi pi-check"></i>{{ 'import.ready' | translate }}</span>
                   }
-                }
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
+                  @for (e of row.errors; track e) {
+                    <div class="danger-text small">{{ e }}</div>
+                  }
+                  @if (row.ok) {
+                    @for (n of row.notes; track n) {
+                      <div class="muted small">{{ n }}</div>
+                    }
+                  }
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </section>
         @if (!done()) {
           <div class="settings-actions">
-            <button pButton type="button" [text]="true" (click)="reset()"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
-            <button pButton type="button" (click)="run()" [loading]="busy() === 'import'" [disabled]="busy() !== null || !r.valid">
+            <button pButton size="small" type="button" [text]="true" (click)="reset()"><span pButtonLabel>{{ 'common.cancel' | translate }}</span></button>
+            <button pButton size="small" type="button" (click)="run()" [loading]="busy() === 'import'" [disabled]="busy() !== null || !r.valid">
               <i class="pi pi-upload" pButtonIcon></i><span pButtonLabel>{{ 'import.run' | translate: { n: r.valid } }}</span>
             </button>
           </div>

@@ -2,7 +2,6 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { Checkbox } from 'primeng/checkbox';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -14,7 +13,8 @@ import { ApiService } from '../../core/api/api.service';
 import { BusinessSettings, Currency, PaymentMethod } from '../../core/api/models';
 import { BusinessService } from '../../core/business/business.service';
 import { NotifyService } from '../../core/notify.service';
-import { FieldLabel } from '../field-label/field-label';
+import { FieldLabel } from '../field-label/field-label';
+import { PickField } from '../pick/pick';
 
 interface Party {
   id: number;
@@ -46,7 +46,7 @@ interface Chosen {
 @Component({
   selector: 'ms-payment-dialog',
   imports: [
-    FormsModule, TranslatePipe, CurrencyPipe, DatePipe, Dialog, AutoComplete, Checkbox, InputNumber, InputText, SelectButton, ButtonDirective,
+    FormsModule, TranslatePipe, CurrencyPipe, DatePipe, Dialog, PickField, Checkbox, InputNumber, InputText, SelectButton, ButtonDirective,
     ButtonLabel, FieldLabel,
   ],
   templateUrl: './payment-dialog.html',
@@ -64,7 +64,6 @@ export class PaymentDialog {
   private readonly notify = inject(NotifyService);
 
   protected readonly party = signal<Party | null>(null);
-  protected readonly parties = signal<Party[]>([]);
   protected readonly amount = signal<number | null>(null);
   protected readonly currency = signal<Currency>('USD');
   protected readonly method = signal<PaymentMethod>('CASH');
@@ -127,12 +126,6 @@ export class PaymentDialog {
         }
       }
     });
-  }
-
-  protected find(event: AutoCompleteCompleteEvent): void {
-    this.api
-      .page<Party>(this.isCustomer() ? '/customers' : '/suppliers', { page: 0, size: 10 }, { q: event.query })
-      .subscribe({ next: (p) => this.parties.set(p.content) });
   }
 
   /** Picking someone who owes (or is owed) fills in the whole balance. */

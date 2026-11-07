@@ -4,7 +4,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { Dialog } from 'primeng/dialog';
@@ -32,6 +31,7 @@ import { Option, warehouseOptions } from '../../../shared/options';
 import { AttachButton } from '../../../shared/attach-button/attach-button';
 import { exportList } from '../../../shared/list-export';
 import { toIsoDate } from '../../../shared/dates';
+import { PickField } from '../../../shared/pick/pick';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 interface CountLine {
@@ -91,7 +91,7 @@ interface StockCount {
   selector: 'ms-counts-page',
   imports: [AttachButton, DatePicker,
     FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, TableModule, Dialog, IconField, InputIcon,
-    InputNumber, InputText, ProgressBar, Select, SelectButton, ToggleSwitch, AutoComplete, ButtonDirective, ButtonIcon,
+    InputNumber, InputText, ProgressBar, Select, SelectButton, ToggleSwitch, PickField, ButtonDirective, ButtonIcon,
     ButtonLabel, FieldLabel, CameraScanner,
   ],
   templateUrl: './counts-page.html',
@@ -188,7 +188,6 @@ export class CountsPage {
   protected readonly scope = signal<CountScope>('ALL');
   protected readonly categoryId = signal<number | null>(null);
   protected readonly chosen = signal<Product[]>([]);
-  protected readonly found = signal<Product[]>([]);
   protected readonly blind = signal(false);
   protected readonly canStart = computed(
     () =>
@@ -265,13 +264,6 @@ export class CountsPage {
     this.chosen.set([]);
     this.blind.set(false);
     this.startOpen.set(true);
-  }
-
-  protected findProducts(event: AutoCompleteCompleteEvent): void {
-    this.catalog.searchProducts({ page: 0, size: 15, sort: 'nameEn,asc', q: event.query }).subscribe({
-      next: (page) => this.found.set(page.content.filter((p) => !this.chosen().some((c) => c.id === p.id))),
-      error: (e) => this.notify.error(e),
-    });
   }
 
   protected start(): void {

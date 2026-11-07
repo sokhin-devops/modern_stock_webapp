@@ -11,7 +11,6 @@ import { SelectButton } from 'primeng/selectbutton';
 
 import { environment } from '../../../environments/environment';
 import { DashboardData, StockRow, StockSummary } from '../../core/api/models';
-import { AuthService } from '../../core/auth/auth.service';
 import { BillingService } from '../../core/billing.service';
 import { BusinessService } from '../../core/business/business.service';
 import { LangService } from '../../core/lang.service';
@@ -38,7 +37,6 @@ const USD_SHORT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 
 export class Dashboard {
   protected readonly business = inject(BusinessService);
   protected readonly lang = inject(LangService);
-  protected readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
 
@@ -86,14 +84,6 @@ export class Dashboard {
 
   /** Bars of the best sellers, as a share of the first. */
   protected readonly topMax = computed(() => Math.max(1, ...(this.data.value()?.topProducts ?? []).map((p) => p.sales)));
-
-  /** Trial days left, while the top banner (last 7 days without a plan) is not already saying so. */
-  protected readonly trialDaysLeft = computed(() => {
-    const days = this.billingState.trialDaysLeft();
-    return days != null && (days > 7 || this.billing()?.subscribed) ? days : null;
-  });
-
-  protected readonly firstName = computed(() => this.auth.user()?.fullName.split(' ')[0] ?? '');
 
   /** Something waits for the member (approvals, transfers to receive, counts in progress). */
   protected readonly waitingCount = computed(() => {

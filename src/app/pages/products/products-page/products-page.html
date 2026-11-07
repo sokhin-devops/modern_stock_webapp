@@ -3,24 +3,24 @@
     <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'products.title' | translate }}</span></nav>
     <div class="page-actions">
       @if (tab() === 'products') {
-        <button pButton type="button" [outlined]="true" (click)="labelsOpen.set(true)">
+        <button pButton size="small" type="button" [outlined]="true" (click)="labelsOpen.set(true)">
           <i class="pi pi-barcode" pButtonIcon></i><span pButtonLabel>{{ 'labels.button' | translate }}</span>
         </button>
       }
       @if (canManage()) {
         @switch (tab()) {
           @case ('products') {
-            <button pButton type="button" (click)="openProduct(null)">
+            <button pButton size="small" type="button" (click)="openProduct(null)">
               <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'products.new' | translate }}</span>
             </button>
           }
           @case ('categories') {
-            <button pButton type="button" (click)="openCategory(null)">
+            <button pButton size="small" type="button" (click)="openCategory(null)">
               <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'products.newCategory' | translate }}</span>
             </button>
           }
           @case ('units') {
-            <button pButton type="button" (click)="openUnit(null)">
+            <button pButton size="small" type="button" (click)="openUnit(null)">
               <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'products.newUnit' | translate }}</span>
             </button>
           }
@@ -41,146 +41,152 @@
           <div class="toolbar">
             <p-iconfield class="search">
               <p-inputicon class="pi pi-search" />
-              <input pInputText type="search" [placeholder]="'products.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
+              <input pInputText pSize="small" type="search" [placeholder]="'products.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
                      (input)="onSearch($any($event.target).value)" />
             </p-iconfield>
-            <p-select [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
+            <p-select size="small" [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
                       (ngModelChange)="setCategory($event)" [showClear]="true" [placeholder]="'products.allCategories' | translate"
                       [ariaLabel]="'products.category' | translate" class="category-filter" appendTo="body" />
-            <p-togglebutton [ngModel]="showInactive()" (ngModelChange)="setInactive($event)"
+            <p-togglebutton size="small" [ngModel]="showInactive()" (ngModelChange)="setInactive($event)"
                             [onLabel]="'products.showInactive' | translate" [offLabel]="'products.showInactive' | translate"
                             onIcon="pi pi-eye-slash" offIcon="pi pi-eye-slash" />
           </div>
 
-          <p-table class="ms-table" [value]="rows()" [lazy]="true" (onLazyLoad)="load($event)" [loading]="loading()"
-                   [paginator]="true" [rows]="20" [first]="first()" [totalRecords]="total()" [rowsPerPageOptions]="[20, 50, 100]"
-                   [showCurrentPageReport]="true" [currentPageReportTemplate]="'{first}–{last} / {totalRecords}'"
-                   [scrollable]="true" scrollHeight="flex" sortField="nameEn" [sortOrder]="1" dataKey="id" [rowHover]="true">
-            <ng-template #header>
-              <tr>
-                <th pSortableColumn="nameEn">{{ 'products.colProduct' | translate }} <p-sortIcon field="nameEn" /></th>
-                <th pSortableColumn="sku">{{ 'products.colSku' | translate }} <p-sortIcon field="sku" /></th>
-                <th>{{ 'products.colCategory' | translate }}</th>
-                <th pSortableColumn="sellPrice" class="num">{{ 'products.colPrice' | translate }} <p-sortIcon field="sellPrice" /></th>
-                <th class="num">{{ 'products.colStock' | translate }}</th>
-                <th>{{ 'products.colStatus' | translate }}</th>
-                @if (showActions()) {
-                  <th class="actions"></th>
-                }
-              </tr>
-            </ng-template>
-            <ng-template #body let-p>
-              <tr class="clickable" tabindex="0" (click)="openProduct(p)" (keydown.enter)="openProduct(p)">
-                <td>
-                  <div class="prod-cell">
-                    <span class="thumb-sm">
-                      @if (p.photoUrl) {
-                        <img [src]="p.photoUrl | apiFile" alt="" loading="lazy" />
-                      } @else {
-                        <i class="icon pi pi-box"></i>
-                      }
-                    </span>
-                    <div>
-                      <div class="strong">{{ lang.name(p.nameEn, p.nameKm) }}</div>
-                      @if (p.barcode) {
-                        <small>{{ p.barcode }}</small>
-                      }
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="rows()" [lazy]="true" (onLazyLoad)="load($event)" [loading]="loading()"
+                     [paginator]="true" [rows]="20" [first]="first()" [totalRecords]="total()" [rowsPerPageOptions]="[20, 50, 100]"
+                     [showCurrentPageReport]="true" [currentPageReportTemplate]="'{first}–{last} / {totalRecords}'"
+                     [scrollable]="true" scrollHeight="flex" sortField="nameEn" [sortOrder]="1" dataKey="id" [rowHover]="true">
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="nameEn">{{ 'products.colProduct' | translate }} <p-sortIcon field="nameEn" /></th>
+                  <th pSortableColumn="sku">{{ 'products.colSku' | translate }} <p-sortIcon field="sku" /></th>
+                  <th>{{ 'products.colCategory' | translate }}</th>
+                  <th pSortableColumn="sellPrice" class="num">{{ 'products.colPrice' | translate }} <p-sortIcon field="sellPrice" /></th>
+                  <th class="num">{{ 'products.colStock' | translate }}</th>
+                  <th>{{ 'products.colStatus' | translate }}</th>
+                  @if (showActions()) {
+                    <th class="actions"></th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-p>
+                <tr class="clickable" tabindex="0" (click)="openProduct(p)" (keydown.enter)="openProduct(p)">
+                  <td>
+                    <div class="prod-cell">
+                      <span class="thumb-sm">
+                        @if (p.photoUrl) {
+                          <img [src]="p.photoUrl | apiFile" alt="" loading="lazy" />
+                        } @else {
+                          <i class="icon pi pi-box"></i>
+                        }
+                      </span>
+                      <div>
+                        <div class="strong">{{ lang.name(p.nameEn, p.nameKm) }}</div>
+                        @if (p.barcode) {
+                          <small>{{ p.barcode }}</small>
+                        }
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td class="muted">{{ p.sku }}</td>
-                <td>{{ categoryLabel(p.categoryId) }}</td>
-                <td class="num">{{ p.sellPrice | currency: 'USD' : 'symbol' : '1.2-4' }}</td>
-                <td class="num">{{ p.qtyOnHand | number: '1.0-3' }} {{ p.baseUnitSymbol }}</td>
-                <td>
-                  @let s = status(p);
-                  <span class="tag" [class]="s.tone">{{ s.key | translate }}</span>
-                </td>
-                @if (showActions()) {
-                  <td class="actions">
-                    @if (canBranchReorder()) {
-                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary"
-                              (click)="$event.stopPropagation(); pricing.set(p); reorderOpen.set(true)"
-                              [attr.aria-label]="'products.branchReorder' | translate" [pTooltip]="'products.branchReorder' | translate"
-                              tooltipPosition="top">
-                        <i class="pi pi-sort-amount-down" pButtonIcon></i>
-                      </button>
-                    }
-                    @if (canBranchPrices()) {
-                      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary"
-                              (click)="$event.stopPropagation(); pricing.set(p); pricesOpen.set(true)"
-                              [attr.aria-label]="'products.branchPrices' | translate" [pTooltip]="'products.branchPrices' | translate" tooltipPosition="top">
-                        <i class="pi pi-tags" pButtonIcon></i>
-                      </button>
-                    }
                   </td>
-                }
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr>
-                <td [attr.colspan]="showActions() ? 7 : 6" class="empty-cell">{{ (q() || categoryId() ? 'common.noResults' : 'products.empty') | translate }}</td>
-              </tr>
-            </ng-template>
-          </p-table>
+                  <td class="muted">{{ p.sku }}</td>
+                  <td>{{ categoryLabel(p.categoryId) }}</td>
+                  <td class="num">{{ p.sellPrice | currency: 'USD' : 'symbol' : '1.2-4' }}</td>
+                  <td class="num">{{ p.qtyOnHand | number: '1.0-3' }} {{ p.baseUnitSymbol }}</td>
+                  <td>
+                    @let s = status(p);
+                    <span class="tag" [class]="s.tone">{{ s.key | translate }}</span>
+                  </td>
+                  @if (showActions()) {
+                    <td class="actions">
+                      @if (canBranchReorder()) {
+                        <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary"
+                                (click)="$event.stopPropagation(); pricing.set(p); reorderOpen.set(true)"
+                                [attr.aria-label]="'products.branchReorder' | translate" [pTooltip]="'products.branchReorder' | translate"
+                                tooltipPosition="top">
+                          <i class="pi pi-sort-amount-down" pButtonIcon></i>
+                        </button>
+                      }
+                      @if (canBranchPrices()) {
+                        <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary"
+                                (click)="$event.stopPropagation(); pricing.set(p); pricesOpen.set(true)"
+                                [attr.aria-label]="'products.branchPrices' | translate" [pTooltip]="'products.branchPrices' | translate" tooltipPosition="top">
+                          <i class="pi pi-tags" pButtonIcon></i>
+                        </button>
+                      }
+                    </td>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr>
+                  <td [attr.colspan]="showActions() ? 7 : 6" class="empty-cell">{{ (q() || categoryId() ? 'common.noResults' : 'products.empty') | translate }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
 
         <p-tabpanel value="categories">
-          <p-table class="ms-table" [value]="catalog.categories()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
-            <ng-template #header>
-              <tr>
-                <th>{{ 'products.catName' | translate }}</th>
-                <th>{{ 'products.parent' | translate }}</th>
-                <th class="actions"></th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-c>
-              <tr>
-                <td class="strong">{{ lang.name(c.nameEn, c.nameKm) }}</td>
-                <td class="muted">{{ c.parentId ? categoryLabel(c.parentId) : ('products.noParent' | translate) }}</td>
-                <td class="actions">
-                  @if (canManage()) {
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="openCategory(c)"
-                            [attr.aria-label]="'common.edit' | translate" [pTooltip]="'common.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="deleteCategory(c)"
-                            [attr.aria-label]="'common.delete' | translate" [pTooltip]="'common.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
-                  }
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr><td colspan="3" class="empty-cell">{{ 'products.catEmpty' | translate }}</td></tr>
-            </ng-template>
-          </p-table>
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="catalog.categories()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'products.catName' | translate }}</th>
+                  <th>{{ 'products.parent' | translate }}</th>
+                  <th class="actions"></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-c>
+                <tr>
+                  <td class="strong">{{ lang.name(c.nameEn, c.nameKm) }}</td>
+                  <td class="muted">{{ c.parentId ? categoryLabel(c.parentId) : ('products.noParent' | translate) }}</td>
+                  <td class="actions">
+                    @if (canManage()) {
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="openCategory(c)"
+                              [attr.aria-label]="'common.edit' | translate" [pTooltip]="'common.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="deleteCategory(c)"
+                              [attr.aria-label]="'common.delete' | translate" [pTooltip]="'common.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
+                    }
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="3" class="empty-cell">{{ 'products.catEmpty' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
 
         <p-tabpanel value="units">
-          <p-table class="ms-table" [value]="catalog.units()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
-            <ng-template #header>
-              <tr>
-                <th>{{ 'products.unit' | translate }}</th>
-                <th>{{ 'products.symbol' | translate }}</th>
-                <th class="actions"></th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-u>
-              <tr>
-                <td class="strong">{{ lang.name(u.nameEn, u.nameKm) }}</td>
-                <td class="muted">{{ u.symbol }}</td>
-                <td class="actions">
-                  @if (canManage()) {
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="openUnit(u)"
-                            [attr.aria-label]="'common.edit' | translate" [pTooltip]="'common.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
-                    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="deleteUnit(u)"
-                            [attr.aria-label]="'common.delete' | translate" [pTooltip]="'common.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
-                  }
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr><td colspan="3" class="empty-cell">{{ 'products.unitsEmpty' | translate }}</td></tr>
-            </ng-template>
-          </p-table>
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="catalog.units()" [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'products.unit' | translate }}</th>
+                  <th>{{ 'products.symbol' | translate }}</th>
+                  <th class="actions"></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-u>
+                <tr>
+                  <td class="strong">{{ lang.name(u.nameEn, u.nameKm) }}</td>
+                  <td class="muted">{{ u.symbol }}</td>
+                  <td class="actions">
+                    @if (canManage()) {
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="openUnit(u)"
+                              [attr.aria-label]="'common.edit' | translate" [pTooltip]="'common.edit' | translate" tooltipPosition="top"><i class="pi pi-pencil" pButtonIcon></i></button>
+                      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="deleteUnit(u)"
+                              [attr.aria-label]="'common.delete' | translate" [pTooltip]="'common.delete' | translate" tooltipPosition="top"><i class="pi pi-trash" pButtonIcon></i></button>
+                    }
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="3" class="empty-cell">{{ 'products.unitsEmpty' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>

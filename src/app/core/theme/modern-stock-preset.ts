@@ -118,8 +118,11 @@ export const ModernStockPreset = definePreset(Material, {
       900: '#0d47a1',
       950: '#041e49',
     },
+    // Every control is drawn at PrimeNG's small size (size="small" / pSize="small", Improve.md 1): 14 px text and
+    // 8 px above and below, so fields, selects and buttons line up at about 34 px.
     formField: {
       borderRadius: '10px',
+      sm: { fontSize: '0.875rem', paddingX: '0.75rem', paddingY: '0.5rem' },
     },
     content: {
       borderRadius: '12px',
@@ -181,12 +184,18 @@ export const ModernStockPreset = definePreset(Material, {
         paddingX: '20px',
         paddingY: '10px',
         iconOnlyWidth: '40px',
+        sm: { fontSize: '0.875rem', paddingX: '14px', paddingY: '7px', iconOnlyWidth: '34px' },
         label: { fontWeight: '500' },
       },
       colorScheme: {
         light: { text: flatButtons, outlined: outlinedButtons },
         dark: { text: flatButtons, outlined: outlinedButtons },
       },
+    },
+    datatable: {
+      headerCell: { sm: { padding: '0.5rem 0.75rem' } },
+      bodyCell: { sm: { padding: '0.5rem 0.75rem' } },
+      footerCell: { sm: { padding: '0.5rem 0.75rem' } },
     },
     progressbar: {
       root: { background: 'var(--surface-3)', borderRadius: '999px', height: '6px' },
@@ -202,7 +211,7 @@ export const ModernStockPreset = definePreset(Material, {
     },
     // Segmented choices (riel rounding, Monthly / Yearly): the chosen one in the brand's light container.
     togglebutton: {
-      root: { checkedColor: 'var(--on-primary-container)', checkedBorderColor: 'var(--border-strong)' },
+      root: { sm: { fontSize: '0.875rem', padding: '0.4375rem 0.75rem' }, checkedColor:'var(--on-primary-container)', checkedBorderColor: 'var(--border-strong)' },
       icon: { checkedColor: 'var(--on-primary-container)' },
       colorScheme: {
         light: { root: { hoverBackground: 'var(--surface-3)', checkedBackground: 'var(--primary-container)' } },

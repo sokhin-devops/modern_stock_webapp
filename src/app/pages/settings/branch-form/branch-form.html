@@ -4,30 +4,30 @@
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="br-nameEn" control="nameEn">{{ 'settings.branches.nameEn' | translate }}</label>
-        <input pInputText id="br-nameEn" formControlName="nameEn" />
+        <input pInputText pSize="small" id="br-nameEn" formControlName="nameEn" />
       </div>
       <div class="ms-field">
         <label msLabel for="br-code" control="code">{{ 'settings.branches.code' | translate }}</label>
-        <input pInputText id="br-code" formControlName="code" />
+        <input pInputText pSize="small" id="br-code" formControlName="code" />
       </div>
     </div>
     <div class="ms-field">
       <label msLabel for="br-nameKm" control="nameKm">{{ 'settings.branches.nameKm' | translate }}</label>
-      <input pInputText id="br-nameKm" formControlName="nameKm" />
+      <input pInputText pSize="small" id="br-nameKm" formControlName="nameKm" />
     </div>
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="br-phone" control="phone" error="errors.phone">{{ 'settings.branches.phone' | translate }}</label>
-        <input pInputText id="br-phone" type="tel" formControlName="phone" />
+        <input pInputText pSize="small" id="br-phone" type="tel" formControlName="phone" />
       </div>
       <div class="ms-field">
         <label msLabel for="br-province" control="province">{{ 'settings.branches.province' | translate }}</label>
-        <input pInputText id="br-province" formControlName="province" />
+        <input pInputText pSize="small" id="br-province" formControlName="province" />
       </div>
     </div>
     <div class="ms-field">
       <label msLabel for="br-address" control="address">{{ 'settings.branches.address' | translate }}</label>
-      <input pInputText id="br-address" formControlName="address" />
+      <input pInputText pSize="small" id="br-address" formControlName="address" />
     </div>
   </form>
 
@@ -37,12 +37,12 @@
     <div class="warehouses">
       @for (w of warehouses(); track w.id) {
         <div class="warehouse" [class.off]="!w.active">
-          <input pInputText [(ngModel)]="w.nameEn" [disabled]="!canManage()" [attr.aria-label]="'settings.branches.warehouseName' | translate" />
-          <label class="ms-check"><p-checkbox [(ngModel)]="w.sales" [binary]="true" [disabled]="!canManage()" />{{ 'settings.branches.sales' | translate }}</label>
-          <label class="ms-check"><p-checkbox [(ngModel)]="w.receiving" [binary]="true" [disabled]="!canManage()" />{{ 'settings.branches.receiving' | translate }}</label>
-          <label class="ms-check"><p-checkbox [(ngModel)]="w.active" [binary]="true" [disabled]="!canManage()" />{{ 'common.active' | translate }}</label>
+          <input pInputText pSize="small" [(ngModel)]="w.nameEn" [disabled]="!canManage()" [attr.aria-label]="'settings.branches.warehouseName' | translate" />
+          <label class="ms-check"><p-checkbox size="small" [(ngModel)]="w.sales" [binary]="true" [disabled]="!canManage()" />{{ 'settings.branches.sales' | translate }}</label>
+          <label class="ms-check"><p-checkbox size="small" [(ngModel)]="w.receiving" [binary]="true" [disabled]="!canManage()" />{{ 'settings.branches.receiving' | translate }}</label>
+          <label class="ms-check"><p-checkbox size="small" [(ngModel)]="w.active" [binary]="true" [disabled]="!canManage()" />{{ 'common.active' | translate }}</label>
           @if (canManage()) {
-            <button pButton type="button" [rounded]="true" [text]="true" (click)="saveWarehouse(w)" [attr.aria-label]="'common.save' | translate" [pTooltip]="'common.save' | translate" tooltipPosition="top">
+            <button pButton size="small" type="button" [rounded]="true" [text]="true" (click)="saveWarehouse(w)" [attr.aria-label]="'common.save' | translate" [pTooltip]="'common.save' | translate" tooltipPosition="top">
               <i class="pi pi-check" pButtonIcon></i>
             </button>
           }
@@ -50,9 +50,9 @@
       }
       @if (canManage()) {
         <div class="warehouse add">
-          <input pInputText [ngModel]="newWarehouse()" (ngModelChange)="newWarehouse.set($event)" (keydown.enter)="addWarehouse()"
+          <input pInputText pSize="small" [ngModel]="newWarehouse()" (ngModelChange)="newWarehouse.set($event)" (keydown.enter)="addWarehouse()"
                  [placeholder]="'settings.branches.warehouseName' | translate" [attr.aria-label]="'settings.branches.warehouseName' | translate" />
-          <button pButton type="button" [text]="true" (click)="addWarehouse()" [disabled]="!newWarehouse().trim()">
+          <button pButton size="small" type="button" [text]="true" (click)="addWarehouse()" [disabled]="!newWarehouse().trim()">
             <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'settings.branches.addWarehouse' | translate }}</span>
           </button>
         </div>
@@ -63,13 +63,13 @@
   <ng-template #footer>
     <div class="dialog-actions">
       @if (canManage() && branch() && !branch()!.main && branch()!.active) {
-        <button pButton type="button" [text]="true" severity="danger" (click)="deactivate()">
+        <button pButton size="small" type="button" [text]="true" severity="danger" (click)="deactivate()">
           <span pButtonLabel>{{ 'settings.branches.deactivate' | translate }}</span>
         </button>
       }
       <span class="spacer"></span>
       @if (canManage()) {
-        <button pButton type="submit" form="branch-form" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+        <button pButton size="small" type="submit" form="branch-form" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
       }
     </div>
   </ng-template>

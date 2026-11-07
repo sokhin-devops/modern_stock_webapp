@@ -3,20 +3,20 @@
   <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="unit-form">
     <div class="ms-field">
       <label msLabel for="u-nameEn" control="nameEn">{{ 'products.catName' | translate }}</label>
-      <input pInputText id="u-nameEn" formControlName="nameEn" />
+      <input pInputText pSize="small" id="u-nameEn" formControlName="nameEn" />
     </div>
     <div class="ms-field">
       <label msLabel for="u-nameKm" control="nameKm" optional>{{ 'products.catNameKm' | translate }}</label>
-      <input pInputText id="u-nameKm" formControlName="nameKm" />
+      <input pInputText pSize="small" id="u-nameKm" formControlName="nameKm" />
     </div>
     <div class="ms-field">
       <label msLabel for="u-symbol" control="symbol" error="products.symbolHint">{{ 'products.symbol' | translate }}</label>
-      <input pInputText id="u-symbol" formControlName="symbol" />
+      <input pInputText pSize="small" id="u-symbol" formControlName="symbol" />
       <small class="field-hint">{{ 'products.symbolHint' | translate }}</small>
     </div>
   </form>
   <ng-template #footer>
-    <button pButton type="submit" form="unit-form" [loading]="busy()" [disabled]="busy()">
+    <button pButton size="small" type="submit" form="unit-form" [loading]="busy()" [disabled]="busy()">
       <span pButtonLabel>{{ 'common.save' | translate }}</span>
     </button>
   </ng-template>

@@ -2,7 +2,6 @@ import { CurrencyPipe } from '@angular/common';
 import { Component, ElementRef, computed, effect, inject, model, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
@@ -15,7 +14,8 @@ import { CatalogService } from '../../../core/catalog/catalog.service';
 import { LangService } from '../../../core/lang.service';
 import { NotifyService } from '../../../core/notify.service';
 import { BarcodeSvg } from '../../../shared/barcode-svg/barcode-svg';
-import { printCopy } from '../../../shared/print-copy';
+import { printCopy } from '../../../shared/print-copy';
+import { PickField } from '../../../shared/pick/pick';
 
 interface LabelRow {
   product: Product;
@@ -31,7 +31,7 @@ const PER_SHEET = 24;
  */
 @Component({
   selector: 'ms-labels-dialog',
-  imports: [FormsModule, TranslatePipe, CurrencyPipe, Dialog, AutoComplete, InputNumber, ToggleSwitch, ButtonDirective, ButtonIcon, ButtonLabel, BarcodeSvg],
+  imports: [FormsModule, TranslatePipe, CurrencyPipe, Dialog, PickField, InputNumber, ToggleSwitch, ButtonDirective, ButtonIcon, ButtonLabel, BarcodeSvg],
   templateUrl: './labels-dialog.html',
   styleUrl: './labels-dialog.scss',
 })
@@ -44,11 +44,11 @@ export class LabelsDialog {
   private readonly notify = inject(NotifyService);
   protected readonly lang = inject(LangService);
 
-  private readonly picker = viewChild<AutoComplete>('picker');
   private readonly paperEl = viewChild<ElementRef<HTMLElement>>('paper');
 
   protected readonly rows = signal<LabelRow[]>([]);
-  protected readonly found = signal<Product[]>([]);
+  /** The product picker: empty again after each product is added. */
+  protected readonly next = signal<Product | null>(null);
   protected readonly showPrice = signal(true);
   protected readonly busy = signal(false);
   protected readonly canManage = computed(() => this.business.can('product:manage'));
@@ -77,12 +77,6 @@ export class LabelsDialog {
     });
   }
 
-  protected find(event: AutoCompleteCompleteEvent): void {
-    this.catalog.searchProducts({ page: 0, size: 10, q: event.query.trim(), active: true }).subscribe({
-      next: (page) => this.found.set(page.content),
-    });
-  }
-
   protected add(product: Product | null): void {
     if (!product?.id) {
       return;
@@ -91,7 +85,7 @@ export class LabelsDialog {
       this.rows.update((rows) => [...rows, { product, copies: 1 }]);
     }
     // Ready for the next product
-    this.picker()?.clear();
+    this.next.set(null);
   }
 
   /** The goods that came without a barcode, one label each. */

@@ -1,0 +1,67 @@
+:host {
+  display: inline-flex;
+  min-width: 0;
+}
+
+:host(.fluid) {
+  display: flex;
+  width: 100%;
+
+  // Only the box stretches; the quick-add dialog's own element (its dialog shows on <body>) takes no room.
+  > p-select,
+  > p-multiselect {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// A row: the name, then a muted line under it.
+.pick-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+
+  b {
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // "Walk-in customer": one line with a person icon.
+  &.none {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+
+    .pi {
+      color: var(--muted);
+      font-size: 13px;
+    }
+  }
+}
+
+// The foot of the list: the hint on the left, "+ New" on the right, under a hairline.
+.pick-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 6px 14px;
+  border-top: 1px solid var(--border);
+
+  small {
+    font-size: 12px;
+  }
+
+  .pick-add {
+    margin-inline-start: auto;
+  }
+}

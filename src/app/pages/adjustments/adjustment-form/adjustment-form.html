@@ -2,20 +2,20 @@
           [closeAriaLabel]="'common.close' | translate">
   <div class="ms-form">
     @if (kinds().length > 1) {
-      <p-selectbutton [options]="kinds()" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" [allowEmpty]="false">
+      <p-selectbutton size="small" [options]="kinds()" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" [allowEmpty]="false">
         <ng-template #item let-o>{{ o.label | translate }}</ng-template>
       </p-selectbutton>
     }
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="ad-wh">{{ 'common.warehouse' | translate }}</label>
-        <p-select inputId="ad-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+        <p-select size="small" inputId="ad-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
                   (ngModelChange)="warehouseId.set($event)" appendTo="body" />
       </div>
       @if (kind() === 'ADJUSTMENT') {
         <div class="ms-field">
           <label msLabel for="ad-reason">{{ 'adjust.reason' | translate }}</label>
-          <p-select inputId="ad-reason" [options]="reasons()" optionLabel="label" optionValue="value" [ngModel]="reason()"
+          <p-select size="small" inputId="ad-reason" [options]="reasons()" optionLabel="label" optionValue="value" [ngModel]="reason()"
                     (ngModelChange)="reason.set($event)" appendTo="body" />
         </div>
       }
@@ -24,13 +24,13 @@
     <ms-lines-editor [(lines)]="lines" [showCost]="true" [showBatch]="true" [allowNegative]="kind() === 'ADJUSTMENT'" />
     <div class="ms-field">
       <label msLabel for="ad-note">{{ 'common.note' | translate }}</label>
-      <input pInputText id="ad-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
+      <input pInputText pSize="small" id="ad-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
     </div>
   </div>
   <ng-template #footer>
     <div class="dialog-actions">
       <span class="spacer"></span>
-      <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+      <button pButton size="small" type="button" (click)="submit()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
     </div>
   </ng-template>
 </p-dialog>

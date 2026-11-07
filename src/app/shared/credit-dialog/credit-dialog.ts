@@ -1,7 +1,6 @@
 import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
@@ -11,6 +10,7 @@ import { ApiService } from '../../core/api/api.service';
 import { NotifyService } from '../../core/notify.service';
 import { Credit, CREDIT_KINDS, CreditKind } from '../credit-details/credit';
 import { FieldLabel } from '../field-label/field-label';
+import { PickField } from '../pick/pick';
 
 interface Party {
   id: number;
@@ -21,7 +21,7 @@ interface Party {
 /** A credit note or supplier credit by hand, for a price correction: whom, how much, and why. */
 @Component({
   selector: 'ms-credit-dialog',
-  imports: [FormsModule, TranslatePipe, Dialog, AutoComplete, InputNumber, InputText, ButtonDirective, ButtonLabel, FieldLabel],
+  imports: [FormsModule, TranslatePipe, Dialog, PickField, InputNumber, InputText, ButtonDirective, ButtonLabel, FieldLabel],
   templateUrl: './credit-dialog.html',
 })
 export class CreditDialog {
@@ -34,9 +34,8 @@ export class CreditDialog {
   private readonly api = inject(ApiService);
   private readonly notify = inject(NotifyService);
 
-  private readonly config = computed(() => CREDIT_KINDS[this.kind()]);
+  protected readonly config = computed(() => CREDIT_KINDS[this.kind()]);
   protected readonly party = signal<Party | null>(null);
-  protected readonly parties = signal<Party[]>([]);
   protected readonly amount = signal<number | null>(null);
   protected readonly reason = signal('');
   protected readonly busy = signal(false);
@@ -50,10 +49,6 @@ export class CreditDialog {
         this.reason.set('');
       }
     });
-  }
-
-  protected find(event: AutoCompleteCompleteEvent): void {
-    this.api.page<Party>(this.config().parties, { page: 0, size: 10 }, { q: event.query }).subscribe({ next: (p) => this.parties.set(p.content) });
   }
 
   protected pick(p: Party | null): void {

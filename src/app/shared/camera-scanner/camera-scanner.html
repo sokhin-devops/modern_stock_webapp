@@ -14,6 +14,6 @@
     <p class="note muted">{{ (starting() ? 'scanner.starting' : 'scanner.hint') | translate }}</p>
   }
   <ng-template #footer>
-    <button pButton type="button" (click)="visible.set(false)"><span pButtonLabel>{{ 'scanner.done' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="visible.set(false)"><span pButtonLabel>{{ 'scanner.done' | translate }}</span></button>
   </ng-template>
 </p-dialog>

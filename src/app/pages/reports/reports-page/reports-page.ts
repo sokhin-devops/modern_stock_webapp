@@ -4,7 +4,6 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumber } from 'primeng/inputnumber';
@@ -29,7 +28,8 @@ import { toIsoDate } from '../../../shared/dates';
 import { DocLine } from '../../../shared/lines-editor/lines-editor';
 import { PackQtyPipe } from '../../../shared/pack-qty.pipe';
 import { ReportMeta, exportReport, printReport } from '../../../shared/report-export';
-import { PurchaseForm } from '../../purchases/purchase-form/purchase-form';
+import { PurchaseForm } from '../../purchases/purchase-form/purchase-form';
+import { PickField } from '../../../shared/pick/pick';
 
 export type ReportId =
   | 'sales' | 'gross-profit' | 'profit' | 'customer-debt' | 'supplier-debt'
@@ -108,7 +108,7 @@ const USD_SHORT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 
   selector: 'ms-reports-page',
   imports: [
     FormsModule, TranslatePipe, DatePipe, DecimalPipe, CurrencyPipe, DatePicker, ProgressBar, Select, SelectButton, TableModule,
-    BarChart, PackQtyPipe, AutoComplete, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, PurchaseForm, InputNumber,
+    BarChart, PackQtyPipe, PickField, ButtonDirective, ButtonIcon, ButtonLabel, Tooltip, PurchaseForm, InputNumber,
   ],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
@@ -175,7 +175,6 @@ export class ReportsPage {
     this.report();
     return null;
   });
-  protected readonly parties = signal<Party[]>([]);
   protected readonly by = computed<SalesBy>(() => {
     const by = this.query().get('by') as SalesBy | null;
     const allowed = this.report()?.id === 'gross-profit' ? GROSS_BY : SALES_BY;
@@ -315,11 +314,6 @@ export class ReportsPage {
 
   constructor() {
     this.catalog.loadLists();
-  }
-
-  protected findParty(event: AutoCompleteCompleteEvent): void {
-    const path = this.report()?.id === 'supplier-statement' ? '/suppliers' : '/customers';
-    this.api.page<Party>(path, { page: 0, size: 10 }, { q: event.query }).subscribe({ next: (p) => this.parties.set(p.content) });
   }
 
   protected async exportExcel(): Promise<void> {

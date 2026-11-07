@@ -3,6 +3,30 @@
 // the rules below fit PrimeNG components into the prototype's layout and sizes.
 @use 'styles/prototype';
 
+// Inside the app (side menu, top bar, page), the window itself never scrolls: only the page body does, under its fixed
+// header. Nothing hidden (a screen-reader copy, an overlay) can make the whole screen move. Screens only: printing
+// still runs over as many pages as it needs.
+@media screen {
+  html:has(.shell) {
+    overflow: hidden;
+  }
+}
+
+// Light/dark switch (core/theme-mode.service.ts): while it happens, every color changes in the same frame (no button,
+// chip or field fades on its own), and the new mode grows over the old one as a circle instead of the browser's
+// default cross-fade.
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
 // PrimeIcons in the prototype's icon box: <i class="icon pi pi-box"></i> takes a square of the prototype's size
 // (20 px, 18 px in buttons...). PrimeIcons glyphs fill more of their box than Material Symbols (which the prototype
 // was drawn with), so the glyph is drawn at 90 % to keep the same visual weight. Not layered: it must beat the
@@ -148,18 +172,14 @@
   }
 }
 
-// Buttons at the prototype's sizes: 14 px text, 40 px tall; .submit is the 48 px main button of a form.
+// Buttons: 14 px text. Every button is PrimeNG's small size (about 34 px, the theme preset); .submit, the main
+// button of a sign-in form, is a little taller.
 .p-button {
-  min-height: 40px;
   font-size: 14px;
 }
 
-.p-button-icon-only {
-  min-height: 0;
-}
-
 .p-button.submit {
-  min-height: 48px;
+  min-height: 40px;
 }
 
 // Inside a PrimeNG menu (business switcher, branch selector, account): rows with an avatar and two lines.
@@ -312,7 +332,7 @@
   }
 
   .p-datatable-thead > tr > th {
-    height: 40px;
+    height: 36px;
     padding: 0 16px;
     border-bottom: 1px solid var(--border);
     background: var(--primary-soft);
@@ -328,8 +348,8 @@
   }
 
   .p-datatable-tbody > tr > td {
-    height: 52px;
-    padding: 8px 16px;
+    height: 44px;
+    padding: 6px 16px;
     border-bottom: 1px solid var(--border);
   }
 
@@ -374,16 +394,174 @@
     font-weight: 500;
   }
 
-  .empty-cell {
-    height: 120px;
-    color: var(--muted);
-    text-align: center;
-  }
-
   .p-paginator {
     padding: 12px 4px 0;
     background: transparent;
   }
+}
+
+// Every table sits in a white card (Improve.md 6): the header row, the rows and the pager in one rounded box. On list
+// pages the card fills the height under the toolbar and only its rows scroll.
+.table-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.list-page .table-card {
+  flex: 1 1 auto;
+}
+
+.table-card .ms-table .p-datatable {
+  .p-datatable-table-container {
+    border-radius: 0;
+  }
+
+  .p-paginator {
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+}
+
+// Dark mode: table headers are a quiet grey band (the light blue of light mode turns into a heavy navy on dark).
+.app-dark {
+  .ms-table .p-datatable .p-datatable-thead > tr > th,
+  .table th {
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+}
+
+// Nothing to show: an inbox icon over the message, in the middle of the space under the header. A table that fills
+// the card (list pages) stretches its one empty row to the bottom; elsewhere the row is at least 180 px tall.
+.ms-table .p-datatable .p-datatable-tbody > tr > td.empty-cell {
+  height: 180px;
+  padding: 24px 16px;
+  color: var(--muted);
+  text-align: center;
+  vertical-align: middle;
+
+  &::before {
+    content: '\e961'; // pi-inbox
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--border-strong);
+    font-family: 'primeicons';
+    font-size: 24px;
+    line-height: 1;
+  }
+}
+
+.ms-table .p-datatable-flex-scrollable .p-datatable-table-container:has(.empty-cell) > .p-datatable-table {
+  height: 100%;
+}
+
+// Loading: no spinner. The rows fade under a light veil and a thin bar runs under the header; a table with nothing
+// on screen yet shows grey placeholder rows instead of "nothing here".
+.ms-table .p-datatable {
+  --ms-head-h: 36px;
+
+  .p-datatable-mask {
+    align-items: flex-start;
+    background: color-mix(in srgb, var(--surface) 50%, transparent);
+    animation: ms-table-fade 0.2s var(--ease) both;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: var(--ms-head-h);
+      left: 0;
+      right: 0;
+      height: 3px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, transparent, var(--primary), transparent) no-repeat,
+        var(--primary-soft);
+      background-size: 35% 100%, 100% 100%;
+      animation: ms-table-bar 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+  }
+
+  .p-datatable-loading-icon {
+    display: none;
+  }
+
+  &:has(> .p-datatable-mask) .p-datatable-tbody > tr > td {
+    transition: opacity 0.2s var(--ease);
+  }
+
+  &:has(> .p-datatable-mask) .p-datatable-tbody > tr:not(:has(.empty-cell)) > td {
+    opacity: 0.55;
+  }
+
+  &:has(> .p-datatable-mask) .p-datatable-tbody > tr > td.empty-cell {
+    color: transparent;
+
+    &::before {
+      visibility: hidden;
+    }
+  }
+
+  // The first load (no rows yet): grey placeholder rows, one per row height, gently pulsing.
+  &:has(> .p-datatable-mask):has(.p-datatable-tbody:empty, td.empty-cell) > .p-datatable-mask::after {
+    content: '';
+    position: absolute;
+    top: calc(var(--ms-head-h) + 3px);
+    left: 20px;
+    right: 20px;
+    bottom: 0;
+    max-height: 352px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 16px,
+      var(--surface-3) 16px 28px,
+      transparent 28px 44px
+    );
+    -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent);
+    mask-image: linear-gradient(to bottom, #000 40%, transparent);
+    animation: ms-table-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+.compact .ms-table .p-datatable {
+  --ms-head-h: 32px;
+}
+
+@keyframes ms-table-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ms-table-bar {
+  from {
+    background-position: -40% 0, 0 0;
+  }
+
+  to {
+    background-position: 140% 0, 0 0;
+  }
+}
+
+@keyframes ms-table-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+// The picker's list (shared/pick): wide enough for a name and its phone or SKU, whatever the box's width.
+.p-select-overlay.pick-panel,
+.p-multiselect-overlay.pick-panel {
+  min-width: 280px;
 }
 
 // Forms in a dialog over a list (product, customer...): wide enough for two fields per row.
@@ -395,27 +573,10 @@
   width: min(520px, calc(100vw - 32px));
 }
 
-// Toolbars above lists: 40 px controls like the prototype's search box and chips.
+// Toolbars above lists: the small controls (about 34 px) line up with the search box and chips.
 .toolbar {
-  .p-inputtext {
-    height: 40px;
-    padding-block: 0;
-    font-size: 14px;
-  }
-
   .p-select {
-    height: 40px;
     align-items: center;
-  }
-
-  .p-select-label {
-    padding-block: 0;
-    font-size: 14px;
-  }
-
-  .p-togglebutton {
-    height: 40px;
-    font-size: 14px;
   }
 }
 
@@ -584,6 +745,23 @@
   }
 }
 
+// Customer and supplier transactions (new documents and their views) always open over the whole screen: the header
+// and the buttons stay put, and only the content between them scrolls.
+.p-dialog.ms-full-dialog {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+
+  .p-dialog-content {
+    flex: 1 1 auto;
+  }
+}
+
 // A document's header facts (number, date, warehouse...) as small label/value pairs.
 .doc-facts {
   display: grid;
@@ -661,11 +839,11 @@
 // Compact density (FR-6.26, each person's choice in Settings › Appearance): tighter rows for long lists.
 .compact .ms-table .p-datatable {
   .p-datatable-thead > tr > th {
-    height: 34px;
+    height: 32px;
   }
 
   .p-datatable-tbody > tr > td {
-    height: 40px;
+    height: 36px;
     padding-top: 4px;
     padding-bottom: 4px;
   }

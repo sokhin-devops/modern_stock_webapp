@@ -20,32 +20,34 @@
         <div class="settings-card set-rate">
           <div class="ms-field">
             <label msLabel for="rt-date">{{ 'settings.rates.date' | translate }}</label>
-            <p-datepicker inputId="rt-date" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" />
+            <p-datepicker size="small" inputId="rt-date" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" />
           </div>
           <div class="ms-field">
             <label msLabel for="rt-rate">{{ 'settings.rates.rate' | translate }}</label>
-            <p-inputnumber inputId="rt-rate" [ngModel]="rate()" (ngModelChange)="rate.set($event)" prefix="៛" locale="en-US" [min]="1000" [max]="10000" />
+            <p-inputnumber size="small" inputId="rt-rate" [ngModel]="rate()" (ngModelChange)="rate.set($event)" prefix="៛" locale="en-US" [min]="1000" [max]="10000" />
           </div>
-          <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'settings.rates.set' | translate }}</span></button>
+          <button pButton size="small" type="button" (click)="save()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'settings.rates.set' | translate }}</span></button>
         </div>
       }
     </div>
     <p class="muted lead">{{ 'settings.rates.lead' | translate }}</p>
 
-    <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
-             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
-      <ng-template #header>
-        <tr>
-          <th>{{ 'settings.rates.date' | translate }}</th>
-          <th class="num">{{ 'settings.rates.rate' | translate }}</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-r>
-        <tr>
-          <td>{{ r.rateDate | date: 'dd/MM/yyyy' }}</td>
-          <td class="num strong">៛{{ r.usdToKhr | number: '1.0-0' }}</td>
-        </tr>
-      </ng-template>
-    </p-table>
+    <section class="card table-card">
+      <p-table size="small" class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+               [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex" dataKey="id">
+        <ng-template #header>
+          <tr>
+            <th>{{ 'settings.rates.date' | translate }}</th>
+            <th class="num">{{ 'settings.rates.rate' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-r>
+          <tr>
+            <td>{{ r.rateDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="num strong">៛{{ r.usdToKhr | number: '1.0-0' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
   </div>
 </div>

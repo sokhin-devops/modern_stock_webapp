@@ -14,7 +14,7 @@
       @if (picked(); as c) {
         <form class="ms-field pin" (ngSubmit)="submit()">
           <label for="sw-pin">{{ 'pos.switchPin' | translate: { name: c.fullName } }}</label>
-          <input pInputText id="sw-pin" name="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+          <input pInputText pSize="small" id="sw-pin" name="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
                  [ngModel]="pin()" (ngModelChange)="pin.set($event)" />
         </form>
       }
@@ -23,7 +23,7 @@
     }
   }
   <ng-template #footer>
-    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !picked() || pin().length < 4">
+    <button pButton size="small" type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !picked() || pin().length < 4">
       <span pButtonLabel>{{ 'pos.switch' | translate }}</span>
     </button>
   </ng-template>

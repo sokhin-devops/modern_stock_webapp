@@ -4,31 +4,164 @@
   min-height: 0;
 }
 
-.hello {
-  margin-bottom: 20px;
-  font-size: 24px;
-  font-weight: 400;
-}
-
+// Key numbers: white cards with the label on the left and a tinted icon tile on the right, a large value, and one
+// muted line of detail. Cards that open a report lift on hover and show an arrow. A number that needs attention
+// tints its tile (amber: low stock, expiring; red: overdue, expired, a loss).
 .kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
 
-.kpi.link {
+.kpi {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 132px;
+  padding: 18px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
   color: inherit;
   text-decoration: none;
-  transition: box-shadow 0.2s var(--ease);
+  transition:
+    box-shadow 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    transform 0.2s var(--ease);
 
-  &:hover {
-    box-shadow: var(--shadow-2);
+  --kpi-tint: var(--primary-soft);
+  --kpi-ink: var(--primary);
+
+  &.tone-warn {
+    --kpi-tint: var(--warning-bg);
+    --kpi-ink: var(--warning);
+  }
+
+  &.tone-danger {
+    --kpi-tint: var(--danger-bg);
+    --kpi-ink: var(--danger);
   }
 }
 
-.kpi-value.warn {
+.kpi-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kpi-label {
+  min-height: 0;
+  padding-top: 2px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.kpi-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--kpi-tint);
+  color: var(--kpi-ink);
+  font-size: 16px;
+
+  .pi {
+    font-size: 16px;
+  }
+}
+
+.kpi-value {
+  margin-top: auto;
+  padding-top: 10px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tone-danger .kpi-value {
   color: var(--danger);
+}
+
+.kpi-sub {
+  margin-top: 4px;
+  padding-inline-end: 20px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-go {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  opacity: 0;
+  transform: translate(-3px, 3px);
+  transition:
+    opacity 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.kpi.link:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+  text-decoration: none;
+
+  .kpi-go {
+    color: var(--primary);
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.kpi.link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+// While the numbers load: grey bars where the label, value and detail will be.
+.kpi-skeleton {
+  gap: 12px;
+
+  span {
+    display: block;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--surface-3) 25%, var(--surface-2) 50%, var(--surface-3) 75%);
+    background-size: 200% 100%;
+    animation: kpi-shimmer 1.2s linear infinite;
+  }
+
+  span:nth-child(1) {
+    width: 45%;
+  }
+
+  span:nth-child(2) {
+    width: 60%;
+    height: 24px;
+    margin-top: auto;
+  }
+
+  span:nth-child(3) {
+    width: 35%;
+  }
+}
+
+@keyframes kpi-shimmer {
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .cols {
@@ -148,16 +281,49 @@
   --p-progressbar-value-background: var(--danger);
 }
 
-// A thin line under the numbers while they load.
-.kpis + p-progressbar {
-  display: block;
-  margin: -8px 0 16px;
-  --p-progressbar-height: 3px;
-}
-
 @media (max-width: 1000px) {
   .cols {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// Phones: two smaller cards per row, so the key numbers fit on one screen.
+@media (max-width: 640px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .kpi {
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .kpi-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+
+    .pi {
+      font-size: 13px;
+    }
+  }
+
+  .kpi-label {
+    font-size: 12px;
+  }
+
+  .kpi-value {
+    font-size: 19px;
+  }
+
+  .kpi-sub {
+    padding-inline-end: 0;
+    font-size: 11.5px;
+  }
+
+  .kpi-go {
+    display: none;
   }
 }
 

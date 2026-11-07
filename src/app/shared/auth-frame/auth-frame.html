@@ -15,7 +15,7 @@
     </a>
     <span class="below-actions">
       <ms-lang-button />
-      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle()"
+      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle($event)"
               [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate">
         <i class="pi" [class.pi-sun]="theme.dark()" [class.pi-moon]="!theme.dark()" pButtonIcon></i>
       </button>

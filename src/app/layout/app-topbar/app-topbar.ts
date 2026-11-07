@@ -58,6 +58,17 @@ export class AppTopbar {
     const b = this.business.current();
     return b ? this.lang.name(b.nameEn, b.nameKm) : '';
   });
+  /** My role in the open business, under its name. */
+  protected readonly roleName = computed(() => {
+    const b = this.business.current();
+    if (!b) {
+      return '';
+    }
+    // Built-in roles have their names in the translations; a business's own roles carry theirs.
+    return ['OWNER', 'MANAGER', 'STOCK_KEEPER', 'CASHIER'].includes(b.roleCode)
+      ? this.t('roles.' + b.roleCode)
+      : this.lang.name(b.roleNameEn, b.roleNameKm);
+  });
   protected readonly branchName = computed(() => {
     const b = this.business.branch();
     return b ? this.lang.name(b.nameEn, b.nameKm) : null;

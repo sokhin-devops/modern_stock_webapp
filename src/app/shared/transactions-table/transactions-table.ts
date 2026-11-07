@@ -3,7 +3,6 @@ import { Component, computed, DestroyRef, effect, inject, input, output, signal,
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { IconField } from 'primeng/iconfield';
@@ -19,6 +18,7 @@ import { NotifyService } from '../../core/notify.service';
 import { toIsoDate } from '../dates';
 import { LazyList } from '../lazy-list';
 import { exportList } from '../list-export';
+import { PickField } from '../pick/pick';
 
 export type Side = 'CUSTOMER' | 'SUPPLIER';
 
@@ -76,7 +76,7 @@ export function statusKey(type: string, status: string): string {
 @Component({
   selector: 'ms-transactions-table',
   imports: [
-    FormsModule, TranslatePipe, DatePipe, CurrencyPipe, TableModule, Select, DatePicker, IconField, InputIcon, InputText, AutoComplete,
+    FormsModule, TranslatePipe, DatePipe, CurrencyPipe, TableModule, Select, DatePicker, IconField, InputIcon, InputText, PickField,
     ButtonDirective, ButtonIcon, ButtonLabel,
   ],
   templateUrl: './transactions-table.html',
@@ -104,7 +104,6 @@ export class TransactionsTable {
   protected readonly views = signal<string[]>([]);
   /** The customer or supplier picked in the list's own filter (PLAIN.md 12.2: one dropdown per filter, party included). */
   protected readonly party = signal<{ id: number; name: string } | null>(null);
-  protected readonly parties = signal<{ id: number; name: string }[]>([]);
   protected readonly exporting = signal(false);
   /** One dropdown per filter (PLAIN.md 12.2), status included: the statuses this side's documents use. */
   protected readonly status = signal<string | null>(null);
@@ -154,12 +153,6 @@ export class TransactionsTable {
 
   protected onSearch(value: string): void {
     this.search.next(value);
-  }
-
-  protected findParty(e: AutoCompleteCompleteEvent): void {
-    this.api
-      .page<{ id: number; name: string }>(this.side() === 'CUSTOMER' ? '/customers' : '/suppliers', { page: 0, size: 10 }, { q: e.query })
-      .subscribe({ next: (p) => this.parties.set(p.content.map((x) => ({ id: x.id, name: x.name }))) });
   }
 
   protected setParty(p: { id: number; name: string } | string | null): void {

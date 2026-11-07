@@ -3,7 +3,6 @@ import { Component, computed, effect, inject, input, model, output, signal, untr
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { Dialog } from 'primeng/dialog';
@@ -23,7 +22,8 @@ import { fromIsoDate, toIsoDate } from '../../../shared/dates';
 import { FieldLabel } from '../../../shared/field-label/field-label';
 import { DocLine, LinesEditor, emptyLine } from '../../../shared/lines-editor/lines-editor';
 import { filledLines, salesWarehouse, warehouseOptions } from '../../../shared/options';
-import { Delivered, OrderFormTarget, Quotation, SalesOrder } from '../orders/orders';
+import { Delivered, OrderFormTarget, Quotation, SalesOrder } from '../orders/orders';
+import { PickField } from '../../../shared/pick/pick';
 
 interface Party {
   id: number;
@@ -53,7 +53,7 @@ export type OrderSaved =
 @Component({
   selector: 'ms-order-form',
   imports: [
-    FormsModule, TranslatePipe, CurrencyPipe, Dialog, AutoComplete, InputNumber, InputText, Select, SelectButton, DatePicker,
+    FormsModule, TranslatePipe, CurrencyPipe, Dialog, PickField, InputNumber, InputText, Select, SelectButton, DatePicker,
     ButtonDirective, ButtonIcon, ButtonLabel, LinesEditor, FieldLabel,
   ],
   templateUrl: './order-form.html',
@@ -71,7 +71,6 @@ export class OrderForm {
   private readonly notify = inject(NotifyService);
 
   protected readonly customer = signal<Party | null>(null);
-  protected readonly customers = signal<Party[]>([]);
   protected readonly date = signal<Date | null>(null);
   protected readonly warehouseId = signal<number | null>(null);
   protected readonly discount = signal<number | null>(null);
@@ -121,10 +120,6 @@ export class OrderForm {
         ),
       )
       .subscribe((p) => this.preview.set(p));
-  }
-
-  protected findCustomers(event: AutoCompleteCompleteEvent): void {
-    this.api.page<Party>('/customers', { page: 0, size: 10 }, { q: event.query }).subscribe({ next: (p) => this.customers.set(p.content) });
   }
 
   protected submit(deliverNow = false): void {

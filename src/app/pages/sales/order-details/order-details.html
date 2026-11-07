@@ -37,40 +37,44 @@
     }
 
     @if (quotation(); as q) {
-      <p-table class="ms-table" [value]="q.lines" dataKey="id">
-        <ng-template #header>
-          <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th>
-            <th class="num">{{ 'common.price' | translate }}</th><th class="num">{{ 'common.discount' | translate }}</th>
-            <th class="num">{{ 'common.amount' | translate }}</th></tr>
-        </ng-template>
-        <ng-template #body let-l>
-          <tr>
-            <td class="strong">{{ l.productName }}</td>
-            <td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
-            <td class="num">{{ l.unitPrice | currency: 'USD' }}</td>
-            <td class="num muted">{{ l.discount ? (l.discount | currency: 'USD') : '' }}</td>
-            <td class="num">{{ l.lineTotal | currency: 'USD' }}</td>
-          </tr>
-        </ng-template>
-      </p-table>
+      <section class="card table-card">
+        <p-table size="small" class="ms-table" [value]="q.lines" dataKey="id">
+          <ng-template #header>
+            <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'common.qty' | translate }}</th>
+              <th class="num">{{ 'common.price' | translate }}</th><th class="num">{{ 'common.discount' | translate }}</th>
+              <th class="num">{{ 'common.amount' | translate }}</th></tr>
+          </ng-template>
+          <ng-template #body let-l>
+            <tr>
+              <td class="strong">{{ l.productName }}</td>
+              <td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+              <td class="num">{{ l.unitPrice | currency: 'USD' }}</td>
+              <td class="num muted">{{ l.discount ? (l.discount | currency: 'USD') : '' }}</td>
+              <td class="num">{{ l.lineTotal | currency: 'USD' }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </section>
     }
     @if (order(); as o) {
-      <p-table class="ms-table" [value]="o.lines" dataKey="id">
-        <ng-template #header>
-          <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'orders.ordered' | translate }}</th>
-            <th class="num">{{ 'orders.deliveredQty' | translate }}</th><th class="num">{{ 'common.price' | translate }}</th>
-            <th class="num">{{ 'common.amount' | translate }}</th></tr>
-        </ng-template>
-        <ng-template #body let-l>
-          <tr>
-            <td class="strong">{{ l.productName }}@if (l.discount) { <small class="muted"> · −{{ l.discount | currency: 'USD' }}</small> }</td>
-            <td class="num">{{ l.qtyOrdered | number: '1.0-3' }} {{ l.unitSymbol }}</td>
-            <td class="num" [class.done]="l.qtyDelivered >= l.qtyOrdered">{{ l.qtyDelivered | number: '1.0-3' }}</td>
-            <td class="num">{{ l.unitPrice | currency: 'USD' }}</td>
-            <td class="num">{{ l.lineTotal | currency: 'USD' }}</td>
-          </tr>
-        </ng-template>
-      </p-table>
+      <section class="card table-card">
+        <p-table size="small" class="ms-table" [value]="o.lines" dataKey="id">
+          <ng-template #header>
+            <tr><th>{{ 'common.product' | translate }}</th><th class="num">{{ 'orders.ordered' | translate }}</th>
+              <th class="num">{{ 'orders.deliveredQty' | translate }}</th><th class="num">{{ 'common.price' | translate }}</th>
+              <th class="num">{{ 'common.amount' | translate }}</th></tr>
+          </ng-template>
+          <ng-template #body let-l>
+            <tr>
+              <td class="strong">{{ l.productName }}@if (l.discount) { <small class="muted"> · −{{ l.discount | currency: 'USD' }}</small> }</td>
+              <td class="num">{{ l.qtyOrdered | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+              <td class="num" [class.done]="l.qtyDelivered >= l.qtyOrdered">{{ l.qtyDelivered | number: '1.0-3' }}</td>
+              <td class="num">{{ l.unitPrice | currency: 'USD' }}</td>
+              <td class="num">{{ l.lineTotal | currency: 'USD' }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </section>
     }
 
     <div class="totals">
@@ -103,55 +107,55 @@
       <div class="dialog-actions">
         @if (quotation(); as q) {
           @if (canManage() && q.status === 'DRAFT') {
-            <button pButton type="button" [text]="true" severity="danger" (click)="remove(q)" [disabled]="busy()"><span pButtonLabel>{{ 'common.delete' | translate }}</span></button>
+            <button pButton size="small" type="button" [text]="true" severity="danger" (click)="remove(q)" [disabled]="busy()"><span pButtonLabel>{{ 'common.delete' | translate }}</span></button>
           }
           @if (canManage() && (q.status === 'DRAFT' || q.status === 'SENT')) {
-            <button pButton type="button" [text]="true" severity="danger" (click)="decline(q)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.decline' | translate }}</span></button>
+            <button pButton size="small" type="button" [text]="true" severity="danger" (click)="decline(q)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.decline' | translate }}</span></button>
           }
         }
         @if (order(); as o) {
           @if (canManage() && o.status === 'CONFIRMED' && nothingDelivered()) {
-            <button pButton type="button" [text]="true" severity="danger" (click)="cancel(o)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.cancel' | translate }}</span></button>
+            <button pButton size="small" type="button" [text]="true" severity="danger" (click)="cancel(o)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.cancel' | translate }}</span></button>
           }
           @if (canManage() && o.status === 'PARTIALLY_DELIVERED') {
-            <button pButton type="button" [text]="true" (click)="close(o)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.close' | translate }}</span></button>
+            <button pButton size="small" type="button" [text]="true" (click)="close(o)" [disabled]="busy()"><span pButtonLabel>{{ 'orders.close' | translate }}</span></button>
           }
         }
         <span class="spacer"></span>
         <ms-attach-button [type]="v.kind === 'quotation' ? 'quotations' : 'sales-orders'" [docId]="v.doc.id" [number]="v.doc.number" />
-        <button pButton type="button" [outlined]="true" (click)="print()">
+        <button pButton size="small" type="button" [outlined]="true" (click)="print()">
           <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
         </button>
         @if (proformaOk()) {
-          <button pButton type="button" [outlined]="true" (click)="print(true)">
+          <button pButton size="small" type="button" [outlined]="true" (click)="print(true)">
             <i class="pi pi-file" pButtonIcon></i><span pButtonLabel>{{ 'print.proforma' | translate }}</span>
           </button>
         }
         @if (quotation(); as q) {
           @if (canManage() && (q.status === 'DRAFT' || q.status === 'SENT' || q.status === 'EXPIRED')) {
-            <button pButton type="button" [outlined]="true" (click)="startEdit()" [disabled]="busy()">
+            <button pButton size="small" type="button" [outlined]="true" (click)="startEdit()" [disabled]="busy()">
               <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
             </button>
           }
           @if (canManage() && q.status === 'DRAFT') {
-            <button pButton type="button" [outlined]="true" (click)="send(q)" [disabled]="busy()">
+            <button pButton size="small" type="button" [outlined]="true" (click)="send(q)" [disabled]="busy()">
               <i class="pi pi-send" pButtonIcon></i><span pButtonLabel>{{ 'orders.markSent' | translate }}</span>
             </button>
           }
           @if (canManage() && (q.status === 'DRAFT' || q.status === 'SENT')) {
-            <button pButton type="button" (click)="convert(q)" [loading]="busy()" [disabled]="busy()">
+            <button pButton size="small" type="button" (click)="convert(q)" [loading]="busy()" [disabled]="busy()">
               <i class="pi pi-check" pButtonIcon></i><span pButtonLabel>{{ 'orders.convert' | translate }}</span>
             </button>
           }
         }
         @if (order(); as o) {
           @if (canManage() && o.status === 'CONFIRMED' && nothingDelivered()) {
-            <button pButton type="button" [outlined]="true" (click)="startEdit()" [disabled]="busy()">
+            <button pButton size="small" type="button" [outlined]="true" (click)="startEdit()" [disabled]="busy()">
               <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
             </button>
           }
           @if (canDeliver() && (o.status === 'CONFIRMED' || o.status === 'PARTIALLY_DELIVERED')) {
-            <button pButton type="button" (click)="deliverOpen.set(true)" [disabled]="busy()">
+            <button pButton size="small" type="button" (click)="deliverOpen.set(true)" [disabled]="busy()">
               <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'orders.deliver' | translate }}</span>
             </button>
           }
@@ -159,7 +163,7 @@
       </div>
     }
 </ng-template>
-<p-dialog [visible]="!inline() && !!view()" (visibleChange)="!$event && view.set(null)" styleClass="ms-doc-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+<p-dialog [visible]="!inline() && !!view()" (visibleChange)="!$event && view.set(null)" styleClass="ms-doc-dialog ms-full-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
           [header]="view()?.doc?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   <ng-container [ngTemplateOutlet]="docBody" />
   <ng-template #footer><ng-container [ngTemplateOutlet]="docActions" /></ng-template>

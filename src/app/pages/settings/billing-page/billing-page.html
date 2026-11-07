@@ -24,7 +24,7 @@
             <b>{{ 'settings.billing.pastDue' | translate }}</b>
             <div class="small">{{ 'settings.billing.pastDueLead' | translate: { date: (b.pastDueUntil | date: 'dd/MM/yyyy') } }}</div>
           </div>
-          <button pButton type="button" (click)="openPay(b.openInvoice)">
+          <button pButton size="small" type="button" (click)="openPay(b.openInvoice)">
             <span pButtonLabel>{{ 'settings.billing.payAmount' | translate: { amount: (b.openInvoice.amount | currency: 'USD') } }}</span>
           </button>
         </div>
@@ -41,7 +41,7 @@
               }
             </div>
           </div>
-          <button pButton type="button" (click)="openPay(b.openInvoice)">
+          <button pButton size="small" type="button" (click)="openPay(b.openInvoice)">
             <span pButtonLabel>{{ 'settings.billing.payAmount' | translate: { amount: (b.openInvoice.amount | currency: 'USD') } }}</span>
           </button>
         </div>
@@ -49,7 +49,7 @@
         <div class="banner banner-warn">
           <i class="icon pi pi-info-circle"></i>
           <div class="text">{{ 'settings.billing.cancelled' | translate: { date: (b.currentPeriodEnd | date: 'dd/MM/yyyy') } }}</div>
-          <button pButton type="button" [text]="true" (click)="resume()" [loading]="busy() === '/billing/resume'">
+          <button pButton size="small" type="button" [text]="true" (click)="resume()" [loading]="busy() === '/billing/resume'">
             <span pButtonLabel>{{ 'settings.billing.keepPlan' | translate }}</span>
           </button>
         </div>
@@ -57,7 +57,7 @@
         <div class="banner banner-primary">
           <i class="icon pi pi-calendar"></i>
           <div class="text">{{ 'settings.billing.changesTo' | translate: { plan: next.name, date: (b.currentPeriodEnd | date: 'dd/MM/yyyy') } }}</div>
-          <button pButton type="button" [text]="true" (click)="keepPlan(b)">
+          <button pButton size="small" type="button" [text]="true" (click)="keepPlan(b)">
             <span pButtonLabel>{{ 'settings.billing.keepCurrent' | translate: { plan: b.planName } }}</span>
           </button>
         </div>
@@ -65,7 +65,7 @@
         <div class="banner banner-primary">
           <i class="icon pi pi-calendar"></i>
           <div class="text">{{ ('settings.billing.cycleFrom.' + b.pendingBillingCycle) | translate: { date: (b.currentPeriodEnd | date: 'dd/MM/yyyy') } }}</div>
-          <button pButton type="button" [text]="true" (click)="keepPlan(b)">
+          <button pButton size="small" type="button" [text]="true" (click)="keepPlan(b)">
             <span pButtonLabel>{{ 'settings.billing.keepCycle' | translate }}</span>
           </button>
         </div>
@@ -123,7 +123,7 @@
               <span class="tag tag-primary"><i class="icon pi pi-ticket"></i>{{ c.code }}</span>
               <small class="muted">{{ 'settings.billing.couponRunning' | translate: { pct: c.percentOff, n: c.periodsLeft } }}</small>
             } @else {
-              <input pInputText [ngModel]="couponCode()" (ngModelChange)="couponCode.set($event)" maxlength="30"
+              <input pInputText pSize="small" [ngModel]="couponCode()" (ngModelChange)="couponCode.set($event)" maxlength="30"
                      [placeholder]="'settings.billing.couponPh' | translate" [attr.aria-label]="'settings.billing.couponPh' | translate"
                      (keydown.enter)="redeemCoupon()" />
               <button pButton type="button" [outlined]="true" size="small" (click)="redeemCoupon()"
@@ -198,7 +198,7 @@
               }
             </ul>
             @if (todo !== 'current' && todo !== 'chosen' && todo !== 'none') {
-              <button pButton type="button" class="plan-btn" [outlined]="todo === 'downgrade' || todo === 'toFree' || todo === 'switchCycle'"
+              <button pButton size="small" type="button" class="plan-btn" [outlined]="todo === 'downgrade' || todo === 'toFree' || todo === 'switchCycle'"
                       (click)="act(p, b)" [disabled]="busy() !== null">
                 <span pButtonLabel>{{ (todo === 'switchCycle' ? 'settings.billing.switchTo.' + cycle() : 'settings.billing.action.' + todo) | translate }}</span>
               </button>
@@ -248,7 +248,7 @@
 
       <h3 class="plans-title">{{ 'settings.billing.invoices' | translate }}</h3>
       <section class="card table-card">
-        <p-table class="ms-table" [value]="invoices()" dataKey="id">
+        <p-table size="small" class="ms-table" [value]="invoices()" dataKey="id">
           <ng-template #header>
             <tr>
               <th>{{ 'settings.billing.number' | translate }}</th>
@@ -315,7 +315,7 @@
       <div class="pay-total">{{ i.amount | currency: 'USD' }}</div>
 
       @if ((payState() === 'idle' || payState() === 'failed') && payMethods().length > 1) {
-        <p-selectbutton [options]="payMethods()" optionValue="value" [ngModel]="payMethod()" (ngModelChange)="payMethod.set($event)" [allowEmpty]="false" class="methods">
+        <p-selectbutton size="small" [options]="payMethods()" optionValue="value" [ngModel]="payMethod()" (ngModelChange)="payMethod.set($event)" [allowEmpty]="false" class="methods">
           <ng-template #item let-option>{{ option.label | translate }}</ng-template>
         </p-selectbutton>
       }
@@ -330,7 +330,7 @@
           </ul>
           <div class="ms-field">
             <span msLabel id="tr-bank">{{ 'settings.billing.bank' | translate }}</span>
-            <p-selectbutton [options]="billing()?.banks ?? []" [ngModel]="bank()" (ngModelChange)="bank.set($event)" [allowEmpty]="false"
+            <p-selectbutton size="small" [options]="billing()?.banks ?? []" [ngModel]="bank()" (ngModelChange)="bank.set($event)" [allowEmpty]="false"
                             ariaLabelledBy="tr-bank">
               <ng-template #item let-option>{{ option === 'OTHER' ? ('settings.billing.otherBank' | translate) : option }}</ng-template>
             </p-selectbutton>
@@ -371,16 +371,16 @@
   }
   <ng-template #footer>
     @if (payState() === 'succeeded' || payState() === 'sent') {
-      <button pButton type="button" (click)="closePay()"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+      <button pButton size="small" type="button" (click)="closePay()"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
     } @else if (payMethod() === 'transfer') {
-      <button pButton type="button" (click)="sendTransfer()" [loading]="payState() === 'pending'" [disabled]="payState() === 'pending' || !proof() || !bank()">
+      <button pButton size="small" type="button" (click)="sendTransfer()" [loading]="payState() === 'pending'" [disabled]="payState() === 'pending' || !proof() || !bank()">
         <i class="pi pi-upload" pButtonIcon></i><span pButtonLabel>{{ 'settings.billing.sendTransfer' | translate }}</span>
       </button>
     } @else if (billing()?.demo) {
-      <button pButton type="button" [outlined]="true" severity="danger" (click)="payDemo(false)" [disabled]="payState() === 'pending'">
+      <button pButton size="small" type="button" [outlined]="true" severity="danger" (click)="payDemo(false)" [disabled]="payState() === 'pending'">
         <span pButtonLabel>{{ 'settings.billing.failDemo' | translate }}</span>
       </button>
-      <button pButton type="button" (click)="payDemo(true)" [loading]="payState() === 'pending'" [disabled]="payState() === 'pending'">
+      <button pButton size="small" type="button" (click)="payDemo(true)" [loading]="payState() === 'pending'" [disabled]="payState() === 'pending'">
         <i class="pi pi-credit-card" pButtonIcon></i><span pButtonLabel>{{ 'settings.billing.payDemo' | translate }}</span>
       </button>
     }
@@ -395,7 +395,7 @@
       @if (counted.includes(a.limitKey)) {
         <div class="ms-field narrow">
           <label msLabel for="ad-qty">{{ 'settings.billing.addonQty' | translate }}</label>
-          <p-inputnumber inputId="ad-qty" [ngModel]="addQty()" (ngModelChange)="addQty.set($event ?? 1)" [min]="1" [max]="50" [showButtons]="true"
+          <p-inputnumber size="small" inputId="ad-qty" [ngModel]="addQty()" (ngModelChange)="addQty.set($event ?? 1)" [min]="1" [max]="50" [showButtons]="true"
                          [fluid]="true" />
           @let adds = a.quantity * addQty();
           <small class="field-hint">+{{ adds | number }} {{ (adds === 1 ? 'settings.billing.limitOne.' : 'settings.billing.limit.') + a.limitKey | translate }}</small>
@@ -405,7 +405,7 @@
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" (click)="buyAddon()" [loading]="busy() === '/billing/addons'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'settings.billing.addonAdd' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="buyAddon()" [loading]="busy() === '/billing/addons'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'settings.billing.addonAdd' | translate }}</span></button>
   </ng-template>
 </p-dialog>
 
@@ -421,7 +421,7 @@
     </h4>
     @for (br of k.branches; track br.id) {
       <label class="keep-row" [class.locked]="br.main">
-        <p-checkbox [binary]="true" [ngModel]="br.main || br.keep" (ngModelChange)="toggleKeep('branches', br.id, $event)" [disabled]="br.main" />
+        <p-checkbox size="small" [binary]="true" [ngModel]="br.main || br.keep" (ngModelChange)="toggleKeep('branches', br.id, $event)" [disabled]="br.main" />
         <span>{{ br.name }}</span>
         @if (br.main) { <small class="muted">{{ 'settings.billing.keepAlways' | translate }}</small> }
         @if (br.readOnly) { <span class="tag">{{ 'settings.billing.readOnly' | translate }}</span> }
@@ -434,7 +434,7 @@
     </h4>
     @for (m of k.members; track m.id) {
       <label class="keep-row" [class.locked]="m.owner">
-        <p-checkbox [binary]="true" [ngModel]="m.owner || m.keep" (ngModelChange)="toggleKeep('members', m.id, $event)" [disabled]="m.owner" />
+        <p-checkbox size="small" [binary]="true" [ngModel]="m.owner || m.keep" (ngModelChange)="toggleKeep('members', m.id, $event)" [disabled]="m.owner" />
         <span>{{ m.name }} <small class="muted">· {{ m.role }}</small></span>
         @if (m.owner) { <small class="muted">{{ 'settings.billing.keepAlways' | translate }}</small> }
         @if (m.disabledByPlan) { <span class="tag">{{ 'settings.billing.switchedOff' | translate }}</span> }
@@ -442,7 +442,7 @@
     }
   }
   <ng-template #footer>
-    <button pButton type="button" (click)="saveKeep()" [loading]="busy() === '/billing/keep'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="saveKeep()" [loading]="busy() === '/billing/keep'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>
 

@@ -8,11 +8,11 @@
     </nav>
     <div class="page-actions report-actions">
       @if (ready()) {
-        <button pButton type="button" [outlined]="true" (click)="print()">
+        <button pButton size="small" type="button" [outlined]="true" (click)="print()">
           <i class="pi pi-print" pButtonIcon></i><span pButtonLabel>{{ 'print.print' | translate }}</span>
         </button>
         <span [pTooltip]="canExport() ? '' : ('reports.excelPlan' | translate)" tooltipPosition="bottom">
-          <button pButton type="button" [outlined]="true" (click)="exportExcel()" [disabled]="!canExport()">
+          <button pButton size="small" type="button" [outlined]="true" (click)="exportExcel()" [disabled]="!canExport()">
             <i class="pi pi-file-excel" pButtonIcon></i><span pButtonLabel>{{ 'reports.excel' | translate }}</span>
           </button>
         </span>
@@ -20,10 +20,10 @@
     </div>
     @if (report()?.period) {
       <div class="page-actions period">
-        <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+        <p-datepicker size="small" [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
                       [maxDate]="to()" [ariaLabel]="'reports.from' | translate" />
         <span class="muted">–</span>
-        <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+        <p-datepicker size="small" [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
                       [minDate]="from()" [ariaLabel]="'reports.to' | translate" />
       </div>
     }
@@ -45,7 +45,7 @@
 
     <section class="report-body" #reportBody>
       <div class="report-picker no-print">
-        <p-select [options]="pickerOptions()" optionLabel="label" optionValue="value" [ngModel]="report()?.id"
+        <p-select size="small" [options]="pickerOptions()" optionLabel="label" optionValue="value" [ngModel]="report()?.id"
                   (ngModelChange)="pick($event)" appendTo="body" [ariaLabel]="'reports.pick' | translate" />
       </div>
 
@@ -82,12 +82,10 @@
               </p-selectbutton>
             }
             @if (r.id === 'customer-statement' || r.id === 'supplier-statement') {
-              <p-autocomplete [ngModel]="party()" (ngModelChange)="party.set($event?.id ? $event : null)" [suggestions]="parties()"
-                              (completeMethod)="findParty($event)" optionLabel="name" [forceSelection]="true" [dropdown]="true" appendTo="body"
-                              [placeholder]="(r.id === 'customer-statement' ? 'reports.pickCustomer' : 'reports.pickSupplier') | translate"
-                              [ariaLabel]="(r.id === 'customer-statement' ? 'sales.customer' : 'purchase.supplier') | translate" class="party-pick">
-                <ng-template #item let-p><div><b>{{ p.name }}</b> <small class="muted">{{ p.phone }}</small></div></ng-template>
-              </p-autocomplete>
+              <ms-pick [kind]="r.id === 'customer-statement' ? 'customer' : 'supplier'" [value]="party()" (valueChange)="party.set($event)"
+                       [quickAdd]="false" [fluid]="false" class="party-pick"
+                       [placeholder]="(r.id === 'customer-statement' ? 'reports.pickCustomer' : 'reports.pickSupplier') | translate"
+                       [ariaLabel]="(r.id === 'customer-statement' ? 'sales.customer' : 'purchase.supplier') | translate" />
             }
             @if (r.id === 'sales' || r.id === 'gross-profit') {
               <p-selectbutton [options]="byOptions()" optionValue="value" [ngModel]="by()" (ngModelChange)="setBy($event)"
@@ -102,7 +100,7 @@
               </p-selectbutton>
             }
             @if (r.id === 'stock-on-hand') {
-              <p-select [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
+              <p-select size="small" [options]="categoryOptions()" optionLabel="label" optionValue="value" [ngModel]="categoryId()"
                         (ngModelChange)="categoryId.set($event)" [showClear]="true" [placeholder]="'reports.allCategories' | translate"
                         [filter]="categoryOptions().length > 8" appendTo="body" [ariaLabel]="'products.category' | translate" />
             }
@@ -161,7 +159,7 @@
           }
 
           <section class="card table-card">
-            <p-table class="ms-table" [value]="s.rows" [paginator]="!full() && s.rows.length > 50" [rows]="50" dataKey="key"
+            <p-table size="small" class="ms-table" [value]="s.rows" [paginator]="!full() && s.rows.length > 50" [rows]="50" dataKey="key"
                      [sortField]="s.by === 'DAY' ? 'key' : 'sales'" [sortOrder]="s.by === 'DAY' ? 1 : -1">
               <ng-template #header>
                 <tr>
@@ -241,7 +239,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="c.rows" [paginator]="!full() && c.rows.length > 50" [rows]="50" dataKey="id">
+            <p-table size="small" class="ms-table" [value]="c.rows" [paginator]="!full() && c.rows.length > 50" [rows]="50" dataKey="id">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="name">{{ 'sales.customer' | translate }}</th>
@@ -287,7 +285,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="sd.rows" [paginator]="!full() && sd.rows.length > 50" [rows]="50" dataKey="id">
+            <p-table size="small" class="ms-table" [value]="sd.rows" [paginator]="!full() && sd.rows.length > 50" [rows]="50" dataKey="id">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="name">{{ 'purchase.supplier' | translate }}</th>
@@ -336,7 +334,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="o.rows" [paginator]="!full() && o.rows.length > 50" [rows]="50" dataKey="productId">
+            <p-table size="small" class="ms-table" [value]="o.rows" [paginator]="!full() && o.rows.length > 50" [rows]="50" dataKey="productId">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
@@ -396,7 +394,7 @@
             }
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="ro.rows" [paginator]="!full() && ro.rows.length > 50" [rows]="50" dataKey="productId">
+            <p-table size="small" class="ms-table" [value]="ro.rows" [paginator]="!full() && ro.rows.length > 50" [rows]="50" dataKey="productId">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
@@ -454,7 +452,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="ex.rows" [paginator]="!full() && ex.rows.length > 50" [rows]="50" dataKey="batchId">
+            <p-table size="small" class="ms-table" [value]="ex.rows" [paginator]="!full() && ex.rows.length > 50" [rows]="50" dataKey="batchId">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
@@ -513,7 +511,7 @@
             }
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="cd.rows" [paginator]="!full() && cd.rows.length > 50" [rows]="50">
+            <p-table size="small" class="ms-table" [value]="cd.rows" [paginator]="!full() && cd.rows.length > 50" [rows]="50">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="postedOn">{{ 'reports.count' | translate }}</th>
@@ -559,7 +557,7 @@
             }
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="a.rows" [paginator]="!full() && a.rows.length > 50" [rows]="50" dataKey="productId">
+            <p-table size="small" class="ms-table" [value]="a.rows" [paginator]="!full() && a.rows.length > 50" [rows]="50" dataKey="productId">
               <ng-template #header>
                 <tr>
                   <th>#</th>
@@ -592,7 +590,7 @@
         @if (eoq(); as q) {
           <p class="form-note"><i class="icon pi pi-info-circle"></i>{{ 'reports.eoqHow' | translate: { days: q.salesDays } }}</p>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="q.rows" [paginator]="!full() && q.rows.length > 50" [rows]="50" dataKey="productId">
+            <p-table size="small" class="ms-table" [value]="q.rows" [paginator]="!full() && q.rows.length > 50" [rows]="50" dataKey="productId">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
@@ -640,7 +638,7 @@
             }
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="l.rows" [paginator]="!full() && l.rows.length > 50" [rows]="50">
+            <p-table size="small" class="ms-table" [value]="l.rows" [paginator]="!full() && l.rows.length > 50" [rows]="50">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="reason">{{ 'reports.reason' | translate }}</th>
@@ -685,7 +683,7 @@
             }
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="sl.rows" [paginator]="!full() && sl.rows.length > 50" [rows]="50" dataKey="productId">
+            <p-table size="small" class="ms-table" [value]="sl.rows" [paginator]="!full() && sl.rows.length > 50" [rows]="50" dataKey="productId">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="name">{{ 'common.product' | translate }}</th>
@@ -739,7 +737,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="sh.rows" [paginator]="!full() && sh.rows.length > 50" [rows]="50" dataKey="id">
+            <p-table size="small" class="ms-table" [value]="sh.rows" [paginator]="!full() && sh.rows.length > 50" [rows]="50" dataKey="id">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="closedAt">{{ 'reports.closedAt' | translate }}</th>
@@ -793,7 +791,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="v.rows" dataKey="month">
+            <p-table size="small" class="ms-table" [value]="v.rows" dataKey="month">
               <ng-template #header>
                 <tr>
                   <th>{{ 'reports.month' | translate }}</th>
@@ -839,7 +837,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="pu.rows" [paginator]="!full() && pu.rows.length > 50" [rows]="50" dataKey="key">
+            <p-table size="small" class="ms-table" [value]="pu.rows" [paginator]="!full() && pu.rows.length > 50" [rows]="50" dataKey="key">
               <ng-template #header>
                 <tr>
                   <th pSortableColumn="label">{{ 'reports.purchasesBy.' + pu.by | translate }}</th>
@@ -898,7 +896,7 @@
             </div>
           </div>
           <section class="card table-card">
-            <p-table class="ms-table" [value]="st.lines" [paginator]="!full() && st.lines.length > 50" [rows]="50">
+            <p-table size="small" class="ms-table" [value]="st.lines" [paginator]="!full() && st.lines.length > 50" [rows]="50">
               <ng-template #header>
                 <tr>
                   <th>{{ 'common.date' | translate }}</th>

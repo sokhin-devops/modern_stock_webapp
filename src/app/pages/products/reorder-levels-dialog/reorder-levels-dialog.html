@@ -18,7 +18,7 @@
         <tr>
           <td class="strong">{{ lang.name(b.nameEn, b.nameKm) }}@if (b.main) { <small class="muted"> · {{ 'products.mainBranch' | translate }}</small> }</td>
           <td>
-            <p-inputnumber [ngModel]="levels()[b.id] ?? null" (ngModelChange)="set(b.id, $event)" [maxFractionDigits]="3" [min]="0"
+            <p-inputnumber size="small" [ngModel]="levels()[b.id] ?? null" (ngModelChange)="set(b.id, $event)" [maxFractionDigits]="3" [min]="0"
                            [fluid]="true" [suffix]="loaded() ? ' ' + loaded()!.baseUnitSymbol : ''"
                            [placeholder]="loaded() ? (loaded()!.reorderLevel | number: '1.0-3') + ' ' + loaded()!.baseUnitSymbol : ''"
                            [disabled]="!loaded()" [ariaLabel]="lang.name(b.nameEn, b.nameKm)" />
@@ -28,6 +28,6 @@
     </tbody>
   </table>
   <ng-template #footer>
-    <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !loaded()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+    <button pButton size="small" type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !loaded()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>

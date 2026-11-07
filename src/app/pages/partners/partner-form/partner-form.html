@@ -3,67 +3,67 @@
   <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate id="partner-form">
     <div class="ms-field">
       <label msLabel for="pt-name" control="name">{{ 'partners.name' | translate }}</label>
-      <input pInputText id="pt-name" formControlName="name" />
+      <input pInputText pSize="small" id="pt-name" formControlName="name" />
     </div>
     @if (isCustomer()) {
       <div class="ms-field">
-        <p-selectbutton formControlName="type" [options]="types" optionValue="value" [allowEmpty]="false">
+        <p-selectbutton size="small" formControlName="type" [options]="types" optionValue="value" [allowEmpty]="false">
           <ng-template #item let-option>{{ option.label | translate }}</ng-template>
         </p-selectbutton>
       </div>
     } @else {
       <div class="ms-field">
         <label msLabel for="pt-contact" control="contactPerson">{{ 'partners.contact' | translate }}</label>
-        <input pInputText id="pt-contact" formControlName="contactPerson" />
+        <input pInputText pSize="small" id="pt-contact" formControlName="contactPerson" />
       </div>
     }
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="pt-phone" control="phone" error="errors.phone">{{ 'partners.phone' | translate }}</label>
-        <input pInputText id="pt-phone" type="tel" formControlName="phone" />
+        <input pInputText pSize="small" id="pt-phone" type="tel" formControlName="phone" />
       </div>
       @if (isCustomer()) {
         <div class="ms-field">
           <label msLabel for="pt-tin" control="vatTin">{{ 'partners.vatTin' | translate }}</label>
-          <input pInputText id="pt-tin" formControlName="vatTin" />
+          <input pInputText pSize="small" id="pt-tin" formControlName="vatTin" />
         </div>
       } @else {
         <div class="ms-field">
           <label msLabel for="pt-telegram" control="telegram">{{ 'partners.telegram' | translate }}</label>
-          <input pInputText id="pt-telegram" formControlName="telegram" />
+          <input pInputText pSize="small" id="pt-telegram" formControlName="telegram" />
         </div>
       }
     </div>
     <div class="ms-field">
       <label msLabel for="pt-address" control="address">{{ 'partners.address' | translate }}</label>
-      <input pInputText id="pt-address" formControlName="address" />
+      <input pInputText pSize="small" id="pt-address" formControlName="address" />
     </div>
     <div class="ms-form-row">
       @if (isCustomer()) {
         <div class="ms-field">
           <label msLabel for="pt-credit" control="creditLimit">{{ 'partners.creditLimit' | translate }}</label>
-          <p-inputnumber inputId="pt-credit" formControlName="creditLimit" mode="currency" currency="USD" locale="en-US" [min]="0" />
+          <p-inputnumber size="small" inputId="pt-credit" formControlName="creditLimit" mode="currency" currency="USD" locale="en-US" [min]="0" />
         </div>
       } @else {
         <div class="ms-field">
           <label msLabel for="pt-tin" control="vatTin">{{ 'partners.vatTin' | translate }}</label>
-          <input pInputText id="pt-tin" formControlName="vatTin" />
+          <input pInputText pSize="small" id="pt-tin" formControlName="vatTin" />
         </div>
       }
       <div class="ms-field">
         <label msLabel for="pt-terms" control="paymentTermsDays">{{ 'partners.terms' | translate }}</label>
-        <p-inputnumber inputId="pt-terms" formControlName="paymentTermsDays" [min]="0" [max]="365" locale="en-US" />
+        <p-inputnumber size="small" inputId="pt-terms" formControlName="paymentTermsDays" [min]="0" [max]="365" locale="en-US" />
       </div>
     </div>
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="pt-opening" control="openingBalance">{{ 'partners.openingBalance' | translate }}</label>
-        <p-inputnumber inputId="pt-opening" formControlName="openingBalance" mode="currency" currency="USD" locale="en-US" />
+        <p-inputnumber size="small" inputId="pt-opening" formControlName="openingBalance" mode="currency" currency="USD" locale="en-US" />
         <small class="field-hint">{{ (isCustomer() ? 'partners.openingHint' : 'partners.openingHintSupplier') | translate }}</small>
       </div>
       <div class="ms-field">
         <label msLabel for="pt-opening-date" control="openingBalanceDate">{{ 'partners.openingDate' | translate }}</label>
-        <p-datepicker inputId="pt-opening-date" formControlName="openingBalanceDate" dateFormat="dd/mm/yy" appendTo="body" [showIcon]="true" />
+        <p-datepicker size="small" inputId="pt-opening-date" formControlName="openingBalanceDate" dateFormat="dd/mm/yy" appendTo="body" [showIcon]="true" />
       </div>
     </div>
   </form>
@@ -71,13 +71,13 @@
   <ng-template #footer>
     <div class="dialog-actions">
       @if (canManage() && partner()?.active) {
-        <button pButton type="button" [text]="true" severity="danger" (click)="deactivate()">
+        <button pButton size="small" type="button" [text]="true" severity="danger" (click)="deactivate()">
           <span pButtonLabel>{{ 'partners.deactivate' | translate }}</span>
         </button>
       }
       <span class="spacer"></span>
       @if (canManage() || !partner()) {
-        <button pButton type="submit" form="partner-form" [loading]="busy()" [disabled]="busy()">
+        <button pButton size="small" type="submit" form="partner-form" [loading]="busy()" [disabled]="busy()">
           <span pButtonLabel>{{ 'common.save' | translate }}</span>
         </button>
       }

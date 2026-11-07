@@ -10,23 +10,23 @@
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="shift-usd">{{ (shift() ? 'pos.countedUsd' : 'pos.openingUsd') | translate }}</label>
-        <p-inputnumber inputId="shift-usd" [ngModel]="usd()" (ngModelChange)="usd.set($event)" mode="currency" currency="USD"
+        <p-inputnumber size="small" inputId="shift-usd" [ngModel]="usd()" (ngModelChange)="usd.set($event)" mode="currency" currency="USD"
                        locale="en-US" [min]="0" />
       </div>
       <div class="ms-field">
         <label msLabel for="shift-khr">{{ (shift() ? 'pos.countedKhr' : 'pos.openingKhr') | translate }}</label>
-        <p-inputnumber inputId="shift-khr" [ngModel]="khr()" (ngModelChange)="khr.set($event)" prefix="៛" locale="en-US" [min]="0" [step]="100" />
+        <p-inputnumber size="small" inputId="shift-khr" [ngModel]="khr()" (ngModelChange)="khr.set($event)" prefix="៛" locale="en-US" [min]="0" [step]="100" />
       </div>
     </div>
     @if (shift()) {
       <div class="ms-field">
         <label msLabel for="shift-note" optional>{{ 'pos.note' | translate }}</label>
-        <input pInputText id="shift-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
+        <input pInputText pSize="small" id="shift-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
       </div>
     }
   </div>
   <ng-template #footer>
-    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy()">
+    <button pButton size="small" type="button" (click)="submit()" [loading]="busy()" [disabled]="busy()">
       <span pButtonLabel>{{ (shift() ? 'pos.closeShift' : 'pos.openShift') | translate }}</span>
     </button>
   </ng-template>

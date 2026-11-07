@@ -1,17 +1,13 @@
-<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [header]="'debit.new' | translate"
-          [style]="{ width: 'min(520px, 96vw)' }">
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog ms-full-dialog" [header]="'debit.new' | translate">
   <div class="ms-form dialog-form">
     <p class="muted">{{ 'debit.lead' | translate }}</p>
     <div class="ms-field">
       <label msLabel for="debit-party" required>{{ 'sales.customer' | translate }}</label>
-      <p-autocomplete inputId="debit-party" [ngModel]="party()" (ngModelChange)="pick($event)" [suggestions]="parties()" (completeMethod)="find($event)"
-                      optionLabel="name" [forceSelection]="true" [fluid]="true" [dropdown]="true" appendTo="body" [disabled]="!!start()">
-        <ng-template #item let-p><div><b>{{ p.name }}</b> <small class="muted">{{ p.phone }}</small></div></ng-template>
-      </p-autocomplete>
+      <ms-pick kind="customer" inputId="debit-party" [value]="party()" (picked)="pick($event)" [disabled]="!!start()" />
     </div>
     <div class="ms-field">
       <label msLabel for="debit-invoice" optional>{{ 'debit.invoice' | translate }}</label>
-      <p-select inputId="debit-invoice" [options]="invoices()" optionLabel="number" optionValue="id" [ngModel]="invoiceId()"
+      <p-select size="small" inputId="debit-invoice" [options]="invoices()" optionLabel="number" optionValue="id" [ngModel]="invoiceId()"
                 (ngModelChange)="invoiceId.set($event)" [showClear]="true" [placeholder]="'debit.noInvoice' | translate"
                 [disabled]="!party()" appendTo="body">
         <ng-template #item let-i>{{ i.number }} <small class="muted">· {{ i.total | currency: 'USD' }}</small></ng-template>
@@ -19,13 +15,13 @@
     </div>
     <div class="ms-field">
       <label msLabel for="debit-reason" required>{{ 'debit.reason' | translate }}</label>
-      <input pInputText id="debit-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="500"
+      <input pInputText pSize="small" id="debit-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="500"
              [placeholder]="'debit.reasonPh' | translate" />
     </div>
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="debit-amount" required>{{ 'debit.amount' | translate }}</label>
-        <p-inputnumber inputId="debit-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" mode="currency" currency="USD"
+        <p-inputnumber size="small" inputId="debit-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" mode="currency" currency="USD"
                        locale="en-US" [min]="0" />
       </div>
       @if (vatRate()) {
@@ -40,7 +36,7 @@
     }
   </div>
   <ng-template #footer>
-    <button pButton type="button" (click)="submit()" [loading]="busy()"
+    <button pButton size="small" type="button" (click)="submit()" [loading]="busy()"
             [disabled]="busy() || !party() || !amount() || !reason().trim()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
   </ng-template>
 </p-dialog>
