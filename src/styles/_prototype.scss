@@ -974,8 +974,9 @@ html[lang="km"] .auth-title { line-height: 1.5; }
   .span-2 { grid-column: auto; }
   .page-actions { margin-left: 0; }
   .page-actions [data-action="focus"] { display: none; }
-  .pos { height: auto; min-height: 100vh; }
-  .pos-main { grid-template-columns: minmax(0, 1fr); }
+  /* Phones: the POS header stays put and only the products and cart under it scroll (never the whole screen). */
+  .pos { height: 100vh; height: 100dvh; }
+  .pos-main { grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; align-content: start; overflow-y: auto; }
   .cart { min-height: 520px; }
   .search-sm { flex: 1 1 100%; min-width: 0; }
   .party { padding: 16px; }

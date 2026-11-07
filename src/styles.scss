@@ -3,6 +3,15 @@
 // the rules below fit PrimeNG components into the prototype's layout and sizes.
 @use 'styles/prototype';
 
+// Inside the app (side menu, top bar, page), the window itself never scrolls: only the page body does, under its fixed
+// header. Nothing hidden (a screen-reader copy, an overlay) can make the whole screen move. Screens only: printing
+// still runs over as many pages as it needs.
+@media screen {
+  html:has(.shell) {
+    overflow: hidden;
+  }
+}
+
 // Light/dark switch (core/theme-mode.service.ts): while it happens, every color changes in the same frame (no button,
 // chip or field fades on its own), and the new mode grows over the old one as a circle instead of the browser's
 // default cross-fade.

@@ -1,6 +1,8 @@
 // Marks follow the app's chart rules: thin bars with 4 px rounded tops on the baseline, 2 px apart, a recessive grid,
 // and labels in text colors (never the bar color).
+// Positioned, so the hidden screen-reader copy stays inside the chart (and the page body that scrolls it).
 :host {
+  position: relative;
   display: block;
 }
 

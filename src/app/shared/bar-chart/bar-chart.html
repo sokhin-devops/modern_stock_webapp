@@ -21,10 +21,13 @@
   </div>
 </div>
 
-<!-- The same numbers for screen readers -->
-<table class="tw:sr-only">
-  <caption>{{ label() }}</caption>
-  @for (p of points(); track p.key) {
-    <tr><td>{{ p.tip }}</td></tr>
-  }
-</table>
+<!-- The same numbers for screen readers. In a div: a hidden table alone keeps its full height and made the whole
+     screen scroll. -->
+<div class="tw:sr-only">
+  <table>
+    <caption>{{ label() }}</caption>
+    @for (p of points(); track p.key) {
+      <tr><td>{{ p.tip }}</td></tr>
+    }
+  </table>
+</div>
