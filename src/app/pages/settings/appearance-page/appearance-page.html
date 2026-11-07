@@ -36,14 +36,14 @@
       </div>
       <div class="ms-field">
         <span msLabel id="ap-mode">{{ 'settings.appearance.mode' | translate }}</span>
-        <p-selectbutton [options]="modes" optionValue="value" [ngModel]="theme.mode()" (ngModelChange)="setMode($event)"
+        <p-selectbutton size="small" [options]="modes" optionValue="value" [ngModel]="theme.mode()" (ngModelChange)="setMode($event)"
                         [allowEmpty]="false" ariaLabelledBy="ap-mode">
           <ng-template #item let-option><i [class]="option.icon"></i>&nbsp;{{ option.label | translate }}</ng-template>
         </p-selectbutton>
       </div>
       <div class="ms-field">
         <span msLabel id="ap-density">{{ 'settings.appearance.density' | translate }}</span>
-        <p-selectbutton [options]="densities" optionValue="value" [ngModel]="theme.density()" (ngModelChange)="setDensity($event)"
+        <p-selectbutton size="small" [options]="densities" optionValue="value" [ngModel]="theme.density()" (ngModelChange)="setDensity($event)"
                         [allowEmpty]="false" ariaLabelledBy="ap-density">
           <ng-template #item let-option><i [class]="option.icon"></i>&nbsp;{{ option.label | translate }}</ng-template>
         </p-selectbutton>

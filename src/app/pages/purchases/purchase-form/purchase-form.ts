@@ -1,7 +1,6 @@
 import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { Dialog } from 'primeng/dialog';
@@ -20,6 +19,7 @@ import { DocLine, LinesEditor, emptyLine } from '../../../shared/lines-editor/li
 import { filledLines, receivingWarehouse, warehouseOptions } from '../../../shared/options';
 import { forkJoin } from 'rxjs';
 import { CatalogService } from '../../../core/catalog/catalog.service';
+import { PickField } from '../../../shared/pick/pick';
 
 /** A draft purchase order as the API sends it, to change it. */
 export interface DraftPurchaseOrder {
@@ -39,7 +39,7 @@ export interface DraftPurchaseOrder {
  */
 @Component({
   selector: 'ms-purchase-form',
-  imports: [FormsModule, TranslatePipe, Dialog, AutoComplete, InputText, Select, SelectButton, DatePicker, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
+  imports: [FormsModule, TranslatePipe, Dialog, PickField, InputText, Select, SelectButton, DatePicker, ButtonDirective, ButtonLabel, LinesEditor, FieldLabel],
   templateUrl: './purchase-form.html',
   styleUrl: './purchase-form.scss',
 })
@@ -61,7 +61,6 @@ export class PurchaseForm {
   private readonly catalog = inject(CatalogService);
 
   protected readonly supplier = signal<Supplier | null>(null);
-  protected readonly suppliers = signal<Supplier[]>([]);
   protected readonly warehouseId = signal<number | null>(null);
   protected readonly invoiceNo = signal('');
   protected readonly expected = signal<Date | null>(null);
@@ -119,10 +118,6 @@ export class PurchaseForm {
       },
       error: (e) => this.notify.error(e),
     });
-  }
-
-  protected findSuppliers(event: AutoCompleteCompleteEvent): void {
-    this.api.page<Supplier>('/suppliers', { page: 0, size: 10 }, { q: event.query }).subscribe({ next: (p) => this.suppliers.set(p.content) });
   }
 
   protected submit(): void {

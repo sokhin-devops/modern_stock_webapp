@@ -1,32 +1,27 @@
-<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog"
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog ms-full-dialog"
           [header]="(isCustomer() ? 'sales.receivePayment' : 'purchase.pay') | translate">
   <div class="ms-form dialog-form">
     <p class="muted small">{{ (isCustomer() ? 'sales.receiveLead' : 'purchase.payLead') | translate }}</p>
     <div class="ms-field">
       <label msLabel for="pay-party" required>{{ (isCustomer() ? 'sales.customer' : 'purchase.supplier') | translate }}</label>
-      <p-autocomplete inputId="pay-party" [ngModel]="party()" (ngModelChange)="pick($event)" [suggestions]="parties()" (completeMethod)="find($event)"
-                      optionLabel="name" [forceSelection]="true" [fluid]="true" [dropdown]="true" appendTo="body">
-        <ng-template #item let-p>
-          <div class="party-option"><b>{{ p.name }}</b><small class="muted">${{ p.balance }}</small></div>
-        </ng-template>
-      </p-autocomplete>
+      <ms-pick [kind]="isCustomer() ? 'customer' : 'supplier'" inputId="pay-party" [value]="party()" (picked)="pick($event)" />
     </div>
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="pay-amount" required>{{ 'common.amount' | translate }}</label>
-        <p-inputnumber inputId="pay-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" [min]="0"
+        <p-inputnumber size="small" inputId="pay-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" [min]="0"
                        [minFractionDigits]="currency() === 'USD' ? 2 : 0" [maxFractionDigits]="currency() === 'USD' ? 2 : 0" locale="en-US" [prefix]="currency() === 'USD' ? '$' : '៛'" />
       </div>
-      <p-selectbutton [options]="currencies" optionLabel="label" optionValue="value" [ngModel]="currency()" (ngModelChange)="currency.set($event)" [allowEmpty]="false" />
+      <p-selectbutton size="small" [options]="currencies" optionLabel="label" optionValue="value" [ngModel]="currency()" (ngModelChange)="currency.set($event)" [allowEmpty]="false" />
     </div>
-    <p-selectbutton [options]="methods()" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
+    <p-selectbutton size="small" [options]="methods()" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
       <ng-template #item let-o>{{ o.label | translate }}</ng-template>
     </p-selectbutton>
     @if (openDocs().length > 1) {
       <!-- FR-3.22: one payment for several invoices or bills, the oldest first or the ones picked here -->
       <div class="ms-field">
         <span msLabel id="pay-mode">{{ (isCustomer() ? 'payments.whichInvoices' : 'payments.whichBills') | translate }}</span>
-        <p-selectbutton [options]="modes" optionValue="value" [ngModel]="mode()" (ngModelChange)="setMode($event)" [allowEmpty]="false"
+        <p-selectbutton size="small" [options]="modes" optionValue="value" [ngModel]="mode()" (ngModelChange)="setMode($event)" [allowEmpty]="false"
                         ariaLabelledBy="pay-mode">
           <ng-template #item let-o>{{ o.label | translate }}</ng-template>
         </p-selectbutton>
@@ -35,7 +30,7 @@
         <ul class="docs">
           @for (d of openDocs(); track d.id) {
             <li [class.on]="isChosen(d)">
-              <p-checkbox [binary]="true" [inputId]="'pay-doc-' + d.id" [ngModel]="isChosen(d)" (ngModelChange)="toggle(d, $event)" />
+              <p-checkbox size="small" [binary]="true" [inputId]="'pay-doc-' + d.id" [ngModel]="isChosen(d)" (ngModelChange)="toggle(d, $event)" />
               <label class="grow" [for]="'pay-doc-' + d.id">
                 <span class="strong doc-no">{{ d.number }}</span>
                 <small class="muted" [class.danger-text]="d.overdue">
@@ -44,7 +39,7 @@
                 </small>
               </label>
               @if (isChosen(d)) {
-                <p-inputnumber [ngModel]="chosenAmount(d)" (ngModelChange)="setChosenAmount(d, $event)" mode="currency" currency="USD"
+                <p-inputnumber size="small" [ngModel]="chosenAmount(d)" (ngModelChange)="setChosenAmount(d, $event)" mode="currency" currency="USD"
                                locale="en-US" [min]="0" [max]="d.balance" inputStyleClass="doc-amount" [ariaLabel]="'common.amount' | translate" />
               }
             </li>
@@ -61,16 +56,16 @@
     @if (method() !== 'CASH') {
       <div class="ms-field">
         <label msLabel for="pay-ref">{{ 'common.reference' | translate }}</label>
-        <input pInputText id="pay-ref" [ngModel]="reference()" (ngModelChange)="reference.set($event)" />
+        <input pInputText pSize="small" id="pay-ref" [ngModel]="reference()" (ngModelChange)="reference.set($event)" />
       </div>
     }
     <div class="ms-field">
       <label msLabel for="pay-note">{{ 'common.note' | translate }}</label>
-      <input pInputText id="pay-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
+      <input pInputText pSize="small" id="pay-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
     </div>
   </div>
   <ng-template #footer>
-    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !canSave()">
+    <button pButton size="small" type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !canSave()">
       <span pButtonLabel>{{ 'common.save' | translate }}</span>
     </button>
   </ng-template>

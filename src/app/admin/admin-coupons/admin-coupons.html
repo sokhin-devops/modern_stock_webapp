@@ -6,7 +6,7 @@
 </div>
 <p class="muted lead">{{ 'admin.coupons.lead' | translate }}</p>
 <section class="card table-card">
-  <p-table class="ms-table" [value]="coupons()" dataKey="id" [rowHover]="true">
+  <p-table size="small" class="ms-table" [value]="coupons()" dataKey="id" [rowHover]="true">
     <ng-template #header>
       <tr>
         <th>{{ 'admin.coupons.code' | translate }}</th>
@@ -38,33 +38,33 @@
     <div class="ms-form dialog-form">
       <div class="ms-field">
         <label msLabel for="cp-code" required>{{ 'admin.coupons.code' | translate }}</label>
-        <input pInputText id="cp-code" [ngModel]="c.code" (ngModelChange)="set('code', $event)" maxlength="30" class="code" />
+        <input pInputText pSize="small" id="cp-code" [ngModel]="c.code" (ngModelChange)="set('code', $event)" maxlength="30" class="code" />
         <small class="field-hint">{{ 'admin.coupons.codeHint' | translate }}</small>
       </div>
       <div class="ms-form-row">
         <div class="ms-field">
           <label msLabel for="cp-off">{{ 'admin.coupons.off' | translate }}</label>
-          <p-inputnumber inputId="cp-off" [ngModel]="c.percentOff" (ngModelChange)="set('percentOff', $event)" suffix="%" [min]="1" [max]="100" [fluid]="true" />
+          <p-inputnumber size="small" inputId="cp-off" [ngModel]="c.percentOff" (ngModelChange)="set('percentOff', $event)" suffix="%" [min]="1" [max]="100" [fluid]="true" />
         </div>
         <div class="ms-field">
           <label msLabel for="cp-periods">{{ 'admin.coupons.periods' | translate }}</label>
-          <p-inputnumber inputId="cp-periods" [ngModel]="c.periods" (ngModelChange)="set('periods', $event)" [min]="1" [max]="24" [fluid]="true" />
+          <p-inputnumber size="small" inputId="cp-periods" [ngModel]="c.periods" (ngModelChange)="set('periods', $event)" [min]="1" [max]="24" [fluid]="true" />
         </div>
       </div>
       <div class="ms-form-row">
         <div class="ms-field">
           <label msLabel for="cp-max" optional>{{ 'admin.coupons.max' | translate }}</label>
-          <p-inputnumber inputId="cp-max" [ngModel]="c.maxRedemptions" (ngModelChange)="set('maxRedemptions', $event)" [min]="1" [fluid]="true" />
+          <p-inputnumber size="small" inputId="cp-max" [ngModel]="c.maxRedemptions" (ngModelChange)="set('maxRedemptions', $event)" [min]="1" [fluid]="true" />
         </div>
         <div class="ms-field">
           <label msLabel for="cp-expires" optional>{{ 'admin.coupons.expires' | translate }}</label>
-          <p-datepicker inputId="cp-expires" [ngModel]="expires()" (ngModelChange)="expires.set($event)" dateFormat="dd/mm/yy"
+          <p-datepicker size="small" inputId="cp-expires" [ngModel]="expires()" (ngModelChange)="expires.set($event)" dateFormat="dd/mm/yy"
                         [showClear]="true" appendTo="body" [fluid]="true" />
         </div>
       </div>
       <div class="ms-field">
         <label msLabel for="cp-note" optional>{{ 'common.note' | translate }}</label>
-        <input pInputText id="cp-note" [ngModel]="c.note" (ngModelChange)="set('note', $event)" maxlength="255" />
+        <input pInputText pSize="small" id="cp-note" [ngModel]="c.note" (ngModelChange)="set('note', $event)" maxlength="255" />
       </div>
       <div class="ms-check">
         <p-toggleswitch inputId="cp-active" [ngModel]="c.active" (ngModelChange)="set('active', $event)" />
@@ -73,7 +73,7 @@
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !editing()?.code?.trim()">
+    <button pButton size="small" type="button" (click)="save()" [loading]="busy()" [disabled]="busy() || !editing()?.code?.trim()">
       <span pButtonLabel>{{ 'common.save' | translate }}</span>
     </button>
   </ng-template>

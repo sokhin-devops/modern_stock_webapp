@@ -1,17 +1,19 @@
 <header class="topbar">
-  <button pButton type="button" class="menu-btn" [rounded]="true" [text]="true" severity="secondary" (click)="menu.emit()"
+  <button pButton size="small" type="button" class="menu-btn" [rounded]="true" [text]="true" severity="secondary" (click)="menu.emit()"
           [attr.aria-label]="'shell.menu' | translate">
     <i class="pi pi-bars" pButtonIcon></i>
   </button>
 
+  <!-- Brand: the app's mark, then the open business with my role in it (on phones: the branch) -->
   <div class="brand">
     <a class="logo" routerLink="/dashboard" aria-label="ModernStock"><i class="icon pi pi-box"></i></a>
     <button class="business-btn" type="button" (click)="businessMenu.toggle($event)" aria-haspopup="menu">
       <span class="names">
-        <span>{{ businessName() }}</span>
+        <span class="biz-name">{{ businessName() }}</span>
+        <small class="desktop-only">{{ roleName() }}@if (business.current()?.subscriptionStatus === 'TRIALING') { · {{ 'account.proTrial' | translate }} }</small>
         <small class="phone-only">{{ branchName() ?? ('shell.allBranches' | translate) }}</small>
       </span>
-      <i class="icon pi pi-chevron-down"></i>
+      <i class="chev pi pi-chevron-down" aria-hidden="true"></i>
     </button>
   </div>
 
@@ -32,23 +34,30 @@
         <i class="icon pi pi-money-bill"></i>$1 = ៛{{ rate.usdToKhr | number: '1.0-0' }}
       </a>
     }
-    <a pButton class="help-btn" [rounded]="true" [text]="true" severity="secondary" [href]="helpHref()" target="_blank" rel="noopener"
-       [attr.aria-label]="'shell.help' | translate" [pTooltip]="'shell.help' | translate" tooltipPosition="bottom">
-      <i class="pi pi-question-circle" pButtonIcon></i>
-    </a>
-    <button pButton type="button" class="bell" [rounded]="true" [text]="true" severity="secondary" (click)="openAlerts($event, notifications)"
-            [attr.aria-label]="('shell.notifications' | translate) + (alerts.total() ? ' (' + alerts.total() + ')' : '')"
-            aria-haspopup="dialog" [pTooltip]="'shell.notifications' | translate" tooltipPosition="bottom">
-      <i class="pi pi-bell" pButtonIcon></i>
-      @if (alerts.total()) {
-        <span class="badge" aria-hidden="true">{{ alerts.total() > 99 ? '99+' : alerts.total() }}</span>
-      }
-    </button>
-    <ms-lang-button class="lang" />
-    <button pButton type="button" class="dark-toggle" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle()"
-            [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate">
-      <i class="pi" [class.pi-sun]="theme.dark()" [class.pi-moon]="!theme.dark()" pButtonIcon></i>
-    </button>
+    <!-- Help, notifications, language and dark mode: one group of equal round buttons -->
+    <div class="tools">
+      <a pButton size="small" class="help-btn" [rounded]="true" [text]="true" severity="secondary" [href]="helpHref()" target="_blank" rel="noopener"
+         [attr.aria-label]="'shell.help' | translate" [pTooltip]="'shell.help' | translate" tooltipPosition="bottom">
+        <i class="pi pi-question-circle" pButtonIcon></i>
+      </a>
+      <span class="bell">
+        <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary"
+                (click)="openAlerts($event, notifications)"
+                [attr.aria-label]="('shell.notifications' | translate) + (alerts.total() ? ' (' + alerts.total() + ')' : '')"
+                aria-haspopup="dialog" [pTooltip]="'shell.notifications' | translate" tooltipPosition="bottom">
+          <i class="pi pi-bell" pButtonIcon></i>
+        </button>
+        @if (alerts.total()) {
+          <span class="badge" aria-hidden="true">{{ alerts.total() > 99 ? '99+' : alerts.total() }}</span>
+        }
+      </span>
+      <ms-lang-button class="lang" />
+      <button pButton size="small" type="button" class="dark-toggle" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle($event)"
+              [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate"
+              [pTooltip]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate" tooltipPosition="bottom">
+        <i class="pi" [class.pi-sun]="theme.dark()" [class.pi-moon]="!theme.dark()" pButtonIcon></i>
+      </button>
+    </div>
     <ms-account-menu />
   </div>
 </header>

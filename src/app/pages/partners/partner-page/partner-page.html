@@ -10,12 +10,12 @@
     </nav>
     <div class="page-actions">
       @if (canEdit() && partner()) {
-        <button pButton type="button" [outlined]="true" (click)="editOpen.set(true)">
+        <button pButton size="small" type="button" [outlined]="true" (click)="editOpen.set(true)">
           <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
         </button>
       }
       @if (newItems().length) {
-        <button pButton type="button" (click)="newMenu.toggle($event)" aria-haspopup="true">
+        <button pButton size="small" type="button" (click)="newMenu.toggle($event)" aria-haspopup="true">
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'tx.newButton' | translate }}</span>
         </button>
         <p-menu #newMenu [model]="newItems()" [popup]="true" appendTo="body" />
@@ -96,57 +96,59 @@
         </p-tabpanel>
         <p-tabpanel value="statement">
           <div class="toolbar">
-            <p-datepicker [ngModel]="stFrom()" (ngModelChange)="setStFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+            <p-datepicker size="small" [ngModel]="stFrom()" (ngModelChange)="setStFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
                           [ariaLabel]="'common.from' | translate" class="date-filter" />
-            <p-datepicker [ngModel]="stTo()" (ngModelChange)="setStTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+            <p-datepicker size="small" [ngModel]="stTo()" (ngModelChange)="setStTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
                           [ariaLabel]="'common.to' | translate" class="date-filter" />
             <span class="spacer"></span>
-            <button pButton type="button" [outlined]="true" (click)="exportStatement()" [disabled]="!statement()">
+            <button pButton size="small" type="button" [outlined]="true" (click)="exportStatement()" [disabled]="!statement()">
               <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
             </button>
           </div>
-          <p-table class="ms-table" [value]="statement()?.lines ?? []" [loading]="stLoading()" [scrollable]="true" scrollHeight="flex">
-            <ng-template #header>
-              <tr>
-                <th>{{ 'common.date' | translate }}</th>
-                <th>{{ 'tx.type' | translate }}</th>
-                <th>{{ 'common.number' | translate }}</th>
-                <th class="num">{{ 'party.debit' | translate }}</th>
-                <th class="num">{{ 'party.credit' | translate }}</th>
-                <th class="num">{{ 'party.runningBalance' | translate }}</th>
-              </tr>
-              @if (statement(); as s) {
-                <tr class="opening">
-                  <td>{{ day(s.from) | date: 'dd/MM/yyyy' }}</td>
-                  <td colspan="4">{{ 'party.statementTypes.OPENING' | translate }}</td>
-                  <td class="num strong">{{ s.opening | currency: 'USD' }}</td>
-                </tr>
-              }
-            </ng-template>
-            <ng-template #body let-l>
-              <tr>
-                <td>{{ day(l.date) | date: 'dd/MM/yyyy' }}</td>
-                <td>{{ 'party.statementTypes.' + l.type | translate }}</td>
-                <td class="doc-no">{{ l.number }}</td>
-                <td class="num">{{ l.debit ? (l.debit | currency: 'USD') : '—' }}</td>
-                <td class="num">{{ l.credit ? (l.credit | currency: 'USD') : '—' }}</td>
-                <td class="num strong">{{ l.balance | currency: 'USD' }}</td>
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr><td colspan="6" class="empty-cell">{{ 'party.statementEmpty' | translate }}</td></tr>
-            </ng-template>
-            <ng-template #footer>
-              @if (statement(); as s) {
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="statement()?.lines ?? []" [loading]="stLoading()" [scrollable]="true" scrollHeight="flex">
+              <ng-template #header>
                 <tr>
-                  <td colspan="3">{{ 'party.statementTypes.CLOSING' | translate }}</td>
-                  <td class="num">{{ s.debits | currency: 'USD' }}</td>
-                  <td class="num">{{ s.credits | currency: 'USD' }}</td>
-                  <td class="num strong">{{ s.closing | currency: 'USD' }}</td>
+                  <th>{{ 'common.date' | translate }}</th>
+                  <th>{{ 'tx.type' | translate }}</th>
+                  <th>{{ 'common.number' | translate }}</th>
+                  <th class="num">{{ 'party.debit' | translate }}</th>
+                  <th class="num">{{ 'party.credit' | translate }}</th>
+                  <th class="num">{{ 'party.runningBalance' | translate }}</th>
                 </tr>
-              }
-            </ng-template>
-          </p-table>
+                @if (statement(); as s) {
+                  <tr class="opening">
+                    <td>{{ day(s.from) | date: 'dd/MM/yyyy' }}</td>
+                    <td colspan="4">{{ 'party.statementTypes.OPENING' | translate }}</td>
+                    <td class="num strong">{{ s.opening | currency: 'USD' }}</td>
+                  </tr>
+                }
+              </ng-template>
+              <ng-template #body let-l>
+                <tr>
+                  <td>{{ day(l.date) | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ 'party.statementTypes.' + l.type | translate }}</td>
+                  <td class="doc-no">{{ l.number }}</td>
+                  <td class="num">{{ l.debit ? (l.debit | currency: 'USD') : '—' }}</td>
+                  <td class="num">{{ l.credit ? (l.credit | currency: 'USD') : '—' }}</td>
+                  <td class="num strong">{{ l.balance | currency: 'USD' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="6" class="empty-cell">{{ 'party.statementEmpty' | translate }}</td></tr>
+              </ng-template>
+              <ng-template #footer>
+                @if (statement(); as s) {
+                  <tr>
+                    <td colspan="3">{{ 'party.statementTypes.CLOSING' | translate }}</td>
+                    <td class="num">{{ s.debits | currency: 'USD' }}</td>
+                    <td class="num">{{ s.credits | currency: 'USD' }}</td>
+                    <td class="num strong">{{ s.closing | currency: 'USD' }}</td>
+                  </tr>
+                }
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>

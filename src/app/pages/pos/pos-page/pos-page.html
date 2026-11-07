@@ -1,7 +1,7 @@
 <div class="pos">
   <ms-announcement-banner [inset]="true" />
   <header class="pos-head">
-    <a pButton routerLink="/dashboard" [rounded]="true" [text]="true" severity="secondary" [attr.aria-label]="'pos.back' | translate">
+    <a pButton size="small" routerLink="/dashboard" [rounded]="true" [text]="true" severity="secondary" [attr.aria-label]="'pos.back' | translate">
       <i class="pi pi-arrow-left" pButtonIcon></i>
     </a>
     <span class="logo"><i class="icon pi pi-box"></i></span>
@@ -9,11 +9,14 @@
       <b>{{ 'pos.title' | translate }}</b>
       <span class="muted small">{{ business.current() ? lang.name(business.current()!.nameEn, business.current()!.nameKm) : '' }}</span>
     </div>
+    <!-- The branch, as in the app's top bar: a chip that opens the list of branches -->
     @if (business.canPickBranch() && branchOptions().length > 1) {
-      <p-select [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="business.branchId()"
-                (ngModelChange)="selectBranch($event)" [ariaLabel]="'pos.branch' | translate" class="branch-select" />
+      <button class="chip branch-chip" type="button" (click)="branchMenu.toggle($event)" aria-haspopup="menu" [attr.aria-label]="'pos.branch' | translate">
+        <i class="icon pi pi-shop"></i><span class="branch-name">{{ branch() ? lang.name(branch()!.nameEn, branch()!.nameKm) : '' }}</span><i class="icon pi pi-chevron-down chev"></i>
+      </button>
+      <p-menu #branchMenu [model]="branchItems()" [popup]="true" appendTo="body" />
     } @else if (branch()) {
-      <span class="chip"><i class="icon pi pi-shop"></i>{{ lang.name(branch()!.nameEn, branch()!.nameKm) }}</span>
+      <span class="chip branch-chip fixed"><i class="icon pi pi-shop"></i><span class="branch-name">{{ lang.name(branch()!.nameEn, branch()!.nameKm) }}</span></span>
     }
     @if (canShift()) {
       @if (shift(); as s) {
@@ -32,17 +35,17 @@
     }
     <span class="spacer"></span>
     <ms-lang-button class="hide-sm" />
-    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="switchOpen.set(true)"
+    <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="switchOpen.set(true)"
             [attr.aria-label]="'pos.switchTitle' | translate" [pTooltip]="'pos.switchTitle' | translate" tooltipPosition="bottom">
       <i class="pi pi-users" pButtonIcon></i>
     </button>
     @if (shift()) {
-      <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="shiftOpen.set(true)"
+      <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="shiftOpen.set(true)"
               [attr.aria-label]="'pos.closeShift' | translate">
         <i class="pi pi-lock" pButtonIcon></i>
       </button>
     }
-    <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle()" class="hide-sm"
+    <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="theme.toggle($event)" class="hide-sm"
             [attr.aria-label]="(theme.dark() ? 'common.lightMode' : 'common.darkMode') | translate">
       <i class="pi" [class.pi-sun]="theme.dark()" [class.pi-moon]="!theme.dark()" pButtonIcon></i>
     </button>
@@ -108,33 +111,19 @@
               <i class="pi pi-inbox" pButtonIcon></i><span pButtonLabel>{{ 'pos.heldCount' | translate: { n: held().length } }}</span>
             </button>
           }
-          <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="holdSale()" [disabled]="!lines().length"
+          <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="holdSale()" [disabled]="!lines().length"
                   [attr.aria-label]="'pos.hold' | translate" [pTooltip]="'pos.hold' | translate" tooltipPosition="bottom">
             <i class="pi pi-pause" pButtonIcon></i>
           </button>
-          <button pButton type="button" [rounded]="true" [text]="true" severity="secondary" (click)="clear()" [disabled]="!lines().length"
+          <button pButton size="small" type="button" [rounded]="true" [text]="true" severity="secondary" (click)="clear()" [disabled]="!lines().length"
                   [attr.aria-label]="'pos.clear' | translate">
             <i class="pi pi-trash" pButtonIcon></i>
           </button>
         </div>
+        <!-- The customer: Walk-in until someone is picked; the list opens on click, with search and "+ New customer" -->
         <div class="customer-row">
-          <p-autocomplete [ngModel]="customer()" (ngModelChange)="customer.set($event && $event.id ? $event : null)"
-                          [suggestions]="customerResults()" (completeMethod)="findCustomers($event)" optionLabel="name"
-                          [placeholder]="'pos.walkIn' | translate" [showClear]="true" [forceSelection]="true" [fluid]="true"
-                          [ariaLabel]="'pos.customerPh' | translate" appendTo="body" class="customer-pick-field">
-            <ng-template #item let-c>
-              <div class="customer-option">
-                <b>{{ c.name }}</b>
-                <small class="muted">{{ c.phone }}@if (c.balance > 0) { · ${{ c.balance | number: '1.2-2' }} }</small>
-              </div>
-            </ng-template>
-          </p-autocomplete>
-          @if (canAddCustomer()) {
-            <button pButton type="button" [rounded]="true" [text]="true" (click)="newCustomerOpen.set(true)"
-                    [attr.aria-label]="'partners.newCustomer' | translate" [pTooltip]="'partners.newCustomer' | translate" tooltipPosition="left">
-              <i class="pi pi-user-plus" pButtonIcon></i>
-            </button>
-          }
+          <ms-pick kind="customer" [value]="customer()" (valueChange)="customer.set($event)" [noneLabel]="'pos.walkIn' | translate"
+                   [ariaLabel]="'pos.customerPh' | translate" class="customer-pick-field" />
         </div>
       </div>
 
@@ -151,7 +140,7 @@
               <button type="button" (click)="changeQty(line, 1)" [attr.aria-label]="'pos.more' | translate">+</button>
             </div>
             @if (line.product.units.length) {
-              <p-select [options]="unitOptions(line.product)" optionLabel="label" optionValue="value" [ngModel]="line.unitId"
+              <p-select size="small" [options]="unitOptions(line.product)" optionLabel="label" optionValue="value" [ngModel]="line.unitId"
                         (ngModelChange)="changeUnit(line, $event)" [ariaLabel]="'pos.unit' | translate" class="unit-select" appendTo="body" />
             } @else {
               <span class="unit-chip">{{ line.unitSymbol }}</span>
@@ -190,7 +179,6 @@
                    [receiptHeader]="settings()?.receiptHeader ?? null" [paper]="settings()?.receiptPaper ?? 80"
                    [showVatTin]="settings()?.receiptShowVatTin ?? true" (newSale)="nextSale()" />
 <ms-held-dialog [(visible)]="heldOpen" [sales]="held()" (resume)="resumeHeld($event)" (remove)="removeHeld($event)" />
-<ms-new-customer-dialog [(visible)]="newCustomerOpen" [typed]="customerTyped()" (saved)="customer.set($event)" />
 @if (business.branchId() != null) {
   <ms-shift-dialog [(visible)]="shiftOpen" [shift]="shift()" [branchId]="business.branchId()!" (changed)="shift.set($event)" />
 }

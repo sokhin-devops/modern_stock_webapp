@@ -1,4 +1,4 @@
-<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog ms-full-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
           [header]="(mode() === 'quick' ? 'purchase.quick' : order() ? 'purchase.editOrder' : 'purchase.newOrder') | translate">
   <div class="ms-form">
     @if (mode() === 'quick') {
@@ -7,12 +7,11 @@
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="pu-supplier" required>{{ 'purchase.supplier' | translate }}</label>
-        <p-autocomplete inputId="pu-supplier" [ngModel]="supplier()" (ngModelChange)="supplier.set($event?.id ? $event : null)" [suggestions]="suppliers()"
-                        (completeMethod)="findSuppliers($event)" optionLabel="name" [forceSelection]="true" [fluid]="true" [dropdown]="true" appendTo="body" />
+        <ms-pick kind="supplier" inputId="pu-supplier" [value]="supplier()" (valueChange)="supplier.set($event)" />
       </div>
       <div class="ms-field">
         <label msLabel for="pu-wh">{{ 'common.warehouse' | translate }}</label>
-        <p-select inputId="pu-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+        <p-select size="small" inputId="pu-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
                   (ngModelChange)="warehouseId.set($event)" appendTo="body" />
       </div>
     </div>
@@ -20,27 +19,27 @@
       @if (mode() === 'quick') {
         <div class="ms-field">
           <label msLabel for="pu-inv">{{ 'purchase.invoiceNo' | translate }}</label>
-          <input pInputText id="pu-inv" [ngModel]="invoiceNo()" (ngModelChange)="invoiceNo.set($event)" />
+          <input pInputText pSize="small" id="pu-inv" [ngModel]="invoiceNo()" (ngModelChange)="invoiceNo.set($event)" />
         </div>
       } @else {
         <div class="ms-field">
           <label msLabel for="pu-exp">{{ 'purchase.expected' | translate }}</label>
-          <p-datepicker inputId="pu-exp" [ngModel]="expected()" (ngModelChange)="expected.set($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" />
+          <p-datepicker size="small" inputId="pu-exp" [ngModel]="expected()" (ngModelChange)="expected.set($event)" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" />
         </div>
       }
       <div class="ms-field">
         <label msLabel for="pu-note">{{ 'common.note' | translate }}</label>
-        <input pInputText id="pu-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
+        <input pInputText pSize="small" id="pu-note" [ngModel]="note()" (ngModelChange)="note.set($event)" />
       </div>
     </div>
     <ms-lines-editor [(lines)]="lines" [showCost]="true" [showBatch]="mode() === 'quick'" />
     @if (mode() === 'quick') {
       <div class="pay-row">
-        <p-selectbutton [options]="payOptions" optionValue="value" [ngModel]="payNow()" (ngModelChange)="payNow.set($event)" [allowEmpty]="false">
+        <p-selectbutton size="small" [options]="payOptions" optionValue="value" [ngModel]="payNow()" (ngModelChange)="payNow.set($event)" [allowEmpty]="false">
           <ng-template #item let-o>{{ o.label | translate }}</ng-template>
         </p-selectbutton>
         @if (payNow()) {
-          <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
+          <p-selectbutton size="small" [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
             <ng-template #item let-o>{{ o.label | translate }}</ng-template>
           </p-selectbutton>
         }
@@ -50,7 +49,7 @@
   <ng-template #footer>
     <div class="dialog-actions">
       <span class="spacer"></span>
-      <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+      <button pButton size="small" type="button" (click)="submit()" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
     </div>
   </ng-template>
 </p-dialog>

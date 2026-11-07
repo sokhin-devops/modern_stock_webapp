@@ -3,45 +3,47 @@
     <nav class="breadcrumb" aria-label="Breadcrumb"><span class="current">{{ 'dashboard.title' | translate }}</span></nav>
     <div class="page-actions">
       @if (business.can('sale:create')) {
-        <a pButton routerLink="/pos"><i class="pi pi-shopping-cart" pButtonIcon></i><span pButtonLabel>{{ 'dashboard.openPos' | translate }}</span></a>
+        <a pButton size="small" routerLink="/pos"><i class="pi pi-shopping-cart" pButtonIcon></i><span pButtonLabel>{{ 'dashboard.openPos' | translate }}</span></a>
       }
     </div>
   </div>
 
   <div class="page-body">
-    <h1 class="hello">{{ 'dashboard.hello' | translate: { name: firstName() } }}</h1>
-
-    @if (trialDaysLeft(); as days) {
-      <div class="banner banner-primary">
-        <i class="icon pi pi-star"></i>
-        <div class="text">
-          <b>{{ 'dashboard.trialEnds' | translate: { days } }}</b>
-          <div class="small">{{ 'dashboard.trialLead' | translate: { date: (billing()?.trialEndsAt | date: 'dd/MM/yyyy') } }}</div>
-        </div>
-        <a pButton routerLink="/settings/billing" [text]="true"><span pButtonLabel>{{ 'nav.billing' | translate }}</span></a>
-      </div>
-    }
-
     @let d = data.value();
     @let s = summary.value();
+    <!-- Key numbers: a label with its icon, the value, then one line of detail. Cards with a link open their report. -->
     <div class="kpis">
+      @if (data.isLoading() && !d) {
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="kpi kpi-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+        }
+      }
       @if (d?.today; as today) {
         <div class="kpi">
-          <div class="kpi-label"><i class="icon pi pi-shopping-cart"></i>{{ (d!.ownSalesOnly ? 'dashboard.mySalesToday' : 'dashboard.todaySales') | translate }}</div>
+          <div class="kpi-top">
+            <span class="kpi-label">{{ (d!.ownSalesOnly ? 'dashboard.mySalesToday' : 'dashboard.todaySales') | translate }}</span>
+            <span class="kpi-icon"><i class="pi pi-shopping-cart"></i></span>
+          </div>
           <div class="kpi-value">{{ today.usd | currency: 'USD' }}</div>
           <div class="kpi-sub">៛{{ today.khr | number: '1.0-0' }} · {{ 'dashboard.receipts' | translate: { n: today.receipts } }}</div>
         </div>
       }
       @if (d?.profitToday != null) {
-        <div class="kpi">
-          <div class="kpi-label"><i class="icon pi pi-chart-line"></i>{{ 'dashboard.profitToday' | translate }}</div>
-          <div class="kpi-value" [class.warn]="d!.profitToday! < 0">{{ d!.profitToday! | currency: 'USD' }}</div>
+        <div class="kpi" [class.tone-danger]="d!.profitToday! < 0">
+          <div class="kpi-top">
+            <span class="kpi-label">{{ 'dashboard.profitToday' | translate }}</span>
+            <span class="kpi-icon"><i class="pi pi-chart-line"></i></span>
+          </div>
+          <div class="kpi-value">{{ d!.profitToday! | currency: 'USD' }}</div>
           <div class="kpi-sub">{{ 'dashboard.thisMonth' | translate: { amount: (d!.profitMonth! | currency: 'USD') } }}</div>
         </div>
       }
       @if (s && business.can('product:manage')) {
         <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'stock-on-hand' }">
-          <div class="kpi-label"><i class="icon pi pi-box"></i>{{ 'dashboard.stockValue' | translate }}</div>
+          <div class="kpi-top">
+            <span class="kpi-label">{{ 'dashboard.stockValue' | translate }}</span>
+            <span class="kpi-icon"><i class="pi pi-box"></i></span>
+          </div>
           <div class="kpi-value">{{ s.onHandValue | currency: 'USD' }}</div>
           <div class="kpi-sub">
             @if (s.inTransitValue) {
@@ -50,16 +52,25 @@
               {{ 'dashboard.stockValueHint' | translate }}
             }
           </div>
+          <i class="kpi-go pi pi-arrow-up-right" aria-hidden="true"></i>
         </a>
       }
       @if (s) {
-        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'reorder' }">
-          <div class="kpi-label"><i class="icon pi pi-arrow-down"></i>{{ 'dashboard.lowStock' | translate }}</div>
-          <div class="kpi-value" [class.warn]="s.lowStockItems > 0">{{ s.lowStockItems }}</div>
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'reorder' }" [class.tone-warn]="s.lowStockItems > 0">
+          <div class="kpi-top">
+            <span class="kpi-label">{{ 'dashboard.lowStock' | translate }}</span>
+            <span class="kpi-icon"><i class="pi pi-arrow-down"></i></span>
+          </div>
+          <div class="kpi-value">{{ s.lowStockItems }}</div>
           <div class="kpi-sub">{{ (s.lowStockItems === 1 ? 'dashboard.item' : 'dashboard.items') | translate }}</div>
+          <i class="kpi-go pi pi-arrow-up-right" aria-hidden="true"></i>
         </a>
-        <a class="kpi link" routerLink="/inventory/batches" [queryParams]="{ window: s.expiredBatches && !s.expiringSoon ? 'expired' : '' + s.expiringDays }">
-          <div class="kpi-label"><i class="icon pi pi-calendar-times"></i>{{ 'dashboard.expiring' | translate: { n: s.expiringDays } }}</div>
+        <a class="kpi link" routerLink="/inventory/batches" [queryParams]="{ window: s.expiredBatches && !s.expiringSoon ? 'expired' : '' + s.expiringDays }"
+           [class.tone-warn]="s.expiringSoon > 0 && !s.expiredBatches" [class.tone-danger]="s.expiredBatches > 0">
+          <div class="kpi-top">
+            <span class="kpi-label">{{ 'dashboard.expiring' | translate: { n: s.expiringDays } }}</span>
+            <span class="kpi-icon"><i class="pi pi-calendar-times"></i></span>
+          </div>
           <div class="kpi-value">{{ s.expiringSoon }}</div>
           <div class="kpi-sub">
             {{ (s.expiringSoon === 1 ? 'dashboard.batch' : 'dashboard.batches') | translate }}
@@ -67,28 +78,34 @@
               · <span class="danger-text">{{ 'dashboard.expired' | translate: { n: s.expiredBatches } }}</span>
             }
           </div>
+          <i class="kpi-go pi pi-arrow-up-right" aria-hidden="true"></i>
         </a>
       }
       @if (d?.debts; as debts) {
-        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'customer-debt' }">
-          <div class="kpi-label"><i class="icon pi pi-users"></i>{{ 'dashboard.customerDebt' | translate }}</div>
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'customer-debt' }" [class.tone-danger]="debts.overdueInvoices > 0">
+          <div class="kpi-top">
+            <span class="kpi-label">{{ 'dashboard.customerDebt' | translate }}</span>
+            <span class="kpi-icon"><i class="pi pi-users"></i></span>
+          </div>
           <div class="kpi-value">{{ debts.customersOwe | currency: 'USD' }}</div>
           <div class="kpi-sub" [class.danger-text]="debts.overdueInvoices > 0">
             {{ (debts.overdueInvoices ? 'dashboard.overdueInvoices' : 'dashboard.noneOverdue') | translate: { n: debts.overdueInvoices } }}
           </div>
+          <i class="kpi-go pi pi-arrow-up-right" aria-hidden="true"></i>
         </a>
-        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'supplier-debt' }">
-          <div class="kpi-label"><i class="icon pi pi-truck"></i>{{ 'dashboard.supplierDebt' | translate }}</div>
+        <a class="kpi link" routerLink="/reports" [queryParams]="{ r: 'supplier-debt' }" [class.tone-danger]="debts.overdueBills > 0">
+          <div class="kpi-top">
+            <span class="kpi-label">{{ 'dashboard.supplierDebt' | translate }}</span>
+            <span class="kpi-icon"><i class="pi pi-truck"></i></span>
+          </div>
           <div class="kpi-value">{{ debts.weOwe | currency: 'USD' }}</div>
           <div class="kpi-sub" [class.danger-text]="debts.overdueBills > 0">
             {{ (debts.overdueBills ? 'dashboard.overdueBills' : 'dashboard.noneOverdue') | translate: { n: debts.overdueBills } }}
           </div>
+          <i class="kpi-go pi pi-arrow-up-right" aria-hidden="true"></i>
         </a>
       }
     </div>
-    @if (data.isLoading() && !d) {
-      <p-progressbar mode="indeterminate" />
-    }
 
     <div class="cols">
       <div class="col">

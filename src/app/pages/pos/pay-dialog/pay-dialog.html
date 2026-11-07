@@ -6,7 +6,7 @@
         <div class="due-khr">៛{{ totalKhr() | number: '1.0-0' }}</div>
       </div>
 
-      <p-selectbutton [options]="methods()" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
+      <p-selectbutton size="small" [options]="methods()" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
                       class="methods">
         <ng-template #item let-option>{{ option.label | translate }}</ng-template>
       </p-selectbutton>
@@ -16,7 +16,7 @@
           <div class="money-row">
             <div class="field">
               <label msLabel for="paid-usd">USD</label>
-              <p-inputnumber inputId="paid-usd" [ngModel]="usd()" (ngModelChange)="usd.set($event)" mode="currency" currency="USD"
+              <p-inputnumber size="small" inputId="paid-usd" [ngModel]="usd()" (ngModelChange)="usd.set($event)" mode="currency" currency="USD"
                              locale="en-US" [min]="0" [fluid]="true" inputStyleClass="input-xl" />
               <div class="quick">
                 @for (n of usdQuick; track n) {
@@ -27,7 +27,7 @@
             </div>
             <div class="field">
               <label msLabel for="paid-khr">KHR</label>
-              <p-inputnumber inputId="paid-khr" [ngModel]="khr()" (ngModelChange)="khr.set($event)" prefix="៛" locale="en-US"
+              <p-inputnumber size="small" inputId="paid-khr" [ngModel]="khr()" (ngModelChange)="khr.set($event)" prefix="៛" locale="en-US"
                              [min]="0" [step]="100" [fluid]="true" inputStyleClass="input-xl" />
               <div class="quick">
                 @for (n of khrQuick; track n) {
@@ -51,7 +51,7 @@
         @case ('BANK') {
           <div class="ms-field">
             <label msLabel for="pay-ref">{{ 'pos.reference' | translate }}</label>
-            <input pInputText id="pay-ref" [ngModel]="reference()" (ngModelChange)="reference.set($event)" />
+            <input pInputText pSize="small" id="pay-ref" [ngModel]="reference()" (ngModelChange)="reference.set($event)" />
           </div>
         }
       }

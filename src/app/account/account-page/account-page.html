@@ -10,17 +10,17 @@
           <h2 class="card-title">{{ 'accountPage.profile' | translate }}</h2>
           <div class="ms-field">
             <label msLabel for="ac-name" control="fullName">{{ 'auth.fullName' | translate }}</label>
-            <input pInputText id="ac-name" formControlName="fullName" autocomplete="name" />
+            <input pInputText pSize="small" id="ac-name" formControlName="fullName" autocomplete="name" />
           </div>
           <div class="ms-form-row">
             <div class="ms-field">
               <label msLabel for="ac-username" control="username" error="auth.usernameHint">{{ 'auth.username' | translate }}</label>
-              <input pInputText id="ac-username" formControlName="username" autocomplete="username" autocapitalize="off" />
+              <input pInputText pSize="small" id="ac-username" formControlName="username" autocomplete="username" autocapitalize="off" />
               <small class="field-hint">{{ 'auth.usernameHint' | translate }}</small>
             </div>
             <div class="ms-field">
               <label msLabel for="ac-phone" control="phone" optional error="errors.phone">{{ 'auth.phone' | translate }}</label>
-              <input pInputText id="ac-phone" type="tel" formControlName="phone" placeholder="012 345 678" autocomplete="tel" />
+              <input pInputText pSize="small" id="ac-phone" type="tel" formControlName="phone" placeholder="012 345 678" autocomplete="tel" />
             </div>
           </div>
           @if (auth.user(); as u) {
@@ -37,7 +37,7 @@
             </div>
           }
           <div class="settings-actions">
-            <button pButton type="submit" [loading]="busy() === 'profile'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+            <button pButton size="small" type="submit" [loading]="busy() === 'profile'" [disabled]="busy() !== null"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
           </div>
         </form>
 
@@ -46,12 +46,12 @@
           <h2 class="card-title">{{ 'accountPage.preferences' | translate }}</h2>
           <div class="ms-field">
             <span msLabel id="ac-lang">{{ 'common.language' | translate }}</span>
-            <p-selectbutton [options]="languages" optionValue="value" [ngModel]="lang.lang()" (ngModelChange)="setLanguage($event)"
+            <p-selectbutton size="small" [options]="languages" optionValue="value" [ngModel]="lang.lang()" (ngModelChange)="setLanguage($event)"
                             [allowEmpty]="false" ariaLabelledBy="ac-lang" />
           </div>
           <div class="ms-field">
             <span msLabel id="ac-mode">{{ 'settings.appearance.mode' | translate }}</span>
-            <p-selectbutton [options]="modes" optionValue="value" [ngModel]="theme.mode()" (ngModelChange)="setMode($event)"
+            <p-selectbutton size="small" [options]="modes" optionValue="value" [ngModel]="theme.mode()" (ngModelChange)="setMode($event)"
                             [allowEmpty]="false" ariaLabelledBy="ac-mode">
               <ng-template #item let-o><i class="pi" [class]="o.icon"></i>&nbsp;{{ o.label | translate }}</ng-template>
             </p-selectbutton>
@@ -63,22 +63,22 @@
           <h2 class="card-title">{{ 'auth.password' | translate }}</h2>
           <div class="ms-field">
             <label msLabel for="ac-current" control="currentPassword">{{ 'accountPage.currentPassword' | translate }}</label>
-            <input pInputText id="ac-current" type="password" formControlName="currentPassword" autocomplete="current-password" />
+            <input pInputText pSize="small" id="ac-current" type="password" formControlName="currentPassword" autocomplete="current-password" />
           </div>
           <div class="ms-form-row">
             <div class="ms-field">
               <label msLabel for="ac-new" control="newPassword" error="errors.passwordShort">{{ 'accountPage.newPassword' | translate }}</label>
-              <input pInputText id="ac-new" type="password" formControlName="newPassword" autocomplete="new-password" />
+              <input pInputText pSize="small" id="ac-new" type="password" formControlName="newPassword" autocomplete="new-password" />
               <small class="field-hint">{{ 'errors.passwordShort' | translate }}</small>
             </div>
             <div class="ms-field">
               <label msLabel for="ac-confirm" control="confirmPassword" error="errors.passwordsDiffer"
                      [invalid]="password.controls.confirmPassword.dirty && password.hasError('notSame')">{{ 'auth.confirmPassword' | translate }}</label>
-              <input pInputText id="ac-confirm" type="password" formControlName="confirmPassword" autocomplete="new-password" />
+              <input pInputText pSize="small" id="ac-confirm" type="password" formControlName="confirmPassword" autocomplete="new-password" />
             </div>
           </div>
           <div class="settings-actions">
-            <button pButton type="submit" [loading]="busy() === 'password'" [disabled]="busy() !== null">
+            <button pButton size="small" type="submit" [loading]="busy() === 'password'" [disabled]="busy() !== null">
               <span pButtonLabel>{{ 'accountPage.changePassword' | translate }}</span>
             </button>
           </div>
@@ -90,27 +90,27 @@
           <p class="muted">{{ (auth.user()?.hasPin ? 'accountPage.pinLeadSet' : 'accountPage.pinLead') | translate }}</p>
           <div class="ms-field">
             <label msLabel for="ac-pin-pw" control="currentPassword">{{ 'accountPage.currentPassword' | translate }}</label>
-            <input pInputText id="ac-pin-pw" type="password" formControlName="currentPassword" autocomplete="current-password" />
+            <input pInputText pSize="small" id="ac-pin-pw" type="password" formControlName="currentPassword" autocomplete="current-password" />
           </div>
           <div class="ms-form-row">
             <div class="ms-field">
               <label msLabel for="ac-pin" control="pin" error="accountPage.pinRule">{{ 'accountPage.newPin' | translate }}</label>
-              <input pInputText id="ac-pin" type="password" inputmode="numeric" maxlength="6" formControlName="pin" autocomplete="off" />
+              <input pInputText pSize="small" id="ac-pin" type="password" inputmode="numeric" maxlength="6" formControlName="pin" autocomplete="off" />
               <small class="field-hint">{{ 'accountPage.pinRule' | translate }}</small>
             </div>
             <div class="ms-field">
               <label msLabel for="ac-pin2" control="confirmPin" error="accountPage.pinsDiffer"
                      [invalid]="pin.controls.confirmPin.dirty && pin.hasError('notSame')">{{ 'accountPage.confirmPin' | translate }}</label>
-              <input pInputText id="ac-pin2" type="password" inputmode="numeric" maxlength="6" formControlName="confirmPin" autocomplete="off" />
+              <input pInputText pSize="small" id="ac-pin2" type="password" inputmode="numeric" maxlength="6" formControlName="confirmPin" autocomplete="off" />
             </div>
           </div>
           <div class="settings-actions">
             @if (auth.user()?.hasPin) {
-              <button pButton type="button" [text]="true" severity="danger" (click)="removePin()" [disabled]="busy() !== null">
+              <button pButton size="small" type="button" [text]="true" severity="danger" (click)="removePin()" [disabled]="busy() !== null">
                 <span pButtonLabel>{{ 'accountPage.removePin' | translate }}</span>
               </button>
             }
-            <button pButton type="submit" [loading]="busy() === 'pin'" [disabled]="busy() !== null">
+            <button pButton size="small" type="submit" [loading]="busy() === 'pin'" [disabled]="busy() !== null">
               <span pButtonLabel>{{ (auth.user()?.hasPin ? 'accountPage.changePin' : 'accountPage.setPin') | translate }}</span>
             </button>
           </div>
@@ -121,7 +121,7 @@
           <h2 class="card-title">{{ 'accountPage.everywhere' | translate }}</h2>
           <p class="muted">{{ 'accountPage.everywhereLead' | translate }}</p>
           <div class="settings-actions">
-            <button pButton type="button" [outlined]="true" severity="danger" (click)="signOutEverywhere()" [loading]="busy() === 'everywhere'"
+            <button pButton size="small" type="button" [outlined]="true" severity="danger" (click)="signOutEverywhere()" [loading]="busy() === 'everywhere'"
                     [disabled]="busy() !== null">
               <i class="pi pi-sign-out" pButtonIcon></i><span pButtonLabel>{{ 'accountPage.everywhereButton' | translate }}</span>
             </button>
@@ -135,11 +135,11 @@
             <p class="muted">{{ 'accountPage.deleteLead' | translate }}</p>
             <div class="ms-field">
               <label msLabel for="ac-del-pw">{{ 'accountPage.currentPassword' | translate }}</label>
-              <input pInputText id="ac-del-pw" type="password" [ngModel]="deletePassword()" (ngModelChange)="deletePassword.set($event)"
+              <input pInputText pSize="small" id="ac-del-pw" type="password" [ngModel]="deletePassword()" (ngModelChange)="deletePassword.set($event)"
                      autocomplete="current-password" />
             </div>
             <div class="settings-actions">
-              <button pButton type="button" severity="danger" (click)="deleteAccount()" [loading]="busy() === 'delete'"
+              <button pButton size="small" type="button" severity="danger" (click)="deleteAccount()" [loading]="busy() === 'delete'"
                       [disabled]="busy() !== null || !deletePassword()">
                 <i class="pi pi-trash" pButtonIcon></i><span pButtonLabel>{{ 'accountPage.deleteButton' | translate }}</span>
               </button>

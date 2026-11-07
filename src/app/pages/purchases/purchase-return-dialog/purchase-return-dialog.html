@@ -1,4 +1,4 @@
-<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog" [style]="{ width: 'min(860px, 96vw)' }"
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" styleClass="ms-dialog ms-full-dialog"
           [header]="('purchaseReturns.title' | translate) + (source() ? ' · ' + source()!.number : '')">
   @if (source(); as s) {
     <div class="ms-form">
@@ -27,7 +27,7 @@
               <td class="num muted">{{ r.received | number: '1.0-3' }} {{ r.unitSymbol }}</td>
               <td class="num">{{ r.returnable | number: '1.0-3' }}</td>
               <td class="qty-col">
-                <p-inputnumber [ngModel]="r.qty" (ngModelChange)="setQty(i, $event)" [min]="0" [max]="r.returnable"
+                <p-inputnumber size="small" [ngModel]="r.qty" (ngModelChange)="setQty(i, $event)" [min]="0" [max]="r.returnable"
                                [maxFractionDigits]="3" [disabled]="r.returnable <= 0" locale="en-US"
                                [ariaLabel]="('returns.qty' | translate) + ' ' + r.productName" [fluid]="true" />
               </td>
@@ -39,7 +39,7 @@
 
       <div class="ms-field">
         <label msLabel for="prt-reason" optional>{{ 'returns.reason' | translate }}</label>
-        <input pInputText id="prt-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255" />
+        <input pInputText pSize="small" id="prt-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255" />
       </div>
 
       <div class="money">
@@ -61,11 +61,11 @@
           <div class="refund">
             <span msLabel>{{ 'credits.supplier.refundBy' | translate }}</span>
             <div class="refund-choices">
-              <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)"
+              <p-selectbutton size="small" [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)"
                               [allowEmpty]="false" [ariaLabel]="'credits.supplier.refundBy' | translate">
                 <ng-template #item let-o>{{ o.label | translate }}</ng-template>
               </p-selectbutton>
-              <p-selectbutton [options]="currencies" optionValue="value" optionLabel="label" [ngModel]="currency()"
+              <p-selectbutton size="small" [options]="currencies" optionValue="value" optionLabel="label" [ngModel]="currency()"
                               (ngModelChange)="currency.set($event)" [allowEmpty]="false" ariaLabel="USD / KHR" />
             </div>
           </div>
@@ -76,7 +76,7 @@
     </div>
   }
   <ng-template #footer>
-    <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || total() <= 0">
+    <button pButton size="small" type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || total() <= 0">
       <span pButtonLabel>{{ (canPost() ? 'returns.save' : 'returns.request') | translate: { amount: (total() | currency: 'USD') } }}</span>
     </button>
   </ng-template>

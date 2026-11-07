@@ -31,17 +31,17 @@
               <div class="ms-form-row">
                 <div class="ms-field">
                   <label msLabel for="branchName" control="branchName">{{ 'setup.branchName' | translate }}</label>
-                  <input pInputText id="branchName" formControlName="branchName" placeholder="Toul Kork" />
+                  <input pInputText pSize="small" id="branchName" formControlName="branchName" placeholder="Toul Kork" />
                   <small class="field-hint">{{ 'setup.branchNameHint' | translate }}</small>
                 </div>
                 <div class="ms-field">
                   <label msLabel for="phone" control="phone" optional error="errors.phone">{{ 'setup.phone' | translate }}</label>
-                  <input pInputText id="phone" type="tel" formControlName="phone" placeholder="012 345 678" />
+                  <input pInputText pSize="small" id="phone" type="tel" formControlName="phone" placeholder="012 345 678" />
                 </div>
               </div>
               <div class="ms-field">
                 <label msLabel for="address" control="address" optional>{{ 'setup.address' | translate }}</label>
-                <input pInputText id="address" formControlName="address" />
+                <input pInputText pSize="small" id="address" formControlName="address" />
               </div>
             </div>
           </section>
@@ -54,12 +54,12 @@
               <div class="ms-form-row">
                 <div class="ms-field">
                   <label msLabel for="rate" control="rate" error="1,000 – 10,000">{{ 'setup.rate' | translate }}</label>
-                  <p-inputnumber inputId="rate" formControlName="rate" prefix="$1 = ៛" [min]="1000" [max]="10000"
+                  <p-inputnumber size="small" inputId="rate" formControlName="rate" prefix="$1 = ៛" [min]="1000" [max]="10000"
                                  [useGrouping]="true" locale="en-US" />
                 </div>
                 <div class="ms-field">
                   <span msLabel id="rounding-label">{{ 'setup.round' | translate }}</span>
-                  <p-selectbutton formControlName="rounding" [options]="roundings" optionLabel="label" optionValue="value"
+                  <p-selectbutton size="small" formControlName="rounding" [options]="roundings" optionLabel="label" optionValue="value"
                                   [allowEmpty]="false" ariaLabelledBy="rounding-label" />
                 </div>
               </div>
@@ -77,7 +77,7 @@
             <div class="ms-form">
               <div class="ms-field narrow">
                 <label msLabel for="starterType">{{ 'setup.starterType' | translate }}</label>
-                <p-select inputId="starterType" [options]="types()" optionLabel="label" optionValue="value" [ngModel]="starterType()"
+                <p-select size="small" inputId="starterType" [options]="types()" optionLabel="label" optionValue="value" [ngModel]="starterType()"
                           (ngModelChange)="starterType.set($event)" [ngModelOptions]="{ standalone: true }" appendTo="body" />
               </div>
             </div>
@@ -137,15 +137,15 @@
 
       <div class="finish">
         @if (step() > 0) {
-          <button pButton type="button" [text]="true" (click)="back()" [disabled]="busy()">
+          <button pButton size="small" type="button" [text]="true" (click)="back()" [disabled]="busy()">
             <i class="pi pi-arrow-left" pButtonIcon></i><span pButtonLabel>{{ 'setup.back' | translate }}</span>
           </button>
         }
         <span class="spacer"></span>
         @if (step() < steps.length - 1) {
-          <button pButton type="submit" class="submit"><span pButtonLabel>{{ 'setup.next' | translate }}</span><i class="pi pi-arrow-right" pButtonIcon></i></button>
+          <button pButton size="small" type="submit" class="submit"><span pButtonLabel>{{ 'setup.next' | translate }}</span><i class="pi pi-arrow-right" pButtonIcon></i></button>
         } @else {
-          <button pButton type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
+          <button pButton size="small" type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
             <i class="pi pi-check" pButtonIcon></i><span pButtonLabel>{{ 'setup.finish' | translate }}</span>
           </button>
         }

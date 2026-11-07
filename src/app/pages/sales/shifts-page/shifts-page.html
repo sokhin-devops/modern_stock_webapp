@@ -7,63 +7,65 @@
   </div>
   <div class="page-body list-page">
     <div class="toolbar">
-      <p-select [options]="statuses" optionLabel="label" optionValue="value" [ngModel]="status()" (ngModelChange)="setStatus($event)"
+      <p-select size="small" [options]="statuses" optionLabel="label" optionValue="value" [ngModel]="status()" (ngModelChange)="setStatus($event)"
                 [showClear]="true" [placeholder]="'shifts.anyStatus' | translate" [ariaLabel]="'common.status' | translate" class="filter" appendTo="body">
         <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
         <ng-template #item let-o>{{ o.label | translate }}</ng-template>
       </p-select>
-      <p-datepicker [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+      <p-datepicker size="small" [ngModel]="from()" (ngModelChange)="setFrom($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
                     appendTo="body" [placeholder]="'common.from' | translate" [ariaLabel]="'common.from' | translate" class="date-filter" />
-      <p-datepicker [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
+      <p-datepicker size="small" [ngModel]="to()" (ngModelChange)="setTo($event)" dateFormat="dd/mm/yy" [showIcon]="true" [showClear]="true"
                     appendTo="body" [placeholder]="'common.to' | translate" [ariaLabel]="'common.to' | translate" class="date-filter" />
       <span class="spacer"></span>
-      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+      <button pButton size="small" type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
         <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
       </button>
     </div>
-    <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
-             [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
-             dataKey="id" [rowHover]="true">
-      <ng-template #header>
-        <tr>
-          <th>{{ 'shifts.cashier' | translate }}</th>
-          <th>{{ 'shifts.opened' | translate }}</th>
-          <th>{{ 'shifts.closed' | translate }}</th>
-          <th class="num">{{ 'shifts.expected' | translate }}</th>
-          <th class="num">{{ 'shifts.counted' | translate }}</th>
-          <th class="num">{{ 'shifts.difference' | translate }}</th>
-          <th class="num">{{ 'shifts.receipts' | translate }}</th>
-          <th>{{ 'common.status' | translate }}</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-s>
-        <tr class="clickable" tabindex="0" (click)="open(s)" (keydown.enter)="open(s)">
-          <td class="strong">{{ s.cashierName }}</td>
-          <td>{{ s.openedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-          <td class="muted">{{ s.closedAt ? (s.closedAt | date: 'dd/MM HH:mm') : '—' }}</td>
-          <td class="num">${{ s.expectedUsd | number: '1.2-2' }}<br /><small class="muted">៛{{ s.expectedKhr | number: '1.0-0' }}</small></td>
-          <td class="num">
-            @if (s.countedUsd != null) {
-              ${{ s.countedUsd | number: '1.2-2' }}<br /><small class="muted">៛{{ s.countedKhr | number: '1.0-0' }}</small>
-            } @else {
-              <span class="muted">—</span>
-            }
-          </td>
-          <td class="num">
-            @if (s.differenceUsd != null) {
-              <span [class.danger-text]="s.differenceUsd < 0 || s.differenceKhr < 0">
-                {{ s.differenceUsd | number: '1.2-2' }} $<br /><small>{{ s.differenceKhr | number: '1.0-0' }} ៛</small>
-              </span>
-            } @else {
-              <span class="muted">—</span>
-            }
-          </td>
-          <td class="num">{{ s.receipts }}</td>
-          <td><span class="tag" [class.tag-primary]="s.status === 'OPEN'">{{ 'docs.status.' + s.status | translate }}</span></td>
-        </tr>
-      </ng-template>
-      <ng-template #emptymessage><tr><td colspan="8" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
-    </p-table>
+    <section class="card table-card">
+      <p-table size="small" class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+               [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
+               dataKey="id" [rowHover]="true">
+        <ng-template #header>
+          <tr>
+            <th>{{ 'shifts.cashier' | translate }}</th>
+            <th>{{ 'shifts.opened' | translate }}</th>
+            <th>{{ 'shifts.closed' | translate }}</th>
+            <th class="num">{{ 'shifts.expected' | translate }}</th>
+            <th class="num">{{ 'shifts.counted' | translate }}</th>
+            <th class="num">{{ 'shifts.difference' | translate }}</th>
+            <th class="num">{{ 'shifts.receipts' | translate }}</th>
+            <th>{{ 'common.status' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-s>
+          <tr class="clickable" tabindex="0" (click)="open(s)" (keydown.enter)="open(s)">
+            <td class="strong">{{ s.cashierName }}</td>
+            <td>{{ s.openedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="muted">{{ s.closedAt ? (s.closedAt | date: 'dd/MM HH:mm') : '—' }}</td>
+            <td class="num">${{ s.expectedUsd | number: '1.2-2' }}<br /><small class="muted">៛{{ s.expectedKhr | number: '1.0-0' }}</small></td>
+            <td class="num">
+              @if (s.countedUsd != null) {
+                ${{ s.countedUsd | number: '1.2-2' }}<br /><small class="muted">៛{{ s.countedKhr | number: '1.0-0' }}</small>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td class="num">
+              @if (s.differenceUsd != null) {
+                <span [class.danger-text]="s.differenceUsd < 0 || s.differenceKhr < 0">
+                  {{ s.differenceUsd | number: '1.2-2' }} $<br /><small>{{ s.differenceKhr | number: '1.0-0' }} ៛</small>
+                </span>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td class="num">{{ s.receipts }}</td>
+            <td><span class="tag" [class.tag-primary]="s.status === 'OPEN'">{{ 'docs.status.' + s.status | translate }}</span></td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage><tr><td colspan="8" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr></ng-template>
+      </p-table>
+    </section>
   </div>
 </div>
 

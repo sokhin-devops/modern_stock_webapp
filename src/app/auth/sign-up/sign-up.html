@@ -8,33 +8,33 @@
         <a class="form-note dev-link" [href]="devPath(sent.devLink)"><i class="icon pi pi-code"></i>{{ 'auth.devLink' | translate }}</a>
       }
       <div class="row">
-        <a pButton routerLink="/login"><span pButtonLabel>{{ 'auth.signIn' | translate }}</span></a>
-        <button pButton type="button" [text]="true" (click)="resend()"><span pButtonLabel>{{ 'auth.resend' | translate }}</span></button>
+        <a pButton size="small" routerLink="/login"><span pButtonLabel>{{ 'auth.signIn' | translate }}</span></a>
+        <button pButton size="small" type="button" [text]="true" (click)="resend()"><span pButtonLabel>{{ 'auth.resend' | translate }}</span></button>
       </div>
     </div>
   } @else {
     <form class="ms-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <div class="ms-field">
         <label msLabel for="fullName" control="fullName">{{ 'auth.fullName' | translate }}</label>
-        <input pInputText id="fullName" formControlName="fullName" autocomplete="name" />
+        <input pInputText pSize="small" id="fullName" formControlName="fullName" autocomplete="name" />
       </div>
 
       <div class="ms-field">
         <label msLabel for="email" control="email" error="errors.email">{{ 'auth.email' | translate }}</label>
-        <input pInputText id="email" type="email" formControlName="email" autocomplete="email" />
+        <input pInputText pSize="small" id="email" type="email" formControlName="email" autocomplete="email" />
       </div>
 
       <div class="ms-field">
         <label msLabel for="phone" control="phone" optional error="errors.phone">{{ 'auth.phone' | translate }}</label>
-        <input pInputText id="phone" type="tel" formControlName="phone" autocomplete="tel" placeholder="012 345 678" />
+        <input pInputText pSize="small" id="phone" type="tel" formControlName="phone" autocomplete="tel" placeholder="012 345 678" />
       </div>
 
       <div class="ms-field">
         <label msLabel for="password" control="password" error="errors.passwordShort">{{ 'auth.password' | translate }}</label>
         <div class="ms-password">
-          <input pInputText id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+          <input pInputText pSize="small" id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                  autocomplete="new-password" />
-          <button pButton type="button" class="reveal" [rounded]="true" [text]="true" severity="secondary"
+          <button pButton size="small" type="button" class="reveal" [rounded]="true" [text]="true" severity="secondary"
                   (click)="showPassword.set(!showPassword())" [attr.aria-pressed]="showPassword()"
                   [attr.aria-label]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | translate">
             <i class="pi" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()" pButtonIcon></i>
@@ -45,7 +45,7 @@
 
       <div class="ms-field">
         <div class="ms-check">
-          <p-checkbox formControlName="acceptTerms" [binary]="true" inputId="acceptTerms" />
+          <p-checkbox size="small" formControlName="acceptTerms" [binary]="true" inputId="acceptTerms" />
           <label for="acceptTerms" [class.danger-text]="showError(form.controls.acceptTerms)">
             {{ 'auth.agreePrefix' | translate }}
             <a [href]="websiteUrl + '/' + lang$() + '/terms'" target="_blank" rel="noopener">{{ 'auth.terms' | translate }}</a>
@@ -62,7 +62,7 @@
         <p class="form-error" role="alert"><i class="icon pi pi-exclamation-circle"></i>{{ error() }}</p>
       }
 
-      <button pButton type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
+      <button pButton size="small" type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
         <span pButtonLabel>{{ 'auth.createAccount' | translate }}</span>
       </button>
       <p class="auth-switch">{{ 'auth.haveAccount' | translate }} <a routerLink="/login">{{ 'auth.signIn' | translate }}</a></p>

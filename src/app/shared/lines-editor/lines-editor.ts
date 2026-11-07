@@ -2,7 +2,6 @@ import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, input, model, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumber } from 'primeng/inputnumber';
@@ -12,7 +11,8 @@ import { Tooltip } from 'primeng/tooltip';
 
 import { Product } from '../../core/api/models';
 import { CatalogService } from '../../core/catalog/catalog.service';
-import { LangService } from '../../core/lang.service';
+import { LangService } from '../../core/lang.service';
+import { PickField } from '../pick/pick';
 
 /**
  * One line of a document: a product in one of its units, a quantity, and (receiving) cost, batch and expiry, or (selling)
@@ -40,7 +40,7 @@ export function emptyLine(): DocLine {
  */
 @Component({
   selector: 'ms-lines-editor',
-  imports: [FormsModule, TranslatePipe, DecimalPipe, AutoComplete, Select, InputNumber, InputText, DatePicker, ButtonDirective, ButtonIcon, Tooltip],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, PickField, Select, InputNumber, InputText, DatePicker, ButtonDirective, ButtonIcon, Tooltip],
   templateUrl: './lines-editor.html',
   styleUrl: './lines-editor.scss',
 })
@@ -62,17 +62,10 @@ export class LinesEditor {
   protected readonly lang = inject(LangService);
   /** A picked product shows its name in the member's language. */
   protected readonly productName = (p: Product): string => this.lang.name(p.nameEn, p.nameKm);
-  protected readonly results = signal<Product[]>([]);
 
   protected readonly total = computed(() =>
     this.lines().reduce((sum, l) => sum + (l.qty ?? 0) * (l.unitCost ?? 0), 0),
   );
-
-  protected find(event: AutoCompleteCompleteEvent): void {
-    this.catalog.searchProducts({ page: 0, size: 15, sort: 'nameEn,asc', q: event.query }).subscribe({
-      next: (page) => this.results.set(page.content),
-    });
-  }
 
   protected amount(index: number, line: DocLine): number | null {
     const price = this.prices()[index];

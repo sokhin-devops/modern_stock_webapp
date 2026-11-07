@@ -1,0 +1,21 @@
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" appendTo="body" styleClass="ms-dialog" [style]="{ width: 'min(420px, 96vw)' }"
+          [header]="(isCustomer() ? 'partners.newCustomer' : 'partners.newSupplier') | translate" [closeAriaLabel]="'common.close' | translate">
+  <form class="ms-form" [formGroup]="form" (ngSubmit)="save()" novalidate [id]="formId">
+    <div class="ms-field">
+      <label msLabel [for]="formId + '-name'" control="name">{{ 'partners.name' | translate }}</label>
+      <input pInputText pSize="small" [id]="formId + '-name'" formControlName="name" autocomplete="off" />
+    </div>
+    <div class="ms-field">
+      <label msLabel [for]="formId + '-phone'" control="phone" error="errors.phone">{{ 'partners.phone' | translate }}</label>
+      <input pInputText pSize="small" [id]="formId + '-phone'" type="tel" formControlName="phone" autocomplete="off" />
+      @if (isCustomer()) {
+        <small class="field-hint">{{ 'pos.customerPhoneHint' | translate }}</small>
+      }
+    </div>
+  </form>
+  <ng-template #footer>
+    <button pButton size="small" type="submit" [attr.form]="formId" [loading]="busy()" [disabled]="busy()">
+      <span pButtonLabel>{{ 'common.save' | translate }}</span>
+    </button>
+  </ng-template>
+</p-dialog>

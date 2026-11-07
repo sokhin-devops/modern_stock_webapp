@@ -2393,5 +2393,9 @@
     "SHIFT_SHORT": "{{cashier}} បានបិទវេនខ្វះលុយ៖ {{amounts}}",
     "SALE_VOIDED": "ការលក់ {{number}} (${{amount}}) ត្រូវបានលុបចោលដោយ {{by}}៖ {{reason}}",
     "STOCK_OUT": "{{product}} អស់ស្តុកនៅ {{warehouse}}"
+  },
+  "pick": {
+    "typeForMore": "វាយដើម្បីរកបន្ថែម",
+    "added": "បានបន្ថែម {{name}}។"
   }
 }

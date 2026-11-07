@@ -10,59 +10,61 @@
     <div class="toolbar">
       <p-iconfield class="search">
         <p-inputicon class="pi pi-search" />
-        <input pInputText type="search" [placeholder]="'batches.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
+        <input pInputText pSize="small" type="search" [placeholder]="'batches.searchPh' | translate" [attr.aria-label]="'common.search' | translate"
                [ngModel]="q()" (ngModelChange)="q.set($event)" />
       </p-iconfield>
-      <p-select [options]="windows" optionLabel="label" optionValue="value" [ngModel]="window()" (ngModelChange)="window.set($event)"
+      <p-select size="small" [options]="windows" optionLabel="label" optionValue="value" [ngModel]="window()" (ngModelChange)="window.set($event)"
                 [ariaLabel]="'stock.expiry' | translate" class="filter" appendTo="body">
         <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
         <ng-template #item let-o>{{ o.label | translate }}</ng-template>
       </p-select>
       @if (warehouseChoices().length > 1) {
-        <p-select [options]="warehouseChoices()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+        <p-select size="small" [options]="warehouseChoices()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
                   (ngModelChange)="warehouseId.set($event)" [showClear]="true" [placeholder]="'stock.allWarehouses' | translate"
                   [ariaLabel]="'common.warehouse' | translate" class="filter" appendTo="body" />
       }
       <span class="spacer"></span>
-      <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !shown().length">
+      <button pButton size="small" type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !shown().length">
         <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
       </button>
     </div>
 
-    <p-table class="ms-table" [value]="shown()" [loading]="loading()" [paginator]="shown().length > 50" [rows]="50"
-             [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
-      <ng-template #header>
-        <tr>
-          <th>{{ 'products.colProduct' | translate }}</th>
-          <th>{{ 'stock.batch' | translate }}</th>
-          <th>{{ 'stock.warehouse' | translate }}</th>
-          <th>{{ 'stock.expiry' | translate }}</th>
-          <th class="num">{{ 'stock.onHand' | translate }}</th>
-          <th>{{ 'common.status' | translate }}</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-b>
-        @let left = daysLeft(b);
-        <tr class="clickable" tabindex="0" (click)="openCard(b)" (keydown.enter)="openCard(b)">
-          <td class="strong">{{ b.productName }}</td>
-          <td>{{ b.batchNo ?? '—' }}</td>
-          <td class="muted">{{ b.warehouseName }}</td>
-          <td [class.danger-text]="b.expired">{{ b.expiryDate | date: 'dd/MM/yyyy' }}</td>
-          <td class="num">{{ b.qtyOnHand | number: '1.0-3' }}</td>
-          <td>
-            @if (b.expired) {
-              <span class="tag tag-danger">{{ 'stock.expired' | translate }}</span>
-            } @else if (left <= 30) {
-              <span class="tag tag-warning">{{ 'batches.inDays' | translate: { n: left } }}</span>
-            } @else {
-              <span class="muted">{{ 'batches.inDays' | translate: { n: left } }}</span>
-            }
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template #emptymessage>
-        <tr><td colspan="6" class="empty-cell">{{ 'batches.empty' | translate }}</td></tr>
-      </ng-template>
-    </p-table>
+    <section class="card table-card">
+      <p-table size="small" class="ms-table" [value]="shown()" [loading]="loading()" [paginator]="shown().length > 50" [rows]="50"
+               [scrollable]="true" scrollHeight="flex" dataKey="id" [rowHover]="true">
+        <ng-template #header>
+          <tr>
+            <th>{{ 'products.colProduct' | translate }}</th>
+            <th>{{ 'stock.batch' | translate }}</th>
+            <th>{{ 'stock.warehouse' | translate }}</th>
+            <th>{{ 'stock.expiry' | translate }}</th>
+            <th class="num">{{ 'stock.onHand' | translate }}</th>
+            <th>{{ 'common.status' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-b>
+          @let left = daysLeft(b);
+          <tr class="clickable" tabindex="0" (click)="openCard(b)" (keydown.enter)="openCard(b)">
+            <td class="strong">{{ b.productName }}</td>
+            <td>{{ b.batchNo ?? '—' }}</td>
+            <td class="muted">{{ b.warehouseName }}</td>
+            <td [class.danger-text]="b.expired">{{ b.expiryDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="num">{{ b.qtyOnHand | number: '1.0-3' }}</td>
+            <td>
+              @if (b.expired) {
+                <span class="tag tag-danger">{{ 'stock.expired' | translate }}</span>
+              } @else if (left <= 30) {
+                <span class="tag tag-warning">{{ 'batches.inDays' | translate: { n: left } }}</span>
+              } @else {
+                <span class="muted">{{ 'batches.inDays' | translate: { n: left } }}</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr><td colspan="6" class="empty-cell">{{ 'batches.empty' | translate }}</td></tr>
+        </ng-template>
+      </p-table>
+    </section>
   </div>
 </div>

@@ -4,8 +4,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
+import { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
 import { Select } from 'primeng/select';
 import { Tooltip } from 'primeng/tooltip';
 import { Subject, debounceTime, switchMap } from 'rxjs';
@@ -23,10 +24,10 @@ import { SwitchDialog } from '../switch-dialog/switch-dialog';
 import { AccountMenu } from '../../../shared/account-menu/account-menu';
 import { ApiFilePipe } from '../../../shared/api-file.pipe';
 import { LangButton } from '../../../shared/lang-button/lang-button';
+import { PickField } from '../../../shared/pick/pick';
 import { PayDialog, PreviewLine } from '../pay-dialog/pay-dialog';
 import { ReceiptDialog } from '../receipt-dialog/receipt-dialog';
 import { HeldDialog, HeldSale } from '../held-dialog/held-dialog';
-import { NewCustomerDialog } from '../new-customer-dialog/new-customer-dialog';
 import { ShiftDialog } from '../shift-dialog/shift-dialog';
 
 /** One line of the cart: a product in one of its units. */
@@ -50,8 +51,8 @@ interface CartLine {
 @Component({
   selector: 'ms-pos-page',
   imports: [
-    FormsModule, RouterLink, TranslatePipe, DecimalPipe, DatePipe, AutoComplete, Select, ButtonDirective, ButtonIcon,
-    ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, NewCustomerDialog, HeldDialog, ApiFilePipe,
+    FormsModule, RouterLink, TranslatePipe, DecimalPipe, DatePipe, Select, Menu, ButtonDirective, ButtonIcon,
+    ButtonLabel, Tooltip, LangButton, AccountMenu, PayDialog, ReceiptDialog, ShiftDialog, PickField, HeldDialog, ApiFilePipe,
     AnnouncementBanner, SwitchDialog,
   ],
   host: { '(document:keydown)': 'onKey($event)' },
@@ -81,11 +82,6 @@ export class PosPage {
   // Cart
   protected readonly lines = signal<CartLine[]>([]);
   protected readonly customer = signal<Customer | null>(null);
-  protected readonly customerResults = signal<Customer[]>([]);
-  /** A new customer from here (FR-3.17), starting from what was typed in the search. */
-  protected readonly canAddCustomer = computed(() => this.business.can('customer:create_pos') || this.business.can('customer:manage'));
-  protected readonly customerTyped = signal('');
-  protected readonly newCustomerOpen = signal(false);
   /** Sales put aside to serve the next customer (FR-3.20), kept on this device per business and branch. */
   protected readonly held = signal<HeldSale[]>([]);
   protected readonly heldOpen = signal(false);
@@ -112,6 +108,15 @@ export class PosPage {
   protected readonly canShift = computed(() => this.business.can('cash_shift:own') || this.business.can('cash_shift:all'));
   protected readonly branchOptions = computed(() =>
     this.business.branches().map((b) => ({ value: b.id, label: this.lang.name(b.nameEn, b.nameKm) })),
+  );
+  /** The branch chip's menu: every branch, the one on screen marked. */
+  protected readonly branchItems = computed<MenuItem[]>(() =>
+    this.branchOptions().map((o) => ({
+      label: o.label,
+      icon: o.value === this.business.branchId() ? 'pi pi-check' : 'pi pi-shop',
+      styleClass: o.value === this.business.branchId() ? 'active' : undefined,
+      command: () => this.selectBranch(o.value),
+    })),
   );
 
   protected readonly count = computed(() => this.lines().reduce((n, l) => n + l.qty, 0));
@@ -317,11 +322,6 @@ export class PosPage {
         l === line ? { ...l, unitId, unitSymbol: unit?.unitSymbol ?? line.product.baseUnitSymbol, factor, price: round4(price) } : l,
       ),
     );
-  }
-
-  protected findCustomers(event: AutoCompleteCompleteEvent): void {
-    this.customerTyped.set(event.query);
-    this.pos.customers(event.query).subscribe({ next: (page) => this.customerResults.set(page.content) });
   }
 
   protected openPay(): void {

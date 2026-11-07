@@ -9,7 +9,34 @@ p-popover {
   position: absolute;
 }
 
+// Brand: the app's mark (a soft gradient tile), then the business with my role under its name.
+.logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: linear-gradient(140deg, var(--primary) 0%, var(--primary-hover) 100%);
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--primary) 30%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 20%);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+
+  .icon {
+    font-size: 19px;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 12px color-mix(in srgb, var(--primary) 36%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 20%);
+  }
+}
+
 .business-btn {
+  gap: 10px;
+  height: 44px;
+  padding: 0 8px 0 10px;
+  border-radius: 12px;
   color: var(--text);
 
   .names {
@@ -20,10 +47,35 @@ p-popover {
     line-height: 1.25;
   }
 
+  .biz-name {
+    max-width: 220px;
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-overflow: ellipsis;
+  }
+
   small {
     color: var(--muted);
     font-size: 12px;
     font-weight: 400;
+  }
+
+  .chev {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    color: var(--text-2);
+    font-size: 10px;
+    transition: background-color 0.2s var(--ease);
+  }
+
+  &:hover .chev {
+    background: var(--surface);
   }
 }
 
@@ -34,14 +86,25 @@ p-popover {
 .chip.branch-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 12px;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px 0 12px;
   color: var(--text);
   font-weight: 500;
   cursor: pointer;
 
   .icon {
-    font-size: 18px;
+    font-size: 16px;
+    color: var(--primary);
+  }
+
+  .icon:last-child {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  &:hover {
+    background: var(--surface-3);
   }
 
   &.fixed {
@@ -49,9 +112,95 @@ p-popover {
   }
 }
 
-// The bell carries the prototype's .badge with the number of things to look at.
+// Right side: the rate, one pill of equal round buttons (help, bell, language, dark mode), then my avatar.
+.topbar-actions {
+  gap: 8px;
+}
+
+.rate-chip {
+  height: 36px;
+  font-size: 13px;
+
+  .icon {
+    font-size: 16px;
+  }
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--page);
+
+  .p-button {
+    width: 32px;
+    height: 32px;
+    color: var(--text-2);
+  }
+
+  .p-button:not(:disabled):hover {
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
+    color: var(--text);
+  }
+}
+
+// The language button and the avatar live in their own components; in the bar they take the same sizes.
+:host ::ng-deep {
+  .tools .lang-btn {
+    width: 32px;
+    height: 32px;
+
+    &:not(:disabled):hover {
+      background: var(--surface);
+      box-shadow: var(--shadow-1);
+    }
+  }
+
+  .tools ms-flag {
+    width: 18px;
+    height: 18px;
+  }
+
+  ms-account-menu .avatar {
+    width: 36px;
+    height: 36px;
+    margin-left: 0;
+    font-size: 14px;
+    box-shadow: 0 0 0 2px var(--canvas), 0 0 0 3px var(--border);
+    transition: box-shadow 0.2s var(--ease);
+
+    &:hover {
+      box-shadow: 0 0 0 2px var(--canvas), 0 0 0 3px var(--primary);
+    }
+  }
+}
+
+// The bell carries a small count of things to look at, on its top-right edge. The count sits beside the button, not in
+// it: the round button clips what reaches past its circle (its ripple needs that).
 .bell {
   position: relative;
+  display: inline-flex;
+
+  .badge {
+    top: -2px;
+    right: -3px;
+    pointer-events: none;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-color: var(--page);
+    font-size: 10px;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .business-btn .desktop-only {
+    display: none;
+  }
 }
 
 // The alerts popover (its content keeps this component's styles): one row per kind, opening its page.
@@ -130,6 +279,10 @@ p-popover {
 
   .phone-only {
     display: block;
+  }
+
+  .business-btn .desktop-only {
+    display: none;
   }
 }
 

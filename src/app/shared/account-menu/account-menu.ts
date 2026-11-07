@@ -50,7 +50,7 @@ export class AccountMenu {
       {
         label: t(dark ? 'common.lightMode' : 'common.darkMode'),
         icon: dark ? 'pi pi-sun' : 'pi pi-moon',
-        command: () => this.theme.toggle(),
+        command: (e) => this.theme.toggle(e.originalEvent),
       },
       { separator: true },
       { label: t('account.logout'), icon: 'pi pi-sign-out', command: () => this.auth.logout() },

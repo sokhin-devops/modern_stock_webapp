@@ -6,12 +6,12 @@
     </nav>
     <div class="page-actions">
       @if (canManage() && view() === 'requests') {
-        <button pButton type="button" (click)="requestFormOpen.set(true)">
+        <button pButton size="small" type="button" (click)="requestFormOpen.set(true)">
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'requests.new' | translate }}</span>
         </button>
       }
       @if (canManage() && view() === 'transfers') {
-        <button pButton type="button" (click)="newTransfer()">
+        <button pButton size="small" type="button" (click)="newTransfer()">
           <i class="pi pi-plus" pButtonIcon></i><span pButtonLabel>{{ 'transfer.new' | translate }}</span>
         </button>
       }
@@ -26,53 +26,55 @@
       <p-tabpanels>
         <p-tabpanel value="transfers">
           <div class="toolbar">
-            <p-select [options]="statuses" optionValue="value" [ngModel]="status()" (ngModelChange)="setStatus($event)" [showClear]="true"
+            <p-select size="small" [options]="statuses" optionValue="value" [ngModel]="status()" (ngModelChange)="setStatus($event)" [showClear]="true"
                       [placeholder]="'docs.all' | translate" [ariaLabel]="'common.status' | translate" class="filter" appendTo="body">
               <ng-template #selectedItem let-o>{{ o.label | translate }}</ng-template>
               <ng-template #item let-o>{{ o.label | translate }}</ng-template>
             </p-select>
             <span class="spacer"></span>
-            <button pButton type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
+            <button pButton size="small" type="button" [outlined]="true" (click)="exportAll()" [loading]="exporting()" [disabled]="exporting() || !list.total()">
               <i class="pi pi-download" pButtonIcon></i><span pButtonLabel>{{ 'tx.export' | translate }}</span>
             </button>
           </div>
-          <p-table class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
-                   [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
-                   dataKey="id" [rowHover]="true">
-            <ng-template #header>
-              <tr>
-                <th>{{ 'common.number' | translate }}</th>
-                <th>{{ 'transfer.kind' | translate }}</th>
-                <th>{{ 'common.from' | translate }}</th>
-                <th>{{ 'common.to' | translate }}</th>
-                <th>{{ 'common.date' | translate }}</th>
-                <th class="num">{{ 'docs.value' | translate }}</th>
-                <th>{{ 'common.status' | translate }}</th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-t>
-              <tr class="clickable" tabindex="0" (click)="openRow(t)" (keydown.enter)="openRow(t)">
-                <td class="strong doc-no">{{ t.number }}</td>
-                <td>{{ 'transfer.' + t.kind | translate }}</td>
-                <td>{{ t.fromName }}</td>
-                <td>{{ t.toName }}</td>
-                <td class="muted">{{ (t.receivedAt ?? t.sentAt) | date: 'dd/MM/yyyy' }}</td>
-                <td class="num">{{ t.value | currency: 'USD' }}</td>
-                <td>
-                  <span class="tag" [class]="'status-' + t.status">{{ 'docs.status.' + t.status | translate }}</span>
-                  @if (isLate(t)) {
-                    <span class="tag tag-danger">{{ 'transfer.late' | translate }}</span>
-                  }
-                  @if (t.shortLines) {
-                    <small class="danger-text"> {{ 'transfer.short' | translate: { n: t.shortLines } }}</small>
-                  }
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr><td colspan="7" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr>
-            </ng-template>
-          </p-table>
+          <section class="card table-card">
+            <p-table size="small" class="ms-table" [value]="list.rows()" [lazy]="true" (onLazyLoad)="list.load($event)" [loading]="list.loading()"
+                     [paginator]="true" [rows]="20" [first]="list.first()" [totalRecords]="list.total()" [scrollable]="true" scrollHeight="flex"
+                     dataKey="id" [rowHover]="true">
+              <ng-template #header>
+                <tr>
+                  <th>{{ 'common.number' | translate }}</th>
+                  <th>{{ 'transfer.kind' | translate }}</th>
+                  <th>{{ 'common.from' | translate }}</th>
+                  <th>{{ 'common.to' | translate }}</th>
+                  <th>{{ 'common.date' | translate }}</th>
+                  <th class="num">{{ 'docs.value' | translate }}</th>
+                  <th>{{ 'common.status' | translate }}</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-t>
+                <tr class="clickable" tabindex="0" (click)="openRow(t)" (keydown.enter)="openRow(t)">
+                  <td class="strong doc-no">{{ t.number }}</td>
+                  <td>{{ 'transfer.' + t.kind | translate }}</td>
+                  <td>{{ t.fromName }}</td>
+                  <td>{{ t.toName }}</td>
+                  <td class="muted">{{ (t.receivedAt ?? t.sentAt) | date: 'dd/MM/yyyy' }}</td>
+                  <td class="num">{{ t.value | currency: 'USD' }}</td>
+                  <td>
+                    <span class="tag" [class]="'status-' + t.status">{{ 'docs.status.' + t.status | translate }}</span>
+                    @if (isLate(t)) {
+                      <span class="tag tag-danger">{{ 'transfer.late' | translate }}</span>
+                    }
+                    @if (t.shortLines) {
+                      <small class="danger-text"> {{ 'transfer.short' | translate: { n: t.shortLines } }}</small>
+                    }
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr><td colspan="7" class="empty-cell">{{ 'docs.empty' | translate }}</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
         </p-tabpanel>
         <p-tabpanel value="requests">
           @if (view() === 'requests') {
@@ -97,22 +99,24 @@
         <div><small>{{ 'transfer.carrier' | translate }}</small><b>{{ t.carrierNote }}</b></div>
       }
     </div>
-    <p-table class="ms-table" [value]="t.lines" dataKey="id">
-      <ng-template #header>
-        <tr>
-          <th>{{ 'common.product' | translate }}</th>
-          <th class="num">{{ 'common.qty' | translate }}</th>
-          <th class="num">{{ 'docs.status.RECEIVED' | translate }}</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-l>
-        <tr>
-          <td class="strong">{{ l.productName }}@if (l.batchNo) { <small class="muted"> · {{ l.batchNo }}</small> }</td>
-          <td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
-          <td class="num" [class.danger-text]="l.qtyReceived != null && l.qtyReceived < l.qty">{{ l.qtyReceived | number: '1.0-3' }}</td>
-        </tr>
-      </ng-template>
-    </p-table>
+    <section class="card table-card">
+      <p-table size="small" class="ms-table" [value]="t.lines" dataKey="id">
+        <ng-template #header>
+          <tr>
+            <th>{{ 'common.product' | translate }}</th>
+            <th class="num">{{ 'common.qty' | translate }}</th>
+            <th class="num">{{ 'docs.status.RECEIVED' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-l>
+          <tr>
+            <td class="strong">{{ l.productName }}@if (l.batchNo) { <small class="muted"> · {{ l.batchNo }}</small> }</td>
+            <td class="num">{{ l.qty | number: '1.0-3' }} {{ l.unitSymbol }}</td>
+            <td class="num" [class.danger-text]="l.qtyReceived != null && l.qtyReceived < l.qty">{{ l.qtyReceived | number: '1.0-3' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
     @if (t.returnReason) {
       <p class="danger-text note">{{ t.returnReason }}</p>
     }
@@ -124,32 +128,32 @@
     @if (viewing(); as t) {
       <div class="dialog-actions">
         @if (t.status === 'DRAFT' && canManage()) {
-          <button pButton type="button" [text]="true" severity="danger" (click)="act(t, 'delete')" [disabled]="busy()">
+          <button pButton size="small" type="button" [text]="true" severity="danger" (click)="act(t, 'delete')" [disabled]="busy()">
             <span pButtonLabel>{{ 'transfer.deleteDraft' | translate }}</span>
           </button>
         }
         @if ((t.status === 'MOVED' || t.status === 'RECEIVED') && canReturn()) {
-          <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(t)" [disabled]="busy()">
+          <button pButton size="small" type="button" [text]="true" severity="danger" (click)="voidIt(t)" [disabled]="busy()">
             <span pButtonLabel>{{ 'transfer.void' | translate }}</span>
           </button>
         }
         @if (t.status === 'IN_TRANSIT' && canReturn()) {
-          <button pButton type="button" [text]="true" severity="danger" (click)="act(t, 'return')" [disabled]="busy()">
+          <button pButton size="small" type="button" [text]="true" severity="danger" (click)="act(t, 'return')" [disabled]="busy()">
             <span pButtonLabel>{{ 'transfer.returnIt' | translate }}</span>
           </button>
         }
         <span class="spacer"></span>
         <ms-attach-button type="transfers" [docId]="t.id" [number]="t.number" />
         @if (t.status === 'DRAFT' && canManage()) {
-          <button pButton type="button" [outlined]="true" (click)="editDraft(t)" [disabled]="busy()">
+          <button pButton size="small" type="button" [outlined]="true" (click)="editDraft(t)" [disabled]="busy()">
             <i class="pi pi-pencil" pButtonIcon></i><span pButtonLabel>{{ 'common.edit' | translate }}</span>
           </button>
-          <button pButton type="button" (click)="act(t, t.kind === 'MOVE' ? 'move' : 'send')" [loading]="busy()" [disabled]="busy()">
+          <button pButton size="small" type="button" (click)="act(t, t.kind === 'MOVE' ? 'move' : 'send')" [loading]="busy()" [disabled]="busy()">
             <span pButtonLabel>{{ (t.kind === 'MOVE' ? 'transfer.moveNow' : 'transfer.sendNow') | translate }}</span>
           </button>
         }
         @if (t.status === 'IN_TRANSIT' && canManage()) {
-          <button pButton type="button" (click)="act(t, 'receive')" [loading]="busy()" [disabled]="busy()">
+          <button pButton size="small" type="button" (click)="act(t, 'receive')" [loading]="busy()" [disabled]="busy()">
             <span pButtonLabel>{{ 'transfer.receiveAll' | translate }}</span>
           </button>
         }

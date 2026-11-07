@@ -17,7 +17,7 @@
 
     @if (c.status === 'OPEN' && c.left > 0 && canManage()) {
       <div class="ms-form act">
-        <p-selectbutton [options]="actions()" optionValue="value" [ngModel]="action()" (ngModelChange)="setAction($event)" [allowEmpty]="false"
+        <p-selectbutton size="small" [options]="actions()" optionValue="value" [ngModel]="action()" (ngModelChange)="setAction($event)" [allowEmpty]="false"
                         [ariaLabel]="'credits.what' | translate">
           <ng-template #item let-o>{{ o.label | translate }}</ng-template>
         </p-selectbutton>
@@ -25,7 +25,7 @@
           @if (docOptions().length) {
             <div class="ms-field">
               <label msLabel for="credit-doc" required>{{ 'credits.' + kind() + '.doc' | translate }}</label>
-              <p-select inputId="credit-doc" [options]="docOptions()" optionLabel="label" optionValue="value" [ngModel]="docId()"
+              <p-select size="small" inputId="credit-doc" [options]="docOptions()" optionLabel="label" optionValue="value" [ngModel]="docId()"
                         (ngModelChange)="setDoc($event)" appendTo="body" />
             </div>
           } @else {
@@ -35,18 +35,18 @@
           <div class="ms-field">
             <span msLabel>{{ 'credits.' + kind() + '.refundBy' | translate }}</span>
             <div class="choices">
-              <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
+              <p-selectbutton size="small" [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false"
                               [ariaLabel]="'credits.' + kind() + '.refundBy' | translate">
                 <ng-template #item let-o>{{ o.label | translate }}</ng-template>
               </p-selectbutton>
-              <p-selectbutton [options]="currencies" optionValue="value" optionLabel="label" [ngModel]="currency()" (ngModelChange)="currency.set($event)"
+              <p-selectbutton size="small" [options]="currencies" optionValue="value" optionLabel="label" [ngModel]="currency()" (ngModelChange)="currency.set($event)"
                               [allowEmpty]="false" ariaLabel="USD / KHR" />
             </div>
           </div>
         }
         <div class="ms-field">
           <label msLabel for="credit-amount" required>{{ 'credits.amountUsd' | translate }}</label>
-          <p-inputnumber inputId="credit-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" mode="currency" currency="USD" locale="en-US"
+          <p-inputnumber size="small" inputId="credit-amount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" mode="currency" currency="USD" locale="en-US"
                          [min]="0" [max]="most()" />
           <small class="field-hint">{{ 'credits.most' | translate: { amount: (most() | currency: 'USD') } }}</small>
         </div>
@@ -58,14 +58,14 @@
     @if (credit(); as c) {
       <div class="dialog-actions">
         @if (voidable()) {
-          <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(c)" [disabled]="busy()">
+          <button pButton size="small" type="button" [text]="true" severity="danger" (click)="voidIt(c)" [disabled]="busy()">
             <span pButtonLabel>{{ 'voids.button' | translate }}</span>
           </button>
         }
         <span class="spacer"></span>
         <ms-attach-button [type]="kind() === 'customer' ? 'credit-notes' : 'supplier-credits'" [docId]="c.id" [number]="c.number" />
         @if (c.status === 'OPEN' && c.left > 0 && canManage()) {
-          <button pButton type="button" (click)="submit()" [loading]="busy()"
+          <button pButton size="small" type="button" (click)="submit()" [loading]="busy()"
                   [disabled]="busy() || !amount() || amount()! > most() || (action() === 'apply' && !docId())">
             <i class="pi" [class.pi-file]="action() === 'apply'" [class.pi-wallet]="action() === 'refund'" pButtonIcon></i>
             <span pButtonLabel>{{ 'credits.' + kind() + '.' + (action() === 'apply' ? 'useOn' : 'refund') | translate }}</span>
@@ -74,7 +74,7 @@
       </div>
     }
 </ng-template>
-<p-dialog [visible]="!inline() && !!credit()" (visibleChange)="!$event && credit.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+<p-dialog [visible]="!inline() && !!credit()" (visibleChange)="!$event && credit.set(null)" styleClass="ms-form-dialog ms-full-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
           [header]="credit()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   <ng-container [ngTemplateOutlet]="docBody" />
   <ng-template #footer><ng-container [ngTemplateOutlet]="docActions" /></ng-template>

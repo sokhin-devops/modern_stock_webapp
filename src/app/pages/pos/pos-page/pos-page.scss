@@ -15,8 +15,67 @@
   }
 }
 
-.branch-select {
-  min-width: 160px;
+// The header looks like the app's top bar: the same logo tile and the same branch chip (white on the grey POS).
+.pos-head .logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: linear-gradient(140deg, var(--primary) 0%, var(--primary-hover) 100%);
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--primary) 30%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 20%);
+
+  .icon {
+    font-size: 19px;
+  }
+}
+
+.pos-title b {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.chip.branch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  max-width: 240px;
+  padding: 0 10px 0 12px;
+  border-color: transparent;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+
+  .icon {
+    font-size: 16px;
+    color: var(--primary);
+  }
+
+  .chev {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .branch-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    background: var(--surface-3);
+  }
+
+  &.fixed {
+    cursor: default;
+
+    &:hover {
+      background: var(--surface);
+    }
+  }
 }
 
 // Phones: the header keeps back, POS, branch, shift and account on one row (logo and business name step aside)
@@ -31,8 +90,7 @@
     }
   }
 
-  .branch-select {
-    min-width: 0;
+  .chip.branch-chip {
     max-width: 136px;
   }
 

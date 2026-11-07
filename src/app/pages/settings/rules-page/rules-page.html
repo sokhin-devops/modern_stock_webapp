@@ -16,23 +16,23 @@
         @if (form.controls.vatEnabled.value) {
           <div class="ms-field narrow">
             <label msLabel for="st-rate" control="vatRate">{{ 'settings.tax.vatRate' | translate }}</label>
-            <p-inputnumber inputId="st-rate" formControlName="vatRate" suffix="%" [min]="0" [max]="100" [maxFractionDigits]="2" />
+            <p-inputnumber size="small" inputId="st-rate" formControlName="vatRate" suffix="%" [min]="0" [max]="100" [maxFractionDigits]="2" />
           </div>
         }
         <h3 class="form-section">{{ 'settings.receipt.title' | translate }}</h3>
         <div class="ms-field">
           <label msLabel for="st-header" control="receiptHeader" optional>{{ 'settings.receipt.header' | translate }}</label>
-          <input pInputText id="st-header" formControlName="receiptHeader" />
+          <input pInputText pSize="small" id="st-header" formControlName="receiptHeader" />
           <small class="field-hint">{{ 'settings.receipt.headerHint' | translate }}</small>
         </div>
         <div class="ms-field">
           <label msLabel for="st-footer" control="receiptFooter">{{ 'settings.tax.footer' | translate }}</label>
-          <input pInputText id="st-footer" formControlName="receiptFooter" />
+          <input pInputText pSize="small" id="st-footer" formControlName="receiptFooter" />
           <small class="field-hint">{{ 'settings.tax.footerHint' | translate }}</small>
         </div>
         <div class="ms-field">
           <span msLabel id="st-paper">{{ 'settings.receipt.paper' | translate }}</span>
-          <p-selectbutton formControlName="receiptPaper" [options]="papers" optionLabel="label" optionValue="value" [allowEmpty]="false"
+          <p-selectbutton size="small" formControlName="receiptPaper" [options]="papers" optionLabel="label" optionValue="value" [allowEmpty]="false"
                           ariaLabelledBy="st-paper" />
         </div>
         <div class="ms-check">
@@ -52,7 +52,7 @@
                     {{ 'settings.numbers.types.' + t | translate }}
                     <small class="muted">{{ example(t) }}</small>
                   </label>
-                  <input pInputText [id]="'st-no-' + t" [formControlName]="t" maxlength="6" autocapitalize="characters" spellcheck="false"
+                  <input pInputText pSize="small" [id]="'st-no-' + t" [formControlName]="t" maxlength="6" autocapitalize="characters" spellcheck="false"
                          class="prefix" />
                 </div>
               }
@@ -67,12 +67,12 @@
         <p class="muted">{{ 'settings.rules.lead' | translate }}</p>
         <div class="ms-field">
           <span msLabel id="st-round">{{ 'settings.rules.rounding' | translate }}</span>
-          <p-selectbutton formControlName="rielRounding" [options]="roundings" optionLabel="label" optionValue="value" [allowEmpty]="false"
+          <p-selectbutton size="small" formControlName="rielRounding" [options]="roundings" optionLabel="label" optionValue="value" [allowEmpty]="false"
                           ariaLabelledBy="st-round" />
         </div>
         <div class="ms-field narrow">
           <label msLabel for="st-discount" control="maxDiscountPercent">{{ 'settings.rules.maxDiscount' | translate }}</label>
-          <p-inputnumber inputId="st-discount" formControlName="maxDiscountPercent" suffix="%" [min]="0" [max]="100" />
+          <p-inputnumber size="small" inputId="st-discount" formControlName="maxDiscountPercent" suffix="%" [min]="0" [max]="100" />
           <small class="field-hint">{{ 'settings.rules.maxDiscountHint' | translate }}</small>
         </div>
         <div class="ms-check">
@@ -108,23 +108,23 @@
         <div class="expiry-days">
           <div class="ms-field">
             <label msLabel for="st-exp1" control="expiry1" error="settings.expiry.range">{{ 'settings.expiry.first' | translate }}</label>
-            <p-inputnumber inputId="st-exp1" formControlName="expiry1" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+            <p-inputnumber size="small" inputId="st-exp1" formControlName="expiry1" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
           </div>
           <div class="ms-field">
             <label msLabel for="st-exp2" control="expiry2" error="settings.expiry.range">{{ 'settings.expiry.second' | translate }}</label>
-            <p-inputnumber inputId="st-exp2" formControlName="expiry2" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+            <p-inputnumber size="small" inputId="st-exp2" formControlName="expiry2" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
           </div>
           <div class="ms-field">
             <label msLabel for="st-exp3" control="expiry3" error="settings.expiry.order"
                    [invalid]="form.hasError('expiryOrder')">{{ 'settings.expiry.third' | translate }}</label>
-            <p-inputnumber inputId="st-exp3" formControlName="expiry3" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
+            <p-inputnumber size="small" inputId="st-exp3" formControlName="expiry3" [min]="1" [max]="365" [suffix]="' ' + ('settings.expiry.days' | translate)" />
           </div>
         </div>
         <small class="field-hint">{{ 'settings.expiry.hint' | translate }}</small>
       }
       @if (form.enabled) {
         <div class="settings-actions">
-          <button pButton type="submit" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
+          <button pButton size="small" type="submit" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'common.save' | translate }}</span></button>
         </div>
       }
     </form>

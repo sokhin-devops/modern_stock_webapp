@@ -1,26 +1,22 @@
-<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
+<p-dialog [(visible)]="visible" [blockScroll]="true" styleClass="ms-doc-dialog ms-full-dialog" [closeAriaLabel]="'common.close' | translate" [modal]="true" [draggable]="false" [resizable]="false"
           [header]="('orders.' + (editing() ? 'edit' : 'new') + (kind() === 'quotation' ? 'Quotation' : 'Order')) | translate">
   <div class="ms-form">
     <p class="muted small">{{ (kind() === 'quotation' ? 'orders.quotationLead' : 'orders.orderLead') | translate }}</p>
     <div class="ms-form-row">
       <div class="ms-field">
         <label msLabel for="of-customer" required>{{ 'sales.customer' | translate }}</label>
-        <p-autocomplete inputId="of-customer" [ngModel]="customer()" (ngModelChange)="customer.set($event?.id ? $event : null)"
-                        [suggestions]="customers()" (completeMethod)="findCustomers($event)" optionLabel="name" [forceSelection]="true"
-                        [fluid]="true" [dropdown]="true" appendTo="body">
-          <ng-template #item let-c><div><b>{{ c.name }}</b> <small class="muted">{{ c.phone }}</small></div></ng-template>
-        </p-autocomplete>
+        <ms-pick kind="customer" inputId="of-customer" [value]="customer()" (valueChange)="customer.set($event)" />
       </div>
       @if (kind() === 'quotation') {
         <div class="ms-field">
           <label msLabel for="of-valid" required>{{ 'orders.validUntil' | translate }}</label>
-          <p-datepicker inputId="of-valid" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true"
+          <p-datepicker size="small" inputId="of-valid" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true"
                         [minDate]="today" appendTo="body" />
         </div>
       } @else {
         <div class="ms-field">
           <label msLabel for="of-wh">{{ 'common.warehouse' | translate }}</label>
-          <p-select inputId="of-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
+          <p-select size="small" inputId="of-wh" [options]="warehouses()" optionLabel="label" optionValue="value" [ngModel]="warehouseId()"
                     (ngModelChange)="warehouseId.set($event)" appendTo="body" />
         </div>
       }
@@ -29,13 +25,13 @@
       @if (kind() === 'order') {
         <div class="ms-field">
           <label msLabel for="of-date" optional>{{ 'orders.deliveryDate' | translate }}</label>
-          <p-datepicker inputId="of-date" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true"
+          <p-datepicker size="small" inputId="of-date" [ngModel]="date()" (ngModelChange)="date.set($event)" dateFormat="dd/mm/yy" [showIcon]="true"
                         [minDate]="today" appendTo="body" />
         </div>
       }
       <div class="ms-field">
         <label msLabel for="of-note" optional>{{ 'common.note' | translate }}</label>
-        <input pInputText id="of-note" [ngModel]="note()" (ngModelChange)="note.set($event)" maxlength="500" />
+        <input pInputText pSize="small" id="of-note" [ngModel]="note()" (ngModelChange)="note.set($event)" maxlength="500" />
       </div>
     </div>
 
@@ -44,7 +40,7 @@
     <div class="summary">
       <div class="ms-field discount">
         <label msLabel for="of-discount" optional>{{ 'orders.orderDiscount' | translate }}</label>
-        <p-inputnumber inputId="of-discount" [ngModel]="discount()" (ngModelChange)="discount.set($event)" mode="currency" currency="USD"
+        <p-inputnumber size="small" inputId="of-discount" [ngModel]="discount()" (ngModelChange)="discount.set($event)" mode="currency" currency="USD"
                        locale="en-US" [min]="0" />
       </div>
       <div class="totals">
@@ -69,11 +65,11 @@
     @if (kind() === 'order' && !editing() && canDeliver()) {
       <div class="pay-row">
         <span class="muted small">{{ 'orders.deliverNowHint' | translate }}</span>
-        <p-selectbutton [options]="payOptions" optionValue="value" [ngModel]="payNow()" (ngModelChange)="payNow.set($event)" [allowEmpty]="false">
+        <p-selectbutton size="small" [options]="payOptions" optionValue="value" [ngModel]="payNow()" (ngModelChange)="payNow.set($event)" [allowEmpty]="false">
           <ng-template #item let-o>{{ o.label | translate }}</ng-template>
         </p-selectbutton>
         @if (payNow()) {
-          <p-selectbutton [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
+          <p-selectbutton size="small" [options]="methods" optionValue="value" [ngModel]="method()" (ngModelChange)="method.set($event)" [allowEmpty]="false">
             <ng-template #item let-o>{{ o.label | translate }}</ng-template>
           </p-selectbutton>
         }
@@ -84,11 +80,11 @@
     <div class="dialog-actions">
       <span class="spacer"></span>
       @if (kind() === 'order' && !editing() && canDeliver()) {
-        <button pButton type="button" [outlined]="true" (click)="submit(true)" [disabled]="busy() || !customer() || !filled().length">
+        <button pButton size="small" type="button" [outlined]="true" (click)="submit(true)" [disabled]="busy() || !customer() || !filled().length">
           <i class="pi pi-truck" pButtonIcon></i><span pButtonLabel>{{ 'orders.saveDeliver' | translate }}</span>
         </button>
       }
-      <button pButton type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !customer() || !filled().length">
+      <button pButton size="small" type="button" (click)="submit()" [loading]="busy()" [disabled]="busy() || !customer() || !filled().length">
         <span pButtonLabel>{{ 'common.save' | translate }}</span>
       </button>
     </div>

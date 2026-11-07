@@ -17,7 +17,7 @@
   <ng-template #footer>
     <div class="dialog-actions">
       @if (image()) {
-        <button pButton type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()">
+        <button pButton size="small" type="button" [text]="true" severity="danger" (click)="remove()" [disabled]="busy()">
           <i class="pi pi-trash" pButtonIcon></i><span pButtonLabel>{{ 'docPhoto.remove' | translate }}</span>
         </button>
       }

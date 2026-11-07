@@ -1,36 +1,38 @@
 <div class="toolbar">
-  <p-selectbutton [options]="filters" optionValue="value" [ngModel]="filter()" (ngModelChange)="setFilter($event)" [allowEmpty]="false">
+  <p-selectbutton size="small" [options]="filters" optionValue="value" [ngModel]="filter()" (ngModelChange)="setFilter($event)" [allowEmpty]="false">
     <ng-template #item let-option>{{ option.label | translate }}</ng-template>
   </p-selectbutton>
 </div>
-<p-table class="ms-table" [value]="rows()" [loading]="loading()" dataKey="id" [scrollable]="true" scrollHeight="flex" [rowHover]="true">
-  <ng-template #header>
-    <tr>
-      <th>{{ 'admin.business' | translate }}</th>
-      <th>{{ 'admin.transfer.invoice' | translate }}</th>
-      <th>{{ 'admin.transfer.bank' | translate }}</th>
-      <th class="num">{{ 'settings.billing.amount' | translate }}</th>
-      <th>{{ 'admin.account.status' | translate }}</th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-t>
-    <tr class="clickable" tabindex="0" (click)="view(t)" (keydown.enter)="view(t)">
-      <td><div class="strong">{{ t.businessName }}</div><div class="muted small">{{ t.createdAt | date: 'dd/MM/yyyy HH:mm' }}</div></td>
-      <td><div>{{ t.invoiceNumber }}</div><div class="muted small">{{ t.description }}</div></td>
-      <td><div>{{ t.bank }}</div><div class="muted small">{{ t.reference }}</div></td>
-      <td class="num strong">{{ t.amount | currency: 'USD' }}</td>
-      <td>
-        <span class="tag" [class.tag-primary]="t.status === 'SUCCEEDED'" [class.tag-danger]="t.status === 'FAILED'">{{ 'admin.transfer.' + t.status | translate }}</span>
-        @if (t.failureReason) {
-          <div class="muted small">{{ t.failureReason }}</div>
-        }
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr><td colspan="5" class="empty-cell">{{ (filter() === 'PENDING' ? 'admin.transfer.noneWaiting' : 'common.noResults') | translate }}</td></tr>
-  </ng-template>
-</p-table>
+<section class="card table-card">
+  <p-table size="small" class="ms-table" [value]="rows()" [loading]="loading()" dataKey="id" [scrollable]="true" scrollHeight="flex" [rowHover]="true">
+    <ng-template #header>
+      <tr>
+        <th>{{ 'admin.business' | translate }}</th>
+        <th>{{ 'admin.transfer.invoice' | translate }}</th>
+        <th>{{ 'admin.transfer.bank' | translate }}</th>
+        <th class="num">{{ 'settings.billing.amount' | translate }}</th>
+        <th>{{ 'admin.account.status' | translate }}</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-t>
+      <tr class="clickable" tabindex="0" (click)="view(t)" (keydown.enter)="view(t)">
+        <td><div class="strong">{{ t.businessName }}</div><div class="muted small">{{ t.createdAt | date: 'dd/MM/yyyy HH:mm' }}</div></td>
+        <td><div>{{ t.invoiceNumber }}</div><div class="muted small">{{ t.description }}</div></td>
+        <td><div>{{ t.bank }}</div><div class="muted small">{{ t.reference }}</div></td>
+        <td class="num strong">{{ t.amount | currency: 'USD' }}</td>
+        <td>
+          <span class="tag" [class.tag-primary]="t.status === 'SUCCEEDED'" [class.tag-danger]="t.status === 'FAILED'">{{ 'admin.transfer.' + t.status | translate }}</span>
+          @if (t.failureReason) {
+            <div class="muted small">{{ t.failureReason }}</div>
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr><td colspan="5" class="empty-cell">{{ (filter() === 'PENDING' ? 'admin.transfer.noneWaiting' : 'common.noResults') | translate }}</td></tr>
+    </ng-template>
+  </p-table>
+</section>
 
 <p-dialog [visible]="!!open()" (visibleChange)="!$event && close()" [modal]="true" [draggable]="false" styleClass="ms-dialog"
           [style]="{ width: 'min(560px, 96vw)' }" [header]="open()?.businessName ?? ''">
@@ -50,17 +52,17 @@
     @if (t.status === 'PENDING') {
       <div class="ms-field">
         <label msLabel for="tr-reason" optional>{{ 'admin.transfer.reason' | translate }}</label>
-        <input pInputText id="tr-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255"
+        <input pInputText pSize="small" id="tr-reason" [ngModel]="reason()" (ngModelChange)="reason.set($event)" maxlength="255"
                [placeholder]="'admin.transfer.reasonPh' | translate" />
       </div>
     }
   }
   <ng-template #footer>
     @if (open()?.status === 'PENDING') {
-      <button pButton type="button" [outlined]="true" severity="danger" (click)="review(false)" [disabled]="busy()"><span pButtonLabel>{{ 'admin.transfer.reject' | translate }}</span></button>
-      <button pButton type="button" (click)="review(true)" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'admin.transfer.approve' | translate }}</span></button>
+      <button pButton size="small" type="button" [outlined]="true" severity="danger" (click)="review(false)" [disabled]="busy()"><span pButtonLabel>{{ 'admin.transfer.reject' | translate }}</span></button>
+      <button pButton size="small" type="button" (click)="review(true)" [loading]="busy()" [disabled]="busy()"><span pButtonLabel>{{ 'admin.transfer.approve' | translate }}</span></button>
     } @else {
-      <button pButton type="button" (click)="close()"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
+      <button pButton size="small" type="button" (click)="close()"><span pButtonLabel>{{ 'common.close' | translate }}</span></button>
     }
   </ng-template>
 </p-dialog>

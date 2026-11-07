@@ -19,27 +19,29 @@
       <div><small>{{ 'common.status' | translate }}</small><b><span class="tag" [class]="'status-' + p.status">{{ 'docs.status.' + p.status | translate }}</span></b></div>
     </div>
 
-    <p-table class="ms-table" [value]="p.allocations">
-      <ng-template #header>
-        <tr><th>{{ 'voids.paysTitle' | translate }}</th><th class="num">{{ 'common.amount' | translate }}</th></tr>
-      </ng-template>
-      <ng-template #body let-a>
-        <tr><td>{{ 'voids.toType.' + a.toType | translate }}</td><td class="num strong">{{ a.amount | currency: 'USD' }}</td></tr>
-      </ng-template>
-      <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'voids.nothingPaid' | translate }}</td></tr></ng-template>
-      <ng-template #footer>
-        @if (p.unallocatedUsd > 0 && p.allocations.length) {
-          <tr><td>{{ (customer ? 'voids.deposit' : 'voids.advance') | translate }}</td><td class="num strong">{{ p.unallocatedUsd | currency: 'USD' }}</td></tr>
-        }
-      </ng-template>
-    </p-table>
+    <section class="card table-card">
+      <p-table size="small" class="ms-table" [value]="p.allocations">
+        <ng-template #header>
+          <tr><th>{{ 'voids.paysTitle' | translate }}</th><th class="num">{{ 'common.amount' | translate }}</th></tr>
+        </ng-template>
+        <ng-template #body let-a>
+          <tr><td>{{ 'voids.toType.' + a.toType | translate }}</td><td class="num strong">{{ a.amount | currency: 'USD' }}</td></tr>
+        </ng-template>
+        <ng-template #emptymessage><tr><td colspan="2" class="empty-cell">{{ 'voids.nothingPaid' | translate }}</td></tr></ng-template>
+        <ng-template #footer>
+          @if (p.unallocatedUsd > 0 && p.allocations.length) {
+            <tr><td>{{ (customer ? 'voids.deposit' : 'voids.advance') | translate }}</td><td class="num strong">{{ p.unallocatedUsd | currency: 'USD' }}</td></tr>
+          }
+        </ng-template>
+      </p-table>
+    </section>
   }
 </ng-template>
 <ng-template #docActions>
     @if (payment(); as p) {
       <div class="dialog-actions">
         @if (voidable()) {
-          <button pButton type="button" [text]="true" severity="danger" (click)="voidIt(p)" [loading]="busy()" [disabled]="busy()">
+          <button pButton size="small" type="button" [text]="true" severity="danger" (click)="voidIt(p)" [loading]="busy()" [disabled]="busy()">
             <span pButtonLabel>{{ 'voids.button' | translate }}</span>
           </button>
         }
@@ -48,7 +50,7 @@
       </div>
     }
 </ng-template>
-<p-dialog [visible]="!inline() && !!payment()" (visibleChange)="!$event && payment.set(null)" styleClass="ms-form-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
+<p-dialog [visible]="!inline() && !!payment()" (visibleChange)="!$event && payment.set(null)" styleClass="ms-form-dialog ms-full-dialog" [modal]="true" [draggable]="false" [resizable]="false" [blockScroll]="true" [dismissableMask]="true"
           [header]="payment()?.number ?? ''" [closeAriaLabel]="'common.close' | translate">
   <ng-container [ngTemplateOutlet]="docBody" />
   <ng-template #footer><ng-container [ngTemplateOutlet]="docActions" /></ng-template>

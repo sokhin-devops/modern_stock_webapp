@@ -6,15 +6,15 @@
 
     <div class="ms-field">
       <label msLabel for="login" control="login">{{ 'auth.login' | translate }}</label>
-      <input pInputText id="login" formControlName="login" autocomplete="username" autocapitalize="off" />
+      <input pInputText pSize="small" id="login" formControlName="login" autocomplete="username" autocapitalize="off" />
     </div>
 
     <div class="ms-field">
       <label msLabel for="password" control="password">{{ 'auth.password' | translate }}</label>
       <div class="ms-password">
-        <input pInputText id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+        <input pInputText pSize="small" id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                autocomplete="current-password" />
-        <button pButton type="button" class="reveal" [rounded]="true" [text]="true" severity="secondary"
+        <button pButton size="small" type="button" class="reveal" [rounded]="true" [text]="true" severity="secondary"
                 (click)="showPassword.set(!showPassword())" [attr.aria-pressed]="showPassword()"
                 [attr.aria-label]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | translate">
           <i class="pi" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()" pButtonIcon></i>
@@ -37,7 +37,7 @@
 
     <div class="auth-actions">
       <a routerLink="/forgot-password">{{ 'auth.forgot' | translate }}</a>
-      <button pButton type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
+      <button pButton size="small" type="submit" class="submit" [loading]="busy()" [disabled]="busy()">
         <span pButtonLabel>{{ 'auth.signIn' | translate }}</span>
       </button>
     </div>

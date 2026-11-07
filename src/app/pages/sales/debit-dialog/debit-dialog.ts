@@ -2,7 +2,6 @@ import { CurrencyPipe } from '@angular/common';
 import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ButtonDirective, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
@@ -14,6 +13,7 @@ import { ApiService } from '../../../core/api/api.service';
 import { BusinessSettings } from '../../../core/api/models';
 import { NotifyService } from '../../../core/notify.service';
 import { FieldLabel } from '../../../shared/field-label/field-label';
+import { PickField } from '../../../shared/pick/pick';
 
 interface Party {
   id: number;
@@ -48,7 +48,7 @@ export interface SavedDebit {
  */
 @Component({
   selector: 'ms-debit-dialog',
-  imports: [FormsModule, TranslatePipe, CurrencyPipe, Dialog, AutoComplete, InputNumber, InputText, Select, ToggleSwitch, ButtonDirective, ButtonLabel, FieldLabel],
+  imports: [FormsModule, TranslatePipe, CurrencyPipe, Dialog, PickField, InputNumber, InputText, Select, ToggleSwitch, ButtonDirective, ButtonLabel, FieldLabel],
   templateUrl: './debit-dialog.html',
 })
 export class DebitDialog {
@@ -60,7 +60,6 @@ export class DebitDialog {
   private readonly notify = inject(NotifyService);
 
   protected readonly party = signal<Party | null>(null);
-  protected readonly parties = signal<Party[]>([]);
   protected readonly invoices = signal<InvoiceRow[]>([]);
   protected readonly invoiceId = signal<number | null>(null);
   protected readonly amount = signal<number | null>(null);
@@ -96,10 +95,6 @@ export class DebitDialog {
         });
       }
     });
-  }
-
-  protected find(event: AutoCompleteCompleteEvent): void {
-    this.api.page<Party>('/customers', { page: 0, size: 10 }, { q: event.query }).subscribe({ next: (p) => this.parties.set(p.content) });
   }
 
   protected pick(p: Party | null): void {
